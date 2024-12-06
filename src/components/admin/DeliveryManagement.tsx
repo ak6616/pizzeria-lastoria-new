@@ -1,0 +1,128 @@
+import React, { useState } from 'react';
+import { Edit2, Trash2, Plus } from 'lucide-react';
+import { useDeliveryRules } from '../../hooks/useDeliveryRules';
+import AddDeliveryRuleModal from './AddDeliveryRuleModal';
+import EditDeliveryRuleModal from './EditDeliveryRuleModal';
+import { deleteDeliveryRule } from '../../services/api';
+
+export default function DeliveryManagement() {
+  const { rules, loading, error, refetch } = useDeliveryRules();
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [editingItem, setEditingItem] = useState<any>(null);
+
+  const handleDelete = async (category: string, id: number) => {
+    const categoryMapping: Record<string, string> = {
+      dostawaweekend: 'dostawaweekend',
+      dostawaweekday: 'dostawaweekday',
+    };
+
+    const tableCategory = categoryMapping[category];
+    if (!tableCategory) {
+      alert('Nieprawidłowa kategoria dostawy');
+      return;
+    }
+
+    if (window.confirm('Czy na pewno chcesz usunąć tę pozycję?')) {
+      try {
+        await deleteDeliveryRule(tableCategory, id);
+        await refetch();
+      } catch (err) {
+        console.error('Error deleting menu item:', err);
+        alert('Wystąpił błąd podczas usuwania pozycji');
+      }
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="text-center py-8">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mx-auto"></div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="text-red-500 text-center py-8">
+        Wystąpił błąd podczas ładowania tabeli dostawy
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-6">
+      <div className="flex justify-between items-center">
+        <h2 className="text-xl font-semibold">Tabela dostaw</h2>
+        <button
+          onClick={() => setShowAddModal(true)}
+          className="flex items-center px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition"
+        >
+          <Plus className="w-4 h-4 mr-2" />
+          Dodaj pozycję
+        </button>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {Object.entries(rules).map(([category, categoryRules]) =>
+          categoryRules.map((rule) => (
+            <div
+              key={rule.uniqueId}
+              className="border rounded-lg p-4 hover:shadow-md transition"
+            >
+              <div className="flex justify-between items-start">
+                <div>
+                  <div className="flex items-center gap-2">
+                    <h3 className="font-medium">{rule.nazwa}</h3>
+                    <span className="text-xs px-2 py-1 bg-gray-100 rounded-full">
+                      {category}
+                    </span>
+                  </div>
+                  {rule.ulica && (
+                    <p className="text-sm text-gray-600 mt-1">{rule.ulica}</p>
+                  )}
+                  <p className="text-sm font-semibold mt-2">{rule.ilosc} szt</p>
+                  <p className="text-sm font-semibold mt-2">{rule.koszt} zł</p>
+                </div>
+                <div className="flex space-x-2">
+                  <button
+                    onClick={() => setEditingItem(rule)}
+                    className="p-1 text-blue-500 hover:text-blue-600 transition"
+                  >
+                    <Edit2 className="w-4 h-4" />
+                  </button>
+                  <button
+                    onClick={() => handleDelete(category, rule.id)}
+                    className="p-1 text-red-500 hover:text-red-600 transition"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+            </div>
+          ))
+        )}
+      </div>
+
+      {showAddModal && (
+        <AddDeliveryRuleModal
+          onClose={() => setShowAddModal(false)}
+          onSuccess={async () => {
+            setShowAddModal(false);
+            await refetch();
+          }}
+        />
+      )}
+
+      {editingItem && (
+        <EditDeliveryRuleModal
+          rule={editingItem}
+          onClose={() => setEditingItem(null)}
+          onSuccess={async () => {
+            setEditingItem(null);
+            await refetch();
+          }}
+        />
+      )}
+    </div>
+  );
+}

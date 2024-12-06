@@ -1,0 +1,191 @@
+Potrzebuję nowoczesnej strony dla pizzerii Lastoria. Na pasku nawigacji mają znajdować się 4 podstrony: Home, Menu z rozwijanymi 2 elementami listy - Haczów, Miejsce Piastowe; Galeria, Aktualności, Zamów online. Tło ma być gradientem złożonym z 3 kolorów: czerwonego, żółtego i zielonego. Na pasku nawigacji w lewym górnym rogu ma znajdować się logo samej pizzerii. W galerii mają znajdować się zdjęcia zamieszczane tam zdjęcia, które po kliknięciu będą się powiększać. W menu Haczowa i Miejsca Piastowego będzie zamieszczona lista sprzedawanych pizz, hamburgerów, dodatków oraz napojów wraz z ich ceną. W Aktualnościach będą znajdowały się artykuły dodawane przez admina strony w panelu admina. W "Zamów online" stwórz proszę formularz z imieniem, nazwiskiem, miejscowością, opcjonalną ulicą, numerem domu oraz numerem telefonu. Utwórz także opcjonalne pole "Numer mieszkania". Wszystkie te pola poza Numerem telefonu oraz Ulicą mają być obowiązkowe do wypełnienia. Poniżej zamieść również listę produktów znajdujących się w menu Miejsca Piastowego. Blisko formularza z danymi zamieść również opcjonalne pole "Dostawa na konkretną godzinę: ",, które będzie umożliwiało użytkownikowi podanie godziny dostawy. Wszystkie te dane (dane i adres klienta oraz zamówione produkty) mają zostać wysłane do bazy danych.
+
+W "Zamów online" Numer telefonu ma być obowiązkowy. Pod formularzem dodaj także wszystkie produkty z menu miejsca piastowego przed Przyciskiem "złóż zamówienie". Zamiast "Lastoria" w logo zapisz "Pizzeria Lastoria", podobnie w nagłówku menu. Dodaj w nawigacji podstronę "Panel Admina", który będzie służył do dodawania, usuwania i edycji artykułów z "Aktualności", edycji menu Miejsca Piastowego wraz z kosztami produktów i dowozu oraz dodawania i usuwania zdjęć w "Galerii". W "Home" dodaj kilka animowanych zdjęć pizzy, oraz krótki opis na temat 18-letniego doświadczenia w branży. Do gradientowego tła całej strony dodaj wypełnienie niewielkimi przezroczystymi ikonami pizzy, napoju i hamburgerów. W "Galerii" poza możliwością powiększenia grafiki, dodaj płynną animację tego powiększenia oraz możliwość zmiany zdjęcia na poprzednie bądź następne, również z płynną animacją.
+
+W "home" dla sekcji haczów zmień link na: https://www.google.com/maps/place/Pizzeria+Lastoria/@49.6682919,21.8902343,17z/data=!4m15!1m8!3m7!1s0x473c4402928594b9:0xc63f4d62a9ea108b!2zSGFjesOzdyA1ODYsIDM2LTIxMyBIYWN6w7N3!3b1!8m2!3d49.6682919!4d21.8902343!16s%2Fg%2F11sqf52_jv!3m5!1s0x473c44028ef3868f:0x2aa91fc1c25f28d5!8m2!3d49.6680069!4d21.8903126!16s%2Fg%2F11dfjy87hz?entry=ttu&g_ep=EgoyMDI0MTEyNC4xIKXMDSoASAFQAw%3D%3D , a dla sekcji miejsce piastowe zmień link na: https://www.google.com/maps/place/Pizzeria+Lastoria/@49.6349567,21.7814811,17z/data=!3m1!4b1!4m6!3m5!1s0x473c47b986f7399d:0x12a70f0fa61ccade!8m2!3d49.6349533!4d21.786352!16s%2Fg%2F1tfkdc0_?entry=ttu&g_ep=EgoyMDI0MTEyNC4xIKXMDSoASAFQAw%3D%3D oraz wprowadź poprawne dane ulic i numerów telefonów dla obu tych sekcji. Popraw wyświetlanie listy "menu" w nawigacji tak, aby wyświetlała się ona na środku pod napisem "menu" i popraw hitbox miejsca piastowego w nawigacji. W "zamów online" w paragrafie "dowozimy do:" wypisz listę miejscowości zaimportowaną z bazy danych "if0_37609347_pizzeria" z tabeli "miejscowosci". Koszt dostawy ma być liczony na podstawie miejscowości i ulicy wprowadzonej w formularzu przez użytkownika oraz zależnie od ilości zamówionych pizz. Wszystkie te dane mają być porównane z tabelami "dostawaweekend", bądź "dostawaweekday" z bazy danych "if0_37609347_pizzeria". Jeżeli ilość pizz przekracza ilość zapisaną w bazie, dowóz ba być gratis. Do listy produktów w podstronie "zamów online" dodaj wszystkie produkty z tabel: "pizza", "fastfood", "dodatki", "napoje" wraz z ich cenami z tych tabel z bazy danych "if0_37609347_pizzeria".
+
+
+INSERT INTO dostawaweekday (nazwa,ilosc, koszt) 
+VALUES 
+    (targowiska, 1, 2),
+    (łężany, 1, 2),
+    (pustyny, 1, 2),
+    (iwonicz, 1, 2),
+    (wrocanka, 1, 2),
+    (rogi, 1, 2);
+    ("łęki dukielskie", 2, 4),
+    ("łęki dukielskie", 3, 3),
+    ("wietrzno", NULL, 2, 4),
+    ("wietrzno", NULL, 3, 3);
+    ("lubatowa", NULL, 2, 4),
+    ("lubatowa", NULL, 3, 3);
+
+
+
+INSERT INTO dostawaweekday (nazwa, ulica, ilosc, koszt) 
+VALUES 
+    ("głowienka", "świętego jana", 1, 2),
+    ("krosno", "dębowa", 2, 4),
+    ("krosno", "dębowa", 3, 3),
+    ("krosno", "handlowa", 2, 4),
+    ("krosno", "handlowa", 3, 3),
+    ("krosno", "polna", 2, 4),
+    ("krosno", "polna", 3, 3),
+    ("krosno", "bolesława prusa", 2, 4),
+    ("krosno", "bolesława prusa", 3, 3),
+    ("krosno", "żniwna", 2, 4),
+    ("krosno", "żniwna", 3, 3),
+    ("krosno", "władysława stanisława reymonta", 2, 4),
+    ("krosno", "władysława stanisława reymonta", 3, 3),
+    ("krosno", "nad badoniem", 2, 4),
+    ("krosno", "nad badoniem", 3, 3),
+    ("krosno", "grunwaldzka", 2, 4),
+    ("krosno", "grunwaldzka", 3, 3),
+    ("krosno", "stanisława pigonia", 2, 4),
+    ("krosno", "stanisława pigonia", 3, 3),
+    ("krosno", "suchodolska", 1, 4),
+    ("krosno", "suchodolska", 2, 3),
+    ("krosno", "suchodolska", 3, 2);
+
+
+----------------------------------------------------
+
+host: sql7.freesqldatabase.com
+dbname: sql7748578
+username: sql7748578
+password: taIVSCuIAz
+port: 3306
+
+conn url: jdbc:mysql://sql7.freesqldatabase.com:3306/sql7748578
+
+
+
+Edytuj ustawienia elementów "menu" miejsca piastowego i haczowa tak, aby oba elementy były klikalne i przenosiły do podstron menu miejsca piastowego i haczowa. W menu Miejsca Piastowego wypisz rekordy z tabel: pizza, dodatki, fastfood, napoje. Dane te wypisz wraz z cenami (kolumny: nazwa, cena). Mają one być na bierząco pobierane z bazy danych "sql7748578", host: "sql7.freesqldatabase.com:3306/", username: "sql7748578", hasło: "taIVSCuIAz". W "zamów online" wyświetl te same rekordy co w "menu" miejsca piastowego, jednakże wszystkie produkty mają być możliwe do zamówienia i wyświetlone w 3 kolumnach.
+
+
+INSERT INTO pizza (id, skladniki) VALUES
+(1, 'sos pomidorowy, mozzarella, kukurydza, ser żółty, zioła, oregano'),
+(2, 'sos pomidorowy, mozzarella, pieczarki, papryka, ser żółty, zioła, oregano'),
+(3, 'sos pomidorowy, mozzarella, pieczarki, oliwki, papryka, kukurydza, cebula, ser żółty, zioła, oregano'),
+(4, 'sos pomidorowy, mozzarella, szynka, papryka, ser żółty, zioła, oregano'),
+(5, 'sos pomidorowy, mozzarella, szynka, pieczarki, oliwki, kukurydza, papryka, ser żółty, zioła, oregano'),
+(6, 'sos pomidorowy, mozzarella, salami, papryka, ser żółty, zioła, oregano'),
+(7, 'sos pomidorowy, mozzarella, salami, pieczarki, peperoni, kukurydza, oliwki, papryka, chili, ser żółty, zioła, oregano'),
+(8, 'sos pomidorowy, mozzarella, tuńczyk, cebula, ser żółty, papryka, zioła, oregano'),
+(9, 'sos pomidorowy, mozzarella, tuńczyk, oliwki, pieczarki, papryka, ser żółty, zioła, oregano'),
+(10, 'sos pomidorowy, mozzarella, boczek, szynka, cebula, czosnek, pieczarki, oliwki, kukurydza, ser żółty, papryka, zioła, oregano'),
+(11, 'sos pomidorowy, mozzarella, filet z kurczaka, cebula, peperoni, ser żółty, papryka, zioła, oregano'),
+(12, 'sos pomidorowy, mozzarella, filet z kurczaka, pieczarki, oliwki, ser żółty, papryka, zioła, oregano'),
+(13, 'sos pomidorowy, mozzarella, filet z kurczaka, ananas, kukurydza, papryka, ser żółty, zioła, oregano'),
+(14, 'sos pomidorowy, mozzarella, gyros pieczony, cebula, papryka, pieczarki, ser żółty, sos grecki, oliwki, zioła, oregano'),
+(15, 'sos pomidorowy, mozzarella, owoce morza, tuńczyk, cytryna, ser żółty, papryka, zioła, oregano'),
+(16, 'sos pomidorowy, mozzarella, szynka, salami, pieczarki, papryka, ser żółty, zioła, oregano'),
+(17, 'sos pomidorowy, mozzarella, kurczak, salami, pieczarki, papryka, ser żółty, fasolka czerwona, zioła, oregano'),
+(18, 'sos pomidorowy, mozzarella, szynka, pieczarki, papryka, ser żółty, zioła, oregano'),
+(19, 'sos pomidorowy, mozzarella, pieczarki, papryka, kukurydza, fasolka czerwona, groszek, ser żółty, zioła, oregano'),
+(20, 'sos pomidorowy, mozzarella, boczek, kiełbasa, ogórek, pieczarki, papryka, cebula, czosnek, ser żółty, zioła, oregano'),
+(21, 'sos pomidorowy, mozzarella, pomidor, ogórek, groszek, papryka, brokuły, ser żółty, zioła, oregano'),
+(22, 'sos pomidorowy, mozzarella, szynka, ananas, kukurydza, ser żółty, zioła, oregano'),
+(23, 'sos pomidorowy, mozzarella, szynka, papryka, kapary, ser żółty, zioła, oregano'),
+(24, 'sos pomidorowy, mozzarella, gyros, ogórek, pomidor, ser feta, oliwki, sos grecki, ser żółty, zioła, oregano'),
+(25, 'sos pomidorowy, mozzarella, kurczak, brzoskwinia, ananas, szynka, ser żółty, zioła oregano'),
+(26, 'sos pomidorowy, mozzarella, kiełbasa, brokuły, papryka, ser żółty, zioła, oregano'),
+(27, 'sos pomidorowy, mozzarella, brzoskwinia, ananas, ser żółty, zioła, oregano'),
+(28, 'sos pomidorowy, mozzarella, pomidor, ogórek, cebula, papryka, oliwki, ser feta, ser żółty, zioła, oregano'),
+(29, 'sos pomidorowy, mozzarella, salami, oliwki, kapary, tabasco, chili, ser żółty, zioła, oregano'),
+(30, 'sos pomidorowy, ser parmezan, ser pleśniowy, ser feta, ser żółty, zioła, oregano'),
+(31, 'sos pomidorowy, mozzarella, ser parmezan, szynka parmeńska, pomidorki koktajlowe, rukola, ser żółty, zioła, oregano'),
+(32, 'sos pomidorowy, mozzarella, szpinak, pomidory suszone, ser feta, ser żółty, zioła, oregano'),
+(33, 'sos pomidorowy, mozzarella, salami lub szynka (do wyboru), rukola, ser parmezan, ser żółty, zioła, oregano'),
+(34, 'sos pomidorowy, mozzarella, borowiki, pieczarki, podgrzybki, ser parmezan, ser żółty, zioła, oregano'),
+(35, 'sos pomidorowy, mozzarella, borowiki, boczek, cebula, ser parmezan, oliwki, ser żółty, zioła, oregano'),
+(36, 'sos pomidorowy, mozzarella, ser wędzony, żurawina, rukola, ser żółty, zioła, oregano'),
+(37, 'sos pomidorowy, ser parmezan, ser pleśniowy, ser wędzony, ser żółty, zioła, oregano'),
+(38, 'sos pomidorowy, mozzarella, szpinak, kurczak, cebula, czosnek, ser żółty, zioła, oregano');
+
+
+
+INSERT INTO pizza (skladniki) VALUES
+( 'sos pomidorowy, mozzarella, kukurydza, ser żółty, zioła, oregano'),
+( 'sos pomidorowy, mozzarella, pieczarki, papryka, ser żółty, zioła, oregano'),
+( 'sos pomidorowy, mozzarella, pieczarki, oliwki, papryka, kukurydza, cebula, ser żółty, zioła, oregano'),
+( 'sos pomidorowy, mozzarella, szynka, papryka, ser żółty, zioła, oregano'),
+( 'sos pomidorowy, mozzarella, szynka, pieczarki, oliwki, kukurydza, papryka, ser żółty, zioła, oregano'),
+( 'sos pomidorowy, mozzarella, salami, papryka, ser żółty, zioła, oregano'),
+( 'sos pomidorowy, mozzarella, salami, pieczarki, peperoni, kukurydza, oliwki, papryka, chili, ser żółty, zioła, oregano'),
+( 'sos pomidorowy, mozzarella, tuńczyk, cebula, ser żółty, papryka, zioła, oregano'),
+( 'sos pomidorowy, mozzarella, tuńczyk, oliwki, pieczarki, papryka, ser żółty, zioła, oregano'),
+( 'sos pomidorowy, mozzarella, boczek, szynka, cebula, czosnek, pieczarki, oliwki, kukurydza, ser żółty, papryka, zioła, oregano'),
+( 'sos pomidorowy, mozzarella, filet z kurczaka, cebula, peperoni, ser żółty, papryka, zioła, oregano'),
+( 'sos pomidorowy, mozzarella, filet z kurczaka, pieczarki, oliwki, ser żółty, papryka, zioła, oregano'),
+( 'sos pomidorowy, mozzarella, filet z kurczaka, ananas, kukurydza, papryka, ser żółty, zioła, oregano'),
+( 'sos pomidorowy, mozzarella, gyros pieczony, cebula, papryka, pieczarki, ser żółty, sos grecki, oliwki, zioła, oregano'),
+( 'sos pomidorowy, mozzarella, owoce morza, tuńczyk, cytryna, ser żółty, papryka, zioła, oregano'),
+( 'sos pomidorowy, mozzarella, szynka, salami, pieczarki, papryka, ser żółty, zioła, oregano'),
+( 'sos pomidorowy, mozzarella, kurczak, salami, pieczarki, papryka, ser żółty, fasolka czerwona, zioła, oregano'),
+( 'sos pomidorowy, mozzarella, szynka, pieczarki, papryka, ser żółty, zioła, oregano'),
+( 'sos pomidorowy, mozzarella, pieczarki, papryka, kukurydza, fasolka czerwona, groszek, ser żółty, zioła, oregano'),
+( 'sos pomidorowy, mozzarella, boczek, kiełbasa, ogórek, pieczarki, papryka, cebula, czosnek, ser żółty, zioła, oregano'),
+( 'sos pomidorowy, mozzarella, pomidor, ogórek, groszek, papryka, brokuły, ser żółty, zioła, oregano'),
+( 'sos pomidorowy, mozzarella, szynka, ananas, kukurydza, ser żółty, zioła, oregano'),
+( 'sos pomidorowy, mozzarella, szynka, papryka, kapary, ser żółty, zioła, oregano'),
+( 'sos pomidorowy, mozzarella, gyros, ogórek, pomidor, ser feta, oliwki, sos grecki, ser żółty, zioła, oregano'),
+( 'sos pomidorowy, mozzarella, kurczak, brzoskwinia, ananas, szynka, ser żółty, zioła oregano'),
+( 'sos pomidorowy, mozzarella, kiełbasa, brokuły, papryka, ser żółty, zioła, oregano'),
+( 'sos pomidorowy, mozzarella, brzoskwinia, ananas, ser żółty, zioła, oregano'),
+('sos pomidorowy, mozzarella, pomidor, ogórek, cebula, papryka, oliwki, ser feta, ser żółty, zioła, oregano'),
+( 'sos pomidorowy, mozzarella, salami, oliwki, kapary, tabasco, chili, ser żółty, zioła, oregano'),
+( 'sos pomidorowy, ser parmezan, ser pleśniowy, ser feta, ser żółty, zioła, oregano'),
+( 'sos pomidorowy, mozzarella, ser parmezan, szynka parmeńska, pomidorki koktajlowe, rukola, ser żółty, zioła, oregano'),
+('sos pomidorowy, mozzarella, szpinak, pomidory suszone, ser feta, ser żółty, zioła, oregano'),
+( 'sos pomidorowy, mozzarella, salami lub szynka (do wyboru), rukola, ser parmezan, ser żółty, zioła, oregano'),
+( 'sos pomidorowy, mozzarella, borowiki, pieczarki, podgrzybki, ser parmezan, ser żółty, zioła, oregano'),
+( 'sos pomidorowy, mozzarella, borowiki, boczek, cebula, ser parmezan, oliwki, ser żółty, zioła, oregano'),
+( 'sos pomidorowy, mozzarella, ser wędzony, żurawina, rukola, ser żółty, zioła, oregano'),
+( 'sos pomidorowy, ser parmezan, ser pleśniowy, ser wędzony, ser żółty, zioła, oregano'),
+( 'sos pomidorowy, mozzarella, szpinak, kurczak, cebula, czosnek, ser żółty, zioła, oregano');
+
+------------------------------------------------------------------------
+jak sprawdzić czy item jest w konkretnej tabeli (zapobiec jednoczesnemu dodawaniu się kilku przedmiotów)?
+poprawić formularz, galerię, aktualności i panel admina
+
+-------------------------------------------------------------------------
+W "zamów online" produkty niech wyświetlają się w 3 kolummnach. W "zamów online", poza "składnikami do usunięcia" dodaj również "składniki do dodania", które będą wczystywane z bazy danych, z tabeli "dodatki".
+
+W "galeria" grafika ma być wyświetlana z bazy danych, z tabeli "galeria", kolumna "link".
+
+W "aktualności" artykuły mają być wczytywane z bazy danych, z tabeli "aktualnosci", kolumny: "tytul", "data", "tekst".
+
+
+
+INSERT into miejscowosci (nazwa, ulica) VALUES 
+    ("głowienka",),
+    ("krosno", "dębowa"),
+    ("krosno", "handlowa"),
+    ("krosno", "polna"),
+    ("krosno", "bolesława prusa"),
+    ("krosno", "żniwna"),
+    ("krosno", "władysława stanisława reymonta"),
+    ("krosno", "nad badoniem"),
+    ("krosno", "grunwaldzka"),
+    ("krosno", "stanisława pigonia"),
+    ("krosno", "suchodolska"),
+    ('targowiska',null),
+    ('łężany',null),
+    ('pustyny',null),
+    ('iwonicz',null),
+    ('wrocanka',),
+    ('rogi',),
+    ("łęki dukielskie",),
+    ("niżna łąka", NULL),
+    ("widacz", NULL),
+    ("lubatówka", NULL),
+    ("równe", NULL),
+    ("krościenko wyżne", NULL),
+    ("wietrzno", NULL),
+    ("lubatowa", NULL);
+
+
+UPDATE `miejscowosci` SET `nazwa` = 'głowienka' WHERE `miejscowosci`.`id` = 1; UPDATE `miejscowosci` SET `ulica` = 'dębowa' WHERE `miejscowosci`.`id` = 2; UPDATE `miejscowosci` SET `ulica` = 'bolesława prusa' WHERE `miejscowosci`.`id` = 5; UPDATE `miejscowosci` SET `ulica` = 'żniwna' WHERE `miejscowosci`.`id` = 6; UPDATE `miejscowosci` SET `ulica` = 'władysława stanisława reymonta' WHERE `miejscowosci`.`id` = 7; UPDATE `miejscowosci` SET `ulica` = 'stanisława pigonia' WHERE `miejscowosci`.`id` = 10; UPDATE `miejscowosci` SET `nazwa` = 'łężany' WHERE `miejscowosci`.`id` = 13; UPDATE `miejscowosci` SET `nazwa` = 'łęki dukielskie' WHERE `miejscowosci`.`id` = 18; UPDATE `miejscowosci` SET `nazwa` = 'niżna łąka' WHERE `miejscowosci`.`id` = 19; UPDATE `miejscowosci` SET `nazwa` = 'krościenko wyżne' WHERE `miejscowosci`.`id` = 23;
+
+W "panel admina" w sekcji "menu" wyświetl wszystkie pozycje z "menu" miejsca piastowego i haczowa. Po kliknięciu którejkolwiek z pozycji ma się pojawić przycisk edycji bądź usunięcia. Usunięcie pozycji będzie skutkowało usunięciem rekordu z bazy danych, z tabeli "pizza". W "panel admina" w sekcji "menu" dodaj również przycisk "dodaj pozycję", kliknięcie tego przycisku skutkuje dodanie rekordu do bazy danych. Parametry dla "dodaj pozycję": "kategoria" (nazwa tabeli bazy danych), "nazwa" (kolumna "nazwa" w tabeli), "cena" (kolumna "cena" w tabeli), "opis / składniki" (kolumna "skladniki" w tabeli).
