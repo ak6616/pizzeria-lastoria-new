@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Pizza, ChevronDown } from 'lucide-react';
+import { Pizza, ChevronDown, Menu, X } from 'lucide-react';
 
 const locations = [
   { name: 'Haczów', href: '/menu/haczow' },
@@ -9,6 +9,7 @@ const locations = [
 
 export default function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -26,19 +27,25 @@ export default function Navbar() {
     <nav className="bg-white/10 backdrop-blur-md sticky top-0 z-50">
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">
-          <Link to="/" className="flex items-center space-x-2">
+          <Link to="/" className="flex items-center space-x-2 shrink-0">
             <img
               src="logo.png"
               alt="logo-lastoria"
-              className="flex items-center space-x-2 w-[60px] md:w-[60px] lg:w-[60px] h-auto"
+              className="w-[60px] h-auto"
             />
-            {/* <Pizza className="h-8 w-8 text-white" /> */}
-            <span className="text-xl font-bold text-white">
+            <span className="text-xl font-bold text-white hidden sm:inline">
               Pizzeria Lastoria
             </span>
           </Link>
 
-          <div className="flex items-center space-x-8">
+          <button
+            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+            className="lg:hidden text-white p-2"
+          >
+            {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+          </button>
+
+          <div className="hidden lg:flex items-center space-x-8">
             <Link
               to="/"
               className="text-white hover:text-yellow-200 transition-colors"
@@ -101,6 +108,61 @@ export default function Navbar() {
             </Link>
           </div>
         </div>
+
+        {isMobileMenuOpen && (
+          <div className="lg:hidden py-4 space-y-4">
+            <Link
+              to="/"
+              className="block text-white hover:text-yellow-200 transition-colors py-2"
+              onClick={() => setIsMobileMenuOpen(false)}
+            >
+              Home
+            </Link>
+            
+            <div className="space-y-2">
+              <div className="text-white">Menu</div>
+              {locations.map((location) => (
+                <Link
+                  key={location.href}
+                  to={location.href}
+                  className="block text-white hover:text-yellow-200 transition-colors py-2 pl-4"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  {location.name}
+                </Link>
+              ))}
+            </div>
+
+            <Link
+              to="/gallery"
+              className="block text-white hover:text-yellow-200 transition-colors py-2"
+              onClick={() => setIsMobileMenuOpen(false)}
+            >
+              Galeria
+            </Link>
+            <Link
+              to="/news"
+              className="block text-white hover:text-yellow-200 transition-colors py-2"
+              onClick={() => setIsMobileMenuOpen(false)}
+            >
+              Aktualności
+            </Link>
+            <Link
+              to="/order"
+              className="block text-white hover:text-yellow-200 transition-colors py-2"
+              onClick={() => setIsMobileMenuOpen(false)}
+            >
+              Zamów online
+            </Link>
+            <Link
+              to="/admin"
+              className="block text-white hover:text-yellow-200 transition-colors py-2"
+              onClick={() => setIsMobileMenuOpen(false)}
+            >
+              Panel Admina
+            </Link>
+          </div>
+        )}
       </div>
     </nav>
   );

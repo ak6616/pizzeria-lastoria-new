@@ -1,0 +1,51 @@
+**Deklaracja RODO dotycząca przetwarzania danych osobowych klientów pizzerii Lastoria**  
+
+Szanowni Klienci,  
+
+W trosce o bezpieczeństwo Państwa danych osobowych oraz zgodnie z Rozporządzeniem Parlamentu Europejskiego i Rady (UE) 2016/679 z dnia 27 kwietnia 2016 r. (RODO), informujemy, że Państwa dane osobowe są przetwarzane w następujących celach:  
+
+### **Administrator Danych Osobowych**  
+Administratorem Państwa danych osobowych jest Pizzeria Lastoria z siedzibą w [adres pizzerii], wpisana do rejestru przedsiębiorców pod numerem NIP [NIP pizzerii], kontakt: [adres e-mail, telefon].  
+
+### **Cel i Podstawa Przetwarzania Danych**  
+Państwa dane osobowe przetwarzane są w celu:  
+1. Realizacji zamówienia na posiłki i dostarczenia ich pod wskazany adres (art. 6 ust. 1 lit. b RODO – wykonanie umowy).  
+2. Obsługi płatności związanych z zamówieniem (art. 6 ust. 1 lit. b RODO).  
+3. Ewentualnego dochodzenia lub obrony przed roszczeniami (art. 6 ust. 1 lit. f RODO – uzasadniony interes administratora).  
+
+### **Zakres Przetwarzanych Danych**  
+W celu realizacji zamówienia przetwarzamy następujące dane osobowe:  
+- Imię i nazwisko,  
+- Adres dostawy,  
+- Numer telefonu,  
+- Adres e-mail (w przypadku zamówień online),  
+- Informacje o zamówieniu (rodzaj i ilość produktów).  
+
+### **Odbiorcy Danych**  
+Dane osobowe mogą być przekazywane:  
+- Kurierom lub dostawcom realizującym zamówienie,  
+- Podmiotom obsługującym płatności,  
+- Podmiotom świadczącym usługi IT na rzecz pizzerii Lastoria (np. system do składania zamówień online).  
+
+### **Okres Przechowywania Danych**  
+Państwa dane osobowe będą przechowywane przez okres:  
+- Nie dłuższy niż jest to konieczne do realizacji zamówienia i rozliczenia transakcji,  
+- Do czasu przedawnienia ewentualnych roszczeń wynikających z umowy.  
+
+### **Prawa Klienta**  
+W związku z przetwarzaniem danych osobowych mają Państwo prawo do:  
+1. Dostępu do swoich danych,  
+2. Sprostowania danych,  
+3. Usunięcia danych,  
+4. Ograniczenia przetwarzania,  
+5. Przenoszenia danych,  
+6. Wniesienia sprzeciwu wobec przetwarzania danych,  
+7. Złożenia skargi do Prezesa Urzędu Ochrony Danych Osobowych (PUODO), jeśli uznają Państwo, że przetwarzanie danych narusza przepisy RODO.  
+
+### **Dobrowolność Podania Danych**  
+Podanie danych osobowych jest dobrowolne, ale niezbędne do realizacji zamówienia.  
+
+W przypadku pytań dotyczących przetwarzania danych osobowych prosimy o kontakt pod adresem: [adres e-mail] lub numerem telefonu [numer telefonu].  
+
+Z poważaniem,  
+**Pizzeria Lastoria**  

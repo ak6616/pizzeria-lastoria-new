@@ -33,7 +33,7 @@ export async function submitOrder(orderData: any) {
   const connection = await createConnection();
   try {
     const [result] = await connection.execute(
-      'INSERT INTO zamowienia (imie, nazwisko, miejscowosc, ulica, numerDomu, numerMieszkania, numerTelefonu, delivery_time, items, total_price) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+      'INSERT INTO zamowienia_mp (imie, nazwisko, miejscowosc, ulica, numerDomu, numerMieszkania, numerTelefonu, delivery_time, items, total_price) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
       [
         orderData.firstName,
         orderData.lastName,

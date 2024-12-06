@@ -2,15 +2,17 @@ import React from 'react';
 import { Trash2 } from 'lucide-react';
 import { useOrders } from '../../hooks/useOrders';
 import { deleteOrder } from '../../services/api';
-import { format } from 'date-fns';
+import { format, isValid, parseISO } from 'date-fns';
 import { pl } from 'date-fns/locale';
 
 interface OrderItem {
   name: string;
   quantity: number;
+  price: number;
   removedIngredients?: string[];
   addedIngredients?: Array<{
     name: string;
+    price: number;
   }>;
 }
 
@@ -20,7 +22,7 @@ export default function OrdersManagement() {
   const handleDelete = async (id: number) => {
     if (window.confirm('Czy na pewno chcesz usunąć to zamówienie?')) {
       try {
-        await deleteOrder(id);
+        await deleteOrder(id, 'miejsce-piastowe');
         await refetch();
       } catch (err) {
         console.error('Error deleting order:', err);
@@ -30,10 +32,33 @@ export default function OrdersManagement() {
   };
 
   const parseOrderItems = (itemsString: string): OrderItem[] => {
+    if (!itemsString) {
+      console.warn('Otrzymano pusty string z zamówionymi produktami');
+      return [];
+    }
+
     try {
-      return JSON.parse(itemsString);
+      // Próba sparsowania JSON
+      const items = JSON.parse(itemsString);
+      
+      // Sprawdzenie czy sparsowane dane są tablicą
+      if (!Array.isArray(items)) {
+        console.error('Sparsowane dane nie są tablicą:', items);
+        return [];
+      }
+
+      // Walidacja i mapowanie każdego elementu
+      return items.map(item => ({
+        name: String(item.name || ''),
+        quantity: Number(item.quantity || 0),
+        price: Number(item.price || 0),
+        removedIngredients: Array.isArray(item.removedIngredients) ? item.removedIngredients : [],
+        addedIngredients: Array.isArray(item.addedIngredients) ? item.addedIngredients : []
+      }));
+
     } catch (e) {
-      console.error('Error parsing order items:', e);
+      console.error('Błąd podczas parsowania zamówionych produktów:', e);
+      console.error('Problematyczny string:', itemsString);
       return [];
     }
   };
@@ -44,6 +69,7 @@ export default function OrdersManagement() {
         <div className="flex items-baseline gap-2">
           <span className="font-medium">{item.name}</span>
           <span className="text-sm text-gray-600">x{item.quantity}</span>
+          <span className="text-sm text-gray-600">({item.price} zł)</span>
         </div>
         {(item.removedIngredients?.length ?? 0) > 0 && (
           <div className="text-sm text-red-600 ml-4">
@@ -52,11 +78,25 @@ export default function OrdersManagement() {
         )}
         {(item.addedIngredients?.length ?? 0) > 0 && (
           <div className="text-sm text-green-600 ml-4">
-            Dodane: {item.addedIngredients?.map(i => i.name).join(', ')}
+            Dodane: {item.addedIngredients?.map(i => `${i.name} (+${i.price} zł)`).join(', ')}
           </div>
         )}
       </div>
     ));
+  };
+
+  const formatDate = (dateString: string) => {
+    try {
+      const date = parseISO(dateString);
+      if (!isValid(date)) {
+        console.error('Nieprawidłowa data:', dateString);
+        return 'Nieprawidłowa data';
+      }
+      return format(date, 'dd.MM.yyyy HH:mm', { locale: pl });
+    } catch (error) {
+      console.error('Błąd podczas formatowania daty:', error);
+      return 'Błąd formatu daty';
+    }
   };
 
   if (loading) {
@@ -95,7 +135,7 @@ export default function OrdersManagement() {
                       {order.imie} {order.nazwisko}
                     </h3>
                     <time className="text-sm text-gray-500 block">
-                      {format(new Date(order.dataGodzinaZamowienia), 'dd.MM.yyyy HH:mm', { locale: pl })}
+                      {formatDate(order.dataGodzinaZamowienia)}
                     </time>
                   </div>
                   <div className="text-right">

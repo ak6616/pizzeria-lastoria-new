@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import OrderForm from '../components/OrderForm';
 import { getDeliveryAreas } from '../services/api';
+import { MapPin, Home } from 'lucide-react';
 
 interface DeliveryArea {
   id: number;
@@ -16,7 +17,7 @@ export default function Order() {
   useEffect(() => {
     async function fetchDeliveryAreas() {
       try {
-        const areas = await getDeliveryAreas();
+        const areas = await getDeliveryAreas('miejsce-piastowe');
         setDeliveryAreas(areas);
       } catch (err) {
         setError('Nie udało się załadować listy obszarów dostawy');
@@ -52,13 +53,24 @@ export default function Order() {
 
       <div className="bg-white/90 rounded-lg p-6 mb-8">
         <h2 className="text-xl font-semibold mb-4">Dowozimy do:</h2>
-        <ul className="grid grid-cols-3 gap-4 list-disc list-inside">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {deliveryAreas.map((area) => (
-            <li key={area.id}>
-              {area.nazwa} {area.ulica ? <span>ul. {area.ulica}</span> : null}
-            </li>
+            <div key={area.id} className="flex flex-col">
+              <div className="flex items-center gap-2">
+                <MapPin className="w-4 h-4 text-yellow-600" />
+                <span className="font-medium">{area.nazwa}</span>
+              </div>
+              {area.ulica && (
+                <div className="flex items-center gap-2 ml-4 mt-1">
+                  <Home className="w-4 h-4 text-gray-500" />
+                  <span className="text-sm text-gray-600">
+                    ul. {area.ulica}
+                  </span>
+                </div>
+              )}
+            </div>
           ))}
-        </ul>
+        </div>
       </div>
 
       <OrderForm deliveryAreas={deliveryAreas} />

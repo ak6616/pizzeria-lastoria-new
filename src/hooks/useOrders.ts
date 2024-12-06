@@ -23,7 +23,7 @@ export function useOrders() {
 
   const fetchOrders = useCallback(async () => {
     try {
-      const data = await getOrders();
+      const data = await getOrders('miejsce-piastowe');
       setOrders(data);
       setError(null);
     } catch (err) {

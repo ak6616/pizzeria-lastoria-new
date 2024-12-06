@@ -1,55 +1,21 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, Navigate } from 'react-router-dom';
 import MenuSection from '../components/MenuSection';
-import { getMenuItems } from '../services/api';
-
-interface MenuItem {
-  id: number;
-  nazwa: string;
-  cena: number;
-  skladniki?: string;
-}
+import { useMenuItems } from '../hooks/useMenuItems';
 
 export default function Menu() {
   const { location } = useParams<{ location: string }>();
-  const [pizzaItems, setPizzaItems] = useState<MenuItem[]>([]);
-  const [addonsItems, setAddonsItems] = useState<MenuItem[]>([]);
-  const [fastfoodItems, setFastfoodItems] = useState<MenuItem[]>([]);
-  const [drinksItems, setDrinksItems] = useState<MenuItem[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const {
+    items: menuItems,
+    loading,
+    error
+  } = useMenuItems(location);
 
   if (!location || !['haczow', 'miejsce-piastowe'].includes(location)) {
     return <Navigate to="/" replace />;
   }
 
   const locationName = location === 'haczow' ? 'Haczów' : 'Miejsce Piastowe';
-
-  useEffect(() => {
-    async function fetchMenuItems() {
-      if (location !== 'miejsce-piastowe') {
-        setLoading(false);
-        return;
-      }
-
-      try {
-        const pizzaData = await getMenuItems('pizza');
-        setPizzaItems(pizzaData);
-        const addonsData = await getMenuItems('dodatki');
-        setAddonsItems(addonsData);
-        const fastfoodData = await getMenuItems('fastfood');
-        setFastfoodItems(fastfoodData);
-        const drinksData = await getMenuItems('napoje');
-        setDrinksItems(drinksData);
-      } catch (err) {
-        setError('Nie udało się załadować menu. Spróbuj ponownie później.');
-      } finally {
-        setLoading(false);
-      }
-    }
-
-    fetchMenuItems();
-  }, [location]);
 
   if (loading) {
     return (
@@ -76,20 +42,20 @@ export default function Menu() {
         Menu - {locationName}
       </h1>
 
-      {location === 'miejsce-piastowe' && pizzaItems.length > 0 && (
-        <MenuSection title="Pizza" items={pizzaItems} />
+      {menuItems.pizza.length > 0 && (
+        <MenuSection title="Pizza" items={menuItems.pizza} />
       )}
-      {location === 'miejsce-piastowe' && addonsItems.length > 0 && (
-        <MenuSection title="Dodatki" items={addonsItems} />
+      {menuItems.dodatki.length > 0 && (
+        <MenuSection title="Dodatki" items={menuItems.dodatki} />
       )}
-      {location === 'miejsce-piastowe' && fastfoodItems.length > 0 && (
-        <MenuSection title="Fastfood" items={fastfoodItems} />
+      {menuItems.fastfood.length > 0 && (
+        <MenuSection title="Fastfood" items={menuItems.fastfood} />
       )}
-      {location === 'miejsce-piastowe' && drinksItems.length > 0 && (
-        <MenuSection title="Napoje" items={drinksItems} />
+      {menuItems.napoje.length > 0 && (
+        <MenuSection title="Napoje" items={menuItems.napoje} />
       )}
 
-      {location === 'miejsce-piastowe' && pizzaItems.length === 0 && (
+      {Object.values(menuItems).every(items => items.length === 0) && (
         <p className="text-center text-gray-500">
           Brak dostępnych pozycji w menu.
         </p>

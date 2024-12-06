@@ -5,26 +5,30 @@ import AddDeliveryRuleModal from './AddDeliveryRuleModal';
 import EditDeliveryRuleModal from './EditDeliveryRuleModal';
 import { deleteDeliveryRule } from '../../services/api';
 
+const CATEGORY_NAMES: Record<string, string> = {
+  dostawaweekend: 'Weekend',
+  dostawaweekday: 'Dzień tygodnia'
+};
+
+const CATEGORY_ORDER = ['dostawaweekday', 'dostawaweekend'];
+
 export default function DeliveryManagement() {
   const { rules, loading, error, refetch } = useDeliveryRules();
   const [showAddModal, setShowAddModal] = useState(false);
   const [editingItem, setEditingItem] = useState<any>(null);
 
+  const groupedRules = CATEGORY_ORDER.reduce((acc, category) => {
+    acc[category] = rules.filter(rule => {
+      const ruleCategory = rule.uniqueId.split('_')[0];
+      return ruleCategory === category;
+    });
+    return acc;
+  }, {} as Record<string, any[]>);
+
   const handleDelete = async (category: string, id: number) => {
-    const categoryMapping: Record<string, string> = {
-      dostawaweekend: 'dostawaweekend',
-      dostawaweekday: 'dostawaweekday',
-    };
-
-    const tableCategory = categoryMapping[category];
-    if (!tableCategory) {
-      alert('Nieprawidłowa kategoria dostawy');
-      return;
-    }
-
     if (window.confirm('Czy na pewno chcesz usunąć tę pozycję?')) {
       try {
-        await deleteDeliveryRule(tableCategory, id);
+        await deleteDeliveryRule(category, id);
         await refetch();
       } catch (err) {
         console.error('Error deleting menu item:', err);
@@ -62,46 +66,52 @@ export default function DeliveryManagement() {
         </button>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {Object.entries(rules).map(([category, categoryRules]) =>
-          categoryRules.map((rule) => (
-            <div
-              key={rule.uniqueId}
-              className="border rounded-lg p-4 hover:shadow-md transition"
-            >
-              <div className="flex justify-between items-start">
-                <div>
-                  <div className="flex items-center gap-2">
-                    <h3 className="font-medium">{rule.nazwa}</h3>
-                    <span className="text-xs px-2 py-1 bg-gray-100 rounded-full">
-                      {category}
-                    </span>
+      {CATEGORY_ORDER.map(category => (
+        <div key={category} className="mb-8">
+          <h3 className="text-lg font-semibold mb-4 text-yellow-600">
+            {CATEGORY_NAMES[category]}
+          </h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {groupedRules[category]?.map((rule) => (
+              <div
+                key={rule.uniqueId}
+                className="border rounded-lg p-4 hover:shadow-md transition"
+              >
+                <div className="flex justify-between items-start">
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <h3 className="font-medium">{rule.nazwa}</h3>
+                    </div>
+                    {rule.ulica && (
+                      <p className="text-sm text-gray-600 mt-1">{rule.ulica}</p>
+                    )}
+                    <p className="text-sm font-semibold mt-2">
+                      Minimalna ilość: {rule.ilosc} szt
+                    </p>
+                    <p className="text-sm font-semibold mt-2">
+                      Koszt dostawy: {rule.koszt} zł
+                    </p>
                   </div>
-                  {rule.ulica && (
-                    <p className="text-sm text-gray-600 mt-1">{rule.ulica}</p>
-                  )}
-                  <p className="text-sm font-semibold mt-2">{rule.ilosc} szt</p>
-                  <p className="text-sm font-semibold mt-2">{rule.koszt} zł</p>
-                </div>
-                <div className="flex space-x-2">
-                  <button
-                    onClick={() => setEditingItem(rule)}
-                    className="p-1 text-blue-500 hover:text-blue-600 transition"
-                  >
-                    <Edit2 className="w-4 h-4" />
-                  </button>
-                  <button
-                    onClick={() => handleDelete(category, rule.id)}
-                    className="p-1 text-red-500 hover:text-red-600 transition"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </button>
+                  <div className="flex space-x-2">
+                    <button
+                      onClick={() => setEditingItem(rule)}
+                      className="p-1 text-blue-500 hover:text-blue-600 transition"
+                    >
+                      <Edit2 className="w-4 h-4" />
+                    </button>
+                    <button
+                      onClick={() => handleDelete(category, rule.id)}
+                      className="p-1 text-red-500 hover:text-red-600 transition"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
                 </div>
               </div>
-            </div>
-          ))
-        )}
-      </div>
+            ))}
+          </div>
+        </div>
+      ))}
 
       {showAddModal && (
         <AddDeliveryRuleModal

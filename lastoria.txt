@@ -189,3 +189,13 @@ INSERT into miejscowosci (nazwa, ulica) VALUES
 UPDATE `miejscowosci` SET `nazwa` = 'głowienka' WHERE `miejscowosci`.`id` = 1; UPDATE `miejscowosci` SET `ulica` = 'dębowa' WHERE `miejscowosci`.`id` = 2; UPDATE `miejscowosci` SET `ulica` = 'bolesława prusa' WHERE `miejscowosci`.`id` = 5; UPDATE `miejscowosci` SET `ulica` = 'żniwna' WHERE `miejscowosci`.`id` = 6; UPDATE `miejscowosci` SET `ulica` = 'władysława stanisława reymonta' WHERE `miejscowosci`.`id` = 7; UPDATE `miejscowosci` SET `ulica` = 'stanisława pigonia' WHERE `miejscowosci`.`id` = 10; UPDATE `miejscowosci` SET `nazwa` = 'łężany' WHERE `miejscowosci`.`id` = 13; UPDATE `miejscowosci` SET `nazwa` = 'łęki dukielskie' WHERE `miejscowosci`.`id` = 18; UPDATE `miejscowosci` SET `nazwa` = 'niżna łąka' WHERE `miejscowosci`.`id` = 19; UPDATE `miejscowosci` SET `nazwa` = 'krościenko wyżne' WHERE `miejscowosci`.`id` = 23;
 
 W "panel admina" w sekcji "menu" wyświetl wszystkie pozycje z "menu" miejsca piastowego i haczowa. Po kliknięciu którejkolwiek z pozycji ma się pojawić przycisk edycji bądź usunięcia. Usunięcie pozycji będzie skutkowało usunięciem rekordu z bazy danych, z tabeli "pizza". W "panel admina" w sekcji "menu" dodaj również przycisk "dodaj pozycję", kliknięcie tego przycisku skutkuje dodanie rekordu do bazy danych. Parametry dla "dodaj pozycję": "kategoria" (nazwa tabeli bazy danych), "nazwa" (kolumna "nazwa" w tabeli), "cena" (kolumna "cena" w tabeli), "opis / składniki" (kolumna "skladniki" w tabeli).
+
+RENAME TABLE dodatki_mp TO dodatki;
+RENAME TABLE dostawaweekend_mp TO dostawaweekend;
+RENAME TABLE dostawaweekday_mp TO dostawaweekday;
+RENAME TABLE fastfood_mp TO fastfood;
+RENAME TABLE klienci_mp TO klienci;
+RENAME TABLE miejscowosci_mp TO miejscowosci;
+RENAME TABLE napoje_mp TO napoje;
+RENAME TABLE pizza_mp TO pizza;
+RENAME TABLE zamowienia_mp TO zamowienia;

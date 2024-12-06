@@ -36,7 +36,11 @@ async function createConnection() {
 
 app.get('/api/menu/:category', async (req, res) => {
   const { category } = req.params;
-  const validCategories = ['pizza', 'fastfood', 'napoje', 'dodatki'];
+  const validCategories = [
+    'pizza_mp', 'fastfood_mp', 'napoje_mp', 'dodatki_mp',
+    'pizza_hacz', 'fastfood_hacz', 'napoje_hacz', 'dodatki_hacz'
+  ];
+  
   if (!validCategories.includes(category)) {
     return res.status(400).json({ error: 'Invalid category' });
   }
@@ -127,8 +131,11 @@ app.delete('/api/menu/:category/:id', async (req, res) => {
 
 app.get('/api/delivery/:category', async (req, res) => {
   const { category } = req.params;
-
-  const validCategories = ['dostawaweekday', 'dostawaweekend'];
+  const validCategories = [
+    'dostawaweekday_mp', 'dostawaweekend_mp',
+    'dostawaweekday_hacz', 'dostawaweekend_hacz'
+  ];
+  
   if (!validCategories.includes(category)) {
     return res.status(400).json({ error: 'Invalid category' });
   }
@@ -344,11 +351,18 @@ app.get('/api/gallery', async (req, res) => {
 
 ///////////////////// Obszar dostawy
 
-app.get('/api/delivery-areas', async (req, res) => {
+app.get('/api/delivery-areas:location', async (req, res) => {
+  const { location } = req.params;
+  const validLocations = ['_mp', '_hacz'];
+  
+  if (!validLocations.includes(location)) {
+    return res.status(400).json({ error: 'Invalid location' });
+  }
+
   const connection = await createConnection();
 
   try {
-    const [rows] = await connection.execute('SELECT * FROM miejscowosci');
+    const [rows] = await connection.execute(`SELECT * FROM miejscowosci${location}`);
     res.json(rows);
   } catch (error) {
     console.error('Error fetching delivery areas:', error);
@@ -360,53 +374,71 @@ app.get('/api/delivery-areas', async (req, res) => {
 
 /////////////////////// Koszt dostawy
 
-app.get('/api/delivery-cost', async (req, res) => {
+app.get('/api/delivery-cost:location', async (req, res) => {
   const connection = await createConnection();
   const { city, street, pizzaCount } = req.query;
+  const { location } = req.params;
+  const validLocations = ['_mp', '_hacz'];
+  
+  if (!validLocations.includes(location)) {
+    return res.status(400).json({ error: 'Invalid location' });
+  }
+
   const isWeekend = new Date().getDay() === 0 || new Date().getDay() === 6;
-  const table = isWeekend ? 'dostawaweekend' : 'dostawaweekday';
-  // let lastPizzaCount = 0;
+  const table = isWeekend ? `dostawaweekend${location}` : `dostawaweekday${location}`;
 
   try {
-    const [rows] = await connection.execute(
-      `SELECT * FROM ${table} WHERE nazwa = ? AND (ulica = ? OR ulica IS NULL) AND ilosc = ?`,
-      [city, street, pizzaCount]
-    );
-    const deliveryInfo = rows[0];
-
-    // Zapytania o maksymalną i minimalną wartość
-    const [[{ max_ilosc: max }]] = await connection.execute(
-      `SELECT MAX(ilosc) AS max_ilosc FROM ${table} WHERE nazwa = ? AND (ulica = ? OR ulica IS NULL)`,
-      [city, street]
-    );
-    const [[{ min_ilosc: min }]] = await connection.execute(
-      `SELECT MIN(ilosc) AS min_ilosc FROM ${table} WHERE nazwa = ? AND (ulica = ? OR ulica IS NULL)`,
+    // Pobierz wszystkie reguły dla danej lokalizacji
+    const [allRules] = await connection.execute(
+      `SELECT * FROM ${table} WHERE nazwa = ? AND (ulica = ? OR ulica IS NULL) ORDER BY ilosc ASC`,
       [city, street]
     );
 
-    let cost = 0;
-
-    if (rows.length === 0 && pizzaCount < min) {
-      // Za mało pizz, nie dowozimy
-      cost = null;
-      res.json({
-        cost,
-        message: 'Nie dowozimy do tej lokalizacji przy tak małej ilości',
+    if (allRules.length === 0) {
+      return res.json({
+        cost: null,
+        message: 'Nie dowozimy do tej lokalizacji'
       });
-    } else if (rows.length === 0 && pizzaCount > max) {
-      // Za dużo pizz, dowóz darmowy
-      cost = 0;
-      res.json({ cost, message: null });
-    } else {
-      // Koszt zgodny z bazą danych
-      console.log(deliveryInfo);
-      cost = deliveryInfo.koszt;
-      res.json({ cost, message: null });
     }
 
-    // const cost =
-    //   parseInt(pizzaCount) > deliveryInfo.ilosc ? 0 : deliveryInfo.koszt;
-    return;
+    const pizzaCountNum = parseInt(pizzaCount);
+    const maxRule = allRules[allRules.length - 1];
+
+    // Jeśli liczba pizz jest większa niż największa ilość w regułach, dostawa jest darmowa
+    if (pizzaCountNum > maxRule.ilosc) {
+      return res.json({
+        cost: 0,
+        message: 'Darmowa dostawa!'
+      });
+    }
+
+    // Znajdź regułę z najniższą wymaganą ilością
+    const minRule = allRules[0];
+
+    if (pizzaCountNum < minRule.ilosc) {
+      return res.json({
+        cost: null,
+        message: `Minimalna ilość pizz dla tej lokalizacji to ${minRule.ilosc}`
+      });
+    }
+
+    // Znajdź odpowiednią regułę dla ilości pizz
+    // Sortujemy malejąco, aby znaleźć najwyższą pasującą ilość
+    const sortedRules = allRules.sort((a, b) => b.ilosc - a.ilosc);
+    const applicableRule = sortedRules.find(rule => pizzaCountNum >= rule.ilosc);
+
+    if (!applicableRule) {
+      return res.json({
+        cost: null,
+        message: 'Błąd w obliczaniu kosztu dostawy'
+      });
+    }
+
+    return res.json({
+      cost: applicableRule.koszt,
+      message: applicableRule.koszt === 0 ? 'Darmowa dostawa!' : null
+    });
+
   } catch (error) {
     console.error('Error calculating delivery cost:', error);
     res.status(500).json({ error: 'Internal server error' });
@@ -420,6 +452,46 @@ app.post('/api/orders', async (req, res) => {
   const orderData = req.body;
 
   try {
+    // Upewnij się, że items jest tablicą przed konwersją na JSON
+    const items = Array.isArray(orderData.items) ? orderData.items : [];
+    
+    // Sanityzacja i walidacja każdego elementu
+    const sanitizedItems = items.map(item => ({
+      name: String(item.name || ''),
+      quantity: Number(item.quantity) || 0,
+      removedIngredients: Array.isArray(item.removedIngredients) ? item.removedIngredients : [],
+      addedIngredients: Array.isArray(item.addedIngredients) ? item.addedIngredients : []
+    }));
+
+    // Konwersja do JSON z dodatkowym sprawdzeniem
+    const itemsJson = JSON.stringify(sanitizedItems)
+      .replace(/[\u0000-\u001F\u007F-\u009F]/g, '')
+      .replace(/\\/g, '\\\\')
+      .replace(/\n/g, '\\n')
+      .replace(/\r/g, '\\r')
+      .replace(/\t/g, '\\t');
+
+    // Przygotuj dane z wartościami domyślnymi dla null/undefined
+    const orderValues = [
+      orderData.firstName || '',
+      orderData.lastName || '',
+      orderData.city || '',
+      orderData.street || '',
+      orderData.houseNumber || '',
+      orderData.apartmentNumber || null, // null jest dozwolony w SQL
+      orderData.phone || '',
+      orderData.deliveryTime || null,    // null jest dozwolony w SQL
+      orderData.orderDateTime || new Date().toISOString(),
+      itemsJson,
+      Number(orderData.totalPrice) || 0
+    ];
+
+    // Sprawdź czy nie ma undefined w wartościach
+    if (orderValues.includes(undefined)) {
+      console.error('Wykryto undefined w danych zamówienia:', orderValues);
+      throw new Error('Invalid order data - contains undefined values');
+    }
+
     const [result] = await connection.execute(
       `INSERT INTO zamowienia (
         imie, 
@@ -434,24 +506,17 @@ app.post('/api/orders', async (req, res) => {
         zamowioneProdukty, 
         suma
       ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-      [
-        orderData.firstName,
-        orderData.lastName,
-        orderData.city,
-        orderData.street || '',
-        orderData.houseNumber,
-        orderData.apartmentNumber || '',
-        orderData.phone,
-        orderData.deliveryTime || '',
-        orderData.orderDateTime,
-        JSON.stringify(orderData.items),
-        orderData.totalPrice,
-      ]
+      orderValues
     );
+
     res.json(result);
   } catch (error) {
     console.error('Error submitting order:', error);
-    res.status(500).json({ error: 'Internal server error' });
+    console.error('Order data:', JSON.stringify(orderData, null, 2));
+    res.status(500).json({ 
+      error: 'Internal server error',
+      details: error.message 
+    });
   } finally {
     await connection.end();
   }
@@ -462,7 +527,7 @@ app.get('/api/orders', async (req, res) => {
 
   try {
     const [rows] = await connection.execute(
-      'SELECT * FROM zamowienia ORDER BY dataGodzinaZamowienia DESC'
+      'SELECT *, DATE_FORMAT(dataGodzinaZamowienia, "%Y-%m-%dT%H:%i:%s.000Z") as dataGodzinaZamowienia FROM zamowienia ORDER BY dataGodzinaZamowienia ASC'
     );
     res.json(rows);
   } catch (error) {

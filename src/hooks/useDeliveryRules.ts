@@ -10,46 +10,47 @@ export interface DeliveryRule {
   koszt: number;
 }
 
+interface DeliveryRuleResponse {
+  id: number;
+  nazwa: string;
+  ulica?: string;
+  ilosc: number;
+  koszt: number;
+}
+
 export function useDeliveryRules() {
-  const [rules, setRules] = useState<Record<string, DeliveryRule[]>>({
-    dostawaweekend: [],
-    dostawaweekday: [],
-  });
+  const [rules, setRules] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchAllDeliveryRules = useCallback(async () => {
+  const fetchRules = useCallback(async () => {
     try {
-      const [dostawaweekday, dostawaweekend] = await Promise.all([
-        getDeliveryRules('dostawaweekday'),
-        getDeliveryRules('dostawaweekend'),
-      ]);
+      const weekdayRules = await getDeliveryRules('dostawaweekday', 'miejsce-piastowe');
+      const weekendRules = await getDeliveryRules('dostawaweekend', 'miejsce-piastowe');
 
-      const processedRules = {
-        weekday: dostawaweekday.map((rule) => ({
+      const formattedRules = [
+        ...weekdayRules.map((rule: DeliveryRuleResponse) => ({
           ...rule,
-          category: 'dostawaweekday',
-          uniqueId: `weekday_${rule.id}`,
+          uniqueId: `dostawaweekday_${rule.id}`
         })),
-        weekend: dostawaweekend.map((rule) => ({
+        ...weekendRules.map((rule: DeliveryRuleResponse) => ({
           ...rule,
-          category: 'dostawaweekend',
-          uniqueId: `weekend_${rule.id}`,
-        })),
-      };
+          uniqueId: `dostawaweekend_${rule.id}`
+        }))
+      ];
 
-      setRules(processedRules);
+      setRules(formattedRules);
       setError(null);
     } catch (err) {
-      setError('Nie udało się załadować regół dowozu');
+      setError('Nie udało się załadować zasad dostawy');
     } finally {
       setLoading(false);
     }
   }, []);
 
   useEffect(() => {
-    fetchAllDeliveryRules();
-  }, [fetchAllDeliveryRules]);
+    fetchRules();
+  }, [fetchRules]);
 
-  return { rules, loading, error, refetch: fetchAllDeliveryRules };
+  return { rules, loading, error, refetch: fetchRules };
 }

@@ -1,8 +1,22 @@
 const API_BASE_URL = 'http://localhost:3000/api';
 
+type LocationSuffix = '_mp' | '_hacz';
+
+const getLocationSuffix = (location: string): string => {
+  switch (location) {
+    case 'miejsce-piastowe':
+      return '_mp';
+    case 'haczow':
+      return '_hacz';
+    default:
+      return '_mp';
+  }
+};
+
 //////////dodatki
-export async function getAdditionalIngredients() {
-  const response = await fetch(`${API_BASE_URL}/menu/dodatki`);
+export async function getAdditionalIngredients(location: string) {
+  const suffix = getLocationSuffix(location);
+  const response = await fetch(`${API_BASE_URL}/menu/dodatki${suffix}`);
   if (!response.ok) {
     throw new Error('Failed to fetch additional ingredients');
   }
@@ -102,8 +116,9 @@ export async function deleteNews(id: number) {
   return response.json();
 }
 ////////////obszar dostawy
-export async function getDeliveryAreas() {
-  const response = await fetch(`${API_BASE_URL}/delivery-areas`);
+export async function getDeliveryAreas(location: string) {
+  const suffix = getLocationSuffix(location);
+  const response = await fetch(`${API_BASE_URL}/delivery-areas${suffix}`);
   if (!response.ok) {
     throw new Error('Failed to fetch delivery areas');
   }
@@ -113,10 +128,12 @@ export async function getDeliveryAreas() {
 export async function calculateDeliveryCost(
   city: string,
   street: string,
-  pizzaCount: number
+  pizzaCount: number,
+  location: string
 ) {
+  const suffix = getLocationSuffix(location);
   const response = await fetch(
-    `${API_BASE_URL}/delivery-cost?city=${encodeURIComponent(
+    `${API_BASE_URL}/delivery-cost${suffix}?city=${encodeURIComponent(
       city
     )}&street=${encodeURIComponent(street)}&pizzaCount=${pizzaCount}`
   );
@@ -126,8 +143,9 @@ export async function calculateDeliveryCost(
   return response.json();
 }
 ///////////////////zamówienia
-export async function submitOrder(orderData: any) {
-  const response = await fetch(`${API_BASE_URL}/orders`, {
+export async function submitOrder(orderData: any, location: string) {
+  const suffix = getLocationSuffix(location);
+  const response = await fetch(`${API_BASE_URL}/orders${suffix}`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -140,15 +158,17 @@ export async function submitOrder(orderData: any) {
   }
   return response.json();
 }
-export async function getOrders() {
-  const response = await fetch(`${API_BASE_URL}/orders`);
+export async function getOrders(location: string) {
+  const suffix = getLocationSuffix(location);
+  const response = await fetch(`${API_BASE_URL}/orders${suffix}`);
   if (!response.ok) {
     throw new Error('Failed to fetch menu items');
   }
   return response.json();
 }
-export async function deleteOrder(id: number) {
-  const response = await fetch(`${API_BASE_URL}/orders/${id}`, {
+export async function deleteOrder(id: number, location: string) {
+  const suffix = getLocationSuffix(location);
+  const response = await fetch(`${API_BASE_URL}/orders${suffix}/${id}`, {
     method: 'DELETE',
   });
 
@@ -227,8 +247,9 @@ export async function deleteMenuItem(category: string, id: number) {
 }
 ////////////////zasady dostawy
 
-export async function getDeliveryRules(category: string) {
-  const response = await fetch(`${API_BASE_URL}/delivery/${category}`);
+export async function getDeliveryRules(category: string, location: string) {
+  const suffix = getLocationSuffix(location);
+  const response = await fetch(`${API_BASE_URL}/delivery/${category}${suffix}`);
   if (!response.ok) {
     throw new Error('Failed to fetch delivery rules');
   }

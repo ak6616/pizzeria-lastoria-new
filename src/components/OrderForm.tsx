@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useMenuItems } from '../hooks/useMenuItems';
 import { useDeliveryCost } from '../hooks/useDeliveryCost';
 import { useOrderForm } from '../hooks/useOrderForm';
-import { Plus, Minus } from 'lucide-react';
+import { Plus, Minus, User, Users, MapPin, Home, Building2, DoorClosed, Phone, Clock } from 'lucide-react';
 import type { CustomerData } from './CustomerDataForm';
 
 interface OrderFormProps {
@@ -16,7 +16,7 @@ export default function OrderForm({ deliveryAreas }: OrderFormProps) {
     additionalIngredients,
     loading: menuLoading,
     error: menuError,
-  } = useMenuItems();
+  } = useMenuItems('miejsce-piastowe');
 
   const {
     selectedItems,
@@ -39,6 +39,15 @@ export default function OrderForm({ deliveryAreas }: OrderFormProps) {
     customerData.street || '',
     pizzaCount
   );
+
+  const CATEGORY_NAMES: Record<string, string> = {
+    pizza: 'Pizza',
+    fastfood: 'Fast Food',
+    napoje: 'Napoje',
+    dodatki: 'Dodatki'
+  };
+
+  const CATEGORY_ORDER = ['pizza', 'fastfood', 'dodatki', 'napoje'];
 
   if (success) {
     return (
@@ -92,12 +101,13 @@ export default function OrderForm({ deliveryAreas }: OrderFormProps) {
   };
 
   const handleCityChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const selectedCity = e.target.value;
-    const selectedArea = deliveryAreas.find(area => area.nazwa === selectedCity);
+    const selectedValue = e.target.value;
+    const [city, street] = selectedValue.split('|');
+    
     setCustomerData(prev => ({
       ...prev,
-      city: selectedCity,
-      street: selectedArea?.ulica || ''
+      city,
+      street: street || '' // Jeśli street jest undefined, ustaw pusty string
     }));
   };
 
@@ -119,7 +129,8 @@ export default function OrderForm({ deliveryAreas }: OrderFormProps) {
       <form onSubmit={handleFormSubmit} className="space-y-8">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
-            <label className="block text-sm font-medium text-gray-700">
+            <label className="block text-sm font-medium text-gray-700 flex items-center gap-2">
+              <User className="w-4 h-4 text-yellow-600" />
               Imię *
             </label>
             <input
@@ -131,7 +142,8 @@ export default function OrderForm({ deliveryAreas }: OrderFormProps) {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700">
+            <label className="block text-sm font-medium text-gray-700 flex items-center gap-2">
+              <Users className="w-4 h-4 text-yellow-600" />
               Nazwisko *
             </label>
             <input
@@ -143,26 +155,32 @@ export default function OrderForm({ deliveryAreas }: OrderFormProps) {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700">
+            <label className="block text-sm font-medium text-gray-700 flex items-center gap-2">
+              <MapPin className="w-4 h-4 text-yellow-600" />
               Miejscowość *
             </label>
             <select
               name="city"
               required
+              value={`${customerData.city || ''}${customerData.street ? `|${customerData.street}` : ''}`}
               onChange={handleCityChange}
               className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-yellow-500 focus:ring-yellow-500"
             >
               <option value="">Wybierz miejscowość</option>
               {deliveryAreas.map((area) => (
-                <option key={area.id} value={area.nazwa}>
-                  {area.nazwa}
+                <option 
+                  key={area.id} 
+                  value={`${area.nazwa}${area.ulica ? `|${area.ulica}` : ''}`}
+                >
+                  {area.nazwa}{area.ulica ? ` (ul. ${area.ulica})` : ''}
                 </option>
               ))}
             </select>
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700">
+            <label className="block text-sm font-medium text-gray-700 flex items-center gap-2">
+              <Home className="w-4 h-4 text-yellow-600" />
               Ulica
             </label>
             <input
@@ -175,7 +193,8 @@ export default function OrderForm({ deliveryAreas }: OrderFormProps) {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700">
+            <label className="block text-sm font-medium text-gray-700 flex items-center gap-2">
+              <Building2 className="w-4 h-4 text-yellow-600" />
               Numer domu *
             </label>
             <input
@@ -187,7 +206,8 @@ export default function OrderForm({ deliveryAreas }: OrderFormProps) {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700">
+            <label className="block text-sm font-medium text-gray-700 flex items-center gap-2">
+              <DoorClosed className="w-4 h-4 text-yellow-600" />
               Numer mieszkania
             </label>
             <input
@@ -198,7 +218,8 @@ export default function OrderForm({ deliveryAreas }: OrderFormProps) {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700">
+            <label className="block text-sm font-medium text-gray-700 flex items-center gap-2">
+              <Phone className="w-4 h-4 text-yellow-600" />
               Numer telefonu *
             </label>
             <input
@@ -210,7 +231,8 @@ export default function OrderForm({ deliveryAreas }: OrderFormProps) {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700">
+            <label className="block text-sm font-medium text-gray-700 flex items-center gap-2">
+              <Clock className="w-4 h-4 text-yellow-600" />
               Dostawa na konkretną godzinę
             </label>
             <input
@@ -223,120 +245,128 @@ export default function OrderForm({ deliveryAreas }: OrderFormProps) {
 
         <div className="mt-8">
           <h3 className="text-lg font-semibold mb-4">Menu</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {Object.entries(menuItems).map(([category, items]) =>
-              items.map((item) => (
-                <div key={item.uniqueId} className="border rounded-lg p-4">
-                  <div className="flex flex-col h-full">
-                    <div className="flex justify-between items-start mb-2">
-                      <div>
-                        <h4 className="font-medium">{item.nazwa}</h4>
-                        {item.skladniki && (
-                          <p className="text-sm text-gray-600">{item.skladniki}</p>
-                        )}
-                        <p className="text-sm font-semibold mt-1">
-                          {item.cena} zł
-                        </p>
-                      </div>
-
-                      <div className="flex items-center space-x-2">
-                        <button
-                          type="button"
-                          onClick={() =>
-                            updateQuantity(
-                              item.uniqueId,
-                              (selectedItems[item.uniqueId] || 0) - 1
-                            )
-                          }
-                          className="p-1 bg-gray-200 rounded hover:bg-gray-300"
-                        >
-                          <Minus className="w-4 h-4" />
-                        </button>
-                        <span className="w-8 text-center">
-                          {selectedItems[item.uniqueId] || 0}
-                        </span>
-                        <button
-                          type="button"
-                          onClick={() =>
-                            updateQuantity(
-                              item.uniqueId,
-                              (selectedItems[item.uniqueId] || 0) + 1
-                            )
-                          }
-                          className="p-1 bg-gray-200 rounded hover:bg-gray-300"
-                        >
-                          <Plus className="w-4 h-4" />
-                        </button>
-                      </div>
-                    </div>
-
-                    {category === 'pizza' && selectedItems[item.uniqueId] > 0 && (
-                      <div className="mt-4 space-y-4">
-                        {item.skladniki && (
+          
+          {CATEGORY_ORDER.map(category => 
+            menuItems[category] && menuItems[category].length > 0 && (
+              <div key={category} className="mb-8">
+                <h4 className="text-xl font-semibold mb-4 text-yellow-600">
+                  {CATEGORY_NAMES[category]}
+                </h4>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {menuItems[category].map((item) => (
+                    <div key={item.uniqueId} className="border rounded-lg p-4">
+                      <div className="flex flex-col h-full">
+                        <div className="flex justify-between items-start mb-2">
                           <div>
-                            <p className="text-sm font-medium mb-2">
-                              Składniki do usunięcia:
+                            <h4 className="font-medium">{item.nazwa}</h4>
+                            {item.skladniki && (
+                              <p className="text-sm text-gray-600">{item.skladniki}</p>
+                            )}
+                            <p className="text-sm font-semibold mt-1">
+                              {item.cena} zł
                             </p>
-                            <div className="flex flex-wrap gap-2">
-                              {item.skladniki.split(', ').map((ingredient) => (
-                                <label
-                                  key={ingredient}
-                                  className="inline-flex items-center"
-                                >
-                                  <input
-                                    type="checkbox"
-                                    checked={customizations
-                                      .find((c) => c.uniqueId === item.uniqueId)
-                                      ?.removedIngredients.includes(ingredient)}
-                                    onChange={() =>
-                                      toggleIngredient(item.uniqueId, ingredient)
-                                    }
-                                    className="rounded border-gray-300 text-yellow-500 focus:ring-yellow-500"
-                                  />
-                                  <span className="ml-2 text-sm">{ingredient}</span>
-                                </label>
-                              ))}
+                          </div>
+
+                          <div className="flex items-center space-x-2">
+                            <button
+                              type="button"
+                              onClick={() =>
+                                updateQuantity(
+                                  item.uniqueId,
+                                  (selectedItems[item.uniqueId] || 0) - 1
+                                )
+                              }
+                              className="p-1 bg-gray-200 rounded hover:bg-gray-300"
+                            >
+                              <Minus className="w-4 h-4" />
+                            </button>
+                            <span className="w-8 text-center">
+                              {selectedItems[item.uniqueId] || 0}
+                            </span>
+                            <button
+                              type="button"
+                              onClick={() =>
+                                updateQuantity(
+                                  item.uniqueId,
+                                  (selectedItems[item.uniqueId] || 0) + 1
+                                )
+                              }
+                              className="p-1 bg-gray-200 rounded hover:bg-gray-300"
+                            >
+                              <Plus className="w-4 h-4" />
+                            </button>
+                          </div>
+                        </div>
+
+                        {category === 'pizza' && selectedItems[item.uniqueId] > 0 && (
+                          <div className="mt-4 space-y-4">
+                            {item.skladniki && (
+                              <div>
+                                <p className="text-sm font-medium mb-2">
+                                  Składniki do usunięcia:
+                                </p>
+                                <div className="flex flex-wrap gap-2">
+                                  {item.skladniki.split(', ').map((ingredient) => (
+                                    <label
+                                      key={ingredient}
+                                      className="inline-flex items-center"
+                                    >
+                                      <input
+                                        type="checkbox"
+                                        checked={customizations
+                                          .find((c) => c.uniqueId === item.uniqueId)
+                                          ?.removedIngredients.includes(ingredient)}
+                                        onChange={() =>
+                                          toggleIngredient(item.uniqueId, ingredient)
+                                        }
+                                        className="rounded border-gray-300 text-yellow-500 focus:ring-yellow-500"
+                                      />
+                                      <span className="ml-2 text-sm">{ingredient}</span>
+                                    </label>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
+
+                            <div>
+                              <p className="text-sm font-medium mb-2">
+                                Dodatkowe składniki:
+                              </p>
+                              <div className="flex flex-wrap gap-2">
+                                {additionalIngredients.map((ingredient) => (
+                                  <label
+                                    key={ingredient.id}
+                                    className="inline-flex items-center"
+                                  >
+                                    <input
+                                      type="checkbox"
+                                      checked={customizations
+                                        .find((c) => c.uniqueId === item.uniqueId)
+                                        ?.addedIngredients.includes(ingredient.id)}
+                                      onChange={() =>
+                                        toggleAdditionalIngredient(
+                                          item.uniqueId,
+                                          ingredient.id
+                                        )
+                                      }
+                                      className="rounded border-gray-300 text-yellow-500 focus:ring-yellow-500"
+                                    />
+                                    <span className="ml-2 text-sm">
+                                      {ingredient.nazwa} (+{ingredient.cena} zł)
+                                    </span>
+                                  </label>
+                                ))}
+                              </div>
                             </div>
                           </div>
                         )}
-
-                        <div>
-                          <p className="text-sm font-medium mb-2">
-                            Dodatkowe składniki:
-                          </p>
-                          <div className="flex flex-wrap gap-2">
-                            {additionalIngredients.map((ingredient) => (
-                              <label
-                                key={ingredient.id}
-                                className="inline-flex items-center"
-                              >
-                                <input
-                                  type="checkbox"
-                                  checked={customizations
-                                    .find((c) => c.uniqueId === item.uniqueId)
-                                    ?.addedIngredients.includes(ingredient.id)}
-                                  onChange={() =>
-                                    toggleAdditionalIngredient(
-                                      item.uniqueId,
-                                      ingredient.id
-                                    )
-                                  }
-                                  className="rounded border-gray-300 text-yellow-500 focus:ring-yellow-500"
-                                />
-                                <span className="ml-2 text-sm">
-                                  {ingredient.nazwa} (+{ingredient.cena} zł)
-                                </span>
-                              </label>
-                            ))}
-                          </div>
-                        </div>
                       </div>
-                    )}
-                  </div>
+                    </div>
+                  ))}
                 </div>
-              ))
-            )}
-          </div>
+              </div>
+            )
+          )}
         </div>
 
         <div className="mt-8 border-t pt-6">

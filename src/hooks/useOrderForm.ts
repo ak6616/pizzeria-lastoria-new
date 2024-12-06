@@ -100,7 +100,7 @@ export function useOrderForm(menuItems: Record<string, MenuItem[]>, additionalIn
   const calculateTotal = (deliveryCost: number | null) => {
     let total = 0;
 
-    // Calculate base items cost
+    // Oblicz koszt pizzy (cena * ilość)
     Object.entries(selectedItems).forEach(([uniqueId, quantity]) => {
       const [category, itemId] = uniqueId.split('_');
       const item = menuItems[category]?.find((i) => i.id === parseInt(itemId));
@@ -109,65 +109,68 @@ export function useOrderForm(menuItems: Record<string, MenuItem[]>, additionalIn
       }
     });
 
-    // Add additional ingredients cost
-    customizations.forEach((customization) => {
-      const itemQuantity = selectedItems[customization.uniqueId] || 0;
-      customization.addedIngredients.forEach((ingredientId) => {
-        const ingredient = additionalIngredients.find((i) => i.id === ingredientId);
-        if (ingredient) {
-          total += ingredient.cena * itemQuantity;
-        }
-      });
-    });
+    // Dodaj koszt dostawy (jeśli nie jest null)
+    if (deliveryCost !== null) {
+      total += deliveryCost;
+    }
 
-    // Add delivery cost
-    return total + (deliveryCost || 0);
+    return total;
   };
 
   const handleSubmit = async (customerData: CustomerData, deliveryCost: number | null) => {
     setIsSubmitting(true);
     setError(null);
 
-    const orderItems = Object.entries(selectedItems)
-      .filter(([_, quantity]) => quantity > 0)
-      .map(([uniqueId, quantity]) => {
-        const [category, itemId] = uniqueId.split('_');
-        const item = menuItems[category]?.find(
-          (i) => i.id === parseInt(itemId)
-        );
-        const customization = customizations.find(
-          (c) => c.uniqueId === uniqueId
-        );
-
-        const addedIngredientsDetails =
-          customization?.addedIngredients.map((id) => {
-            const ingredient = additionalIngredients.find((i) => i.id === id);
-            return {
-              id,
-              name: ingredient?.nazwa,
-              price: ingredient?.cena,
-            };
-          }) || [];
-
-        return {
-          id: parseInt(itemId),
-          category,
-          name: item?.nazwa,
-          quantity,
-          price: item?.cena,
-          removedIngredients: customization?.removedIngredients || [],
-          addedIngredients: addedIngredientsDetails,
-        };
-      });
-
-    const totalPrice = calculateTotal(deliveryCost);
-
     try {
+      // Upewnij się, że wszystkie wymagane pola są wypełnione
+      if (!customerData.firstName || !customerData.lastName || !customerData.city || 
+          !customerData.houseNumber || !customerData.phone) {
+        throw new Error('Proszę wypełnić wszystkie wymagane pola');
+      }
+
+      const orderItems = Object.entries(selectedItems)
+        .filter(([_, quantity]) => quantity > 0)
+        .map(([uniqueId, quantity]) => {
+          const [category, itemId] = uniqueId.split('_');
+          const item = menuItems[category]?.find(
+            (i) => i.id === parseInt(itemId)
+          );
+          const customization = customizations.find(
+            (c) => c.uniqueId === uniqueId
+          );
+
+          const addedIngredientsDetails =
+            customization?.addedIngredients.map((id) => {
+              const ingredient = additionalIngredients.find((i) => i.id === id);
+              return {
+                id,
+                name: ingredient?.nazwa,
+                price: ingredient?.cena,
+              };
+            }) || [];
+
+          return {
+            id: parseInt(itemId),
+            category,
+            name: item?.nazwa || '',  // Dodaj wartość domyślną
+            quantity: quantity || 0,   // Dodaj wartość domyślną
+            price: item?.cena || 0,    // Dodaj wartość domyślną
+            removedIngredients: customization?.removedIngredients || [],
+            addedIngredients: addedIngredientsDetails || []
+          };
+        });
+
+      const totalPrice = calculateTotal(deliveryCost);
+
+      // Dodaj datę zamówienia
+      const orderDateTime = new Date().toISOString();
+
       await submitOrder({
         ...customerData,
         items: orderItems,
         totalPrice,
-      });
+        orderDateTime
+      }, 'miejsce-piastowe');
 
       // Print the order
       printOrder({
@@ -180,8 +183,8 @@ export function useOrderForm(menuItems: Record<string, MenuItem[]>, additionalIn
       setSuccess(true);
       setSelectedItems({});
       setCustomizations([]);
-    } catch (err) {
-      setError('Wystąpił błąd podczas składania zamówienia. Spróbuj ponownie.');
+    } catch (err: any) {
+      setError(err.message || 'Wystąpił błąd podczas składania zamówienia. Spróbuj ponownie.');
     } finally {
       setIsSubmitting(false);
     }
