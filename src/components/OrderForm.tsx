@@ -5,11 +5,54 @@ import { useOrderForm } from '../hooks/useOrderForm';
 import { Plus, Minus, User, Users, MapPin, Home, Building2, DoorClosed, Phone, Clock } from 'lucide-react';
 import type { CustomerData } from '../types';
 import RodoTooltip from './RodoTooltip';
+import { format, parse } from 'date-fns';
+import { pl } from 'date-fns/locale';
 
 interface OrderFormProps {
   deliveryAreas: Array<{ id: number; nazwa: string; ulica: string }>;
   location: string;
 }
+
+// Dodaj funkcję sprawdzającą dostępność dostawy na konkretną godzinę
+const isDeliveryTimeAvailable = (time: string, location: string): { available: boolean; message?: string } => {
+  if (!time) return { available: true };
+
+  const [hours, minutes] = time.split(':').map(Number);
+  const now = new Date();
+  const isWeekend = now.getDay() === 0 || now.getDay() === 6;
+  const isHoliday = false; // TODO: Dodać sprawdzanie świąt
+
+  // Sprawdź czy wybrana godzina mieści się w zakresie
+  if (isWeekend || isHoliday) {
+    if (hours < 16 || hours >= 22) {
+      return {
+        available: false,
+        message: 'W weekendy i święta dowozimy tylko w godzinach 16:00 - 22:00'
+      };
+    }
+  } else {
+    const minHour = location === 'miejsce-piastowe' ? 11 : 12;
+    if (hours < minHour || hours >= 22) {
+      return {
+        available: false,
+        message: `W dni powszednie dowozimy w godzinach ${minHour}:00 - 22:00`
+      };
+    }
+  }
+
+  // Sprawdź czy wybrana godzina nie jest w przeszłości
+  const selectedTime = new Date();
+  selectedTime.setHours(hours, minutes, 0, 0);
+  
+  if (selectedTime < now) {
+    return {
+      available: false,
+      message: 'Nie można zamówić dostawy na godzinę w przeszłości'
+    };
+  }
+
+  return { available: true };
+};
 
 export default function OrderForm({ deliveryAreas, location }: OrderFormProps) {
   const initialCustomerData: CustomerData = {
@@ -74,6 +117,16 @@ export default function OrderForm({ deliveryAreas, location }: OrderFormProps) {
 
   const handleFormSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    
+    const formData = new FormData(e.currentTarget);
+    const deliveryTime = formData.get('deliveryTime') as string;
+    
+    const timeStatus = isDeliveryTimeAvailable(deliveryTime, location);
+    if (!timeStatus.available) {
+      setError(timeStatus.message || 'Niedostępna godzina dostawy');
+      return;
+    }
+
     if (!rodoAccepted) {
       setError('Proszę zaakceptować klauzulę RODO');
       return;
@@ -274,8 +327,16 @@ export default function OrderForm({ deliveryAreas, location }: OrderFormProps) {
               name="deliveryTime"
               value={customerData.deliveryTime}
               onChange={handleInputChange}
+              min={`${location === 'miejsce-piastowe' ? '11' : '12'}:00`}
+              max="21:45"
+              step="900" // 15 minut
               className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-yellow-500 focus:ring-yellow-500"
             />
+            <p className="mt-1 text-sm text-gray-500">
+              Godziny dostawy: {location === 'miejsce-piastowe' ? '11:00' : '12:00'} - 22:00
+              {(new Date().getDay() === 0 || new Date().getDay() === 6) && 
+                ' (w weekendy i święta 16:00 - 22:00)'}
+            </p>
           </div>
         </div>
 
