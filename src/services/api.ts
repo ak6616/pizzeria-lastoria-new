@@ -143,14 +143,14 @@ export async function calculateDeliveryCost(
   return response.json();
 }
 ///////////////////zamówienia
-export async function submitOrder(orderData: any, location: string) {
+export async function submitOrder(data: any, location: string) {
   const suffix = getLocationSuffix(location);
-  const response = await fetch(`${API_BASE_URL}/orders${suffix}`, {
+  const response = await fetch(`${API_BASE_URL}/orders/${suffix}`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify(orderData),
+    body: JSON.stringify(data),
   });
 
   if (!response.ok) {
@@ -160,9 +160,9 @@ export async function submitOrder(orderData: any, location: string) {
 }
 export async function getOrders(location: string) {
   const suffix = getLocationSuffix(location);
-  const response = await fetch(`${API_BASE_URL}/orders${suffix}`);
+  const response = await fetch(`${API_BASE_URL}/orders/${suffix}`);
   if (!response.ok) {
-    throw new Error('Failed to fetch menu items');
+    throw new Error('Failed to fetch orders');
   }
   return response.json();
 }

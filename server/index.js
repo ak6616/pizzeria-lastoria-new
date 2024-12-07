@@ -408,7 +408,7 @@ app.get('/api/delivery-cost:location', async (req, res) => {
     if (pizzaCountNum > maxRule.ilosc) {
       return res.json({
         cost: 0,
-        message: 'Darmowa dostawa!'
+        message: null
       });
     }
 
@@ -550,6 +550,75 @@ app.delete('/api/orders/:id', async (req, res) => {
     res.json(result);
   } catch (error) {
     console.error('Error deleting order:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  } finally {
+    await connection.end();
+  }
+});
+
+// Endpoint dla zamówień z różnych lokalizacji
+app.post('/api/orders/:location', async (req, res) => {
+  const connection = await createConnection();
+  const { location } = req.params;
+  
+  try {
+    const orderData = req.body;
+    const orderValues = [
+      orderData.firstName,
+      orderData.lastName,
+      orderData.city,
+      orderData.street || null,
+      orderData.houseNumber,
+      orderData.apartmentNumber || null,
+      orderData.phone,
+      orderData.deliveryTime || null,
+      new Date().toISOString(),
+      JSON.stringify(orderData.items),
+      orderData.totalPrice
+    ];
+
+    const [result] = await connection.execute(
+      `INSERT INTO zamowienia${location} (
+        imie, 
+        nazwisko, 
+        miejscowosc, 
+        ulica, 
+        numerDomu, 
+        numerMieszkania, 
+        numerTelefonu, 
+        zamowienieNaGodzine, 
+        dataGodzinaZamowienia,
+        zamowioneProdukty, 
+        suma
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      orderValues
+    );
+
+    res.json(result);
+  } catch (error) {
+    console.error('Error submitting order:', error);
+    res.status(500).json({ 
+      error: 'Internal server error',
+      details: error.message 
+    });
+  } finally {
+    await connection.end();
+  }
+});
+
+app.get('/api/orders/:location', async (req, res) => {
+  const connection = await createConnection();
+  const { location } = req.params;
+
+  try {
+    const [rows] = await connection.execute(
+      `SELECT *, DATE_FORMAT(dataGodzinaZamowienia, "%Y-%m-%dT%H:%i:%s.000Z") as dataGodzinaZamowienia 
+       FROM zamowienia${location} 
+       ORDER BY dataGodzinaZamowienia ASC`
+    );
+    res.json(rows);
+  } catch (error) {
+    console.error('Error fetching orders:', error);
     res.status(500).json({ error: 'Internal server error' });
   } finally {
     await connection.end();

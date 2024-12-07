@@ -16,13 +16,17 @@ interface OrderItem {
   }>;
 }
 
-export default function OrdersManagement() {
+interface OrdersManagementProps {
+  location: string;
+}
+
+export default function OrdersManagement({ location }: OrdersManagementProps) {
   const { orders, loading, error, refetch } = useOrders();
 
   const handleDelete = async (id: number) => {
     if (window.confirm('Czy na pewno chcesz usunąć to zamówienie?')) {
       try {
-        await deleteOrder(id, 'miejsce-piastowe');
+        await deleteOrder(id, location);
         await refetch();
       } catch (err) {
         console.error('Error deleting order:', err);
@@ -64,23 +68,38 @@ export default function OrdersManagement() {
   };
 
   const formatOrderItems = (items: OrderItem[]) => {
-    return items.map((item) => (
-      <div key={`${item.name}-${item.quantity}`} className="mb-2">
-        <div className="flex items-baseline gap-2">
-          <span className="font-medium">{item.name}</span>
-          <span className="text-sm text-gray-600">x{item.quantity}</span>
-          <span className="text-sm text-gray-600">({item.price} zł)</span>
+    return items.map((item, index) => (
+      <div 
+        key={`${item.name}-${item.quantity}-${index}`} 
+        className="mb-4 border-b pb-2 last:border-b-0"
+      >
+        <div className="flex justify-between items-start">
+          <div>
+            <div className="font-medium">{item.name}</div>
+            <div className="text-sm text-gray-600 mt-1">
+              Ilość: {item.quantity} x {item.price.toFixed(2)} zł = {(item.quantity * item.price).toFixed(2)} zł
+            </div>
+            {item.removedIngredients && item.removedIngredients.length > 0 && (
+              <div className="text-sm text-red-500 mt-1">
+                <span className="font-medium">Składniki usunięte:</span> {item.removedIngredients.join(', ')}
+              </div>
+            )}
+            {item.addedIngredients && item.addedIngredients.length > 0 && (
+              <div className="text-sm text-green-500 mt-1">
+                <span className="font-medium">Składniki dodane:</span>{' '}
+                {item.addedIngredients.map(ing => (
+                  `${ing.name} (+${ing.price.toFixed(2)} zł)`
+                )).join(', ')}
+              </div>
+            )}
+          </div>
+          <div className="text-right font-medium">
+            {(
+              item.quantity * item.price + 
+              (item.addedIngredients?.reduce((sum, ing) => sum + ing.price * item.quantity, 0) || 0)
+            ).toFixed(2)} zł
+          </div>
         </div>
-        {(item.removedIngredients?.length ?? 0) > 0 && (
-          <div className="text-sm text-red-600 ml-4">
-            Usunięte: {item.removedIngredients?.join(', ')}
-          </div>
-        )}
-        {(item.addedIngredients?.length ?? 0) > 0 && (
-          <div className="text-sm text-green-600 ml-4">
-            Dodane: {item.addedIngredients?.map(i => `${i.name} (+${i.price} zł)`).join(', ')}
-          </div>
-        )}
       </div>
     ));
   };

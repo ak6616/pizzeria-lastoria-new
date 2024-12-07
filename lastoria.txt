@@ -199,3 +199,21 @@ RENAME TABLE miejscowosci_mp TO miejscowosci;
 RENAME TABLE napoje_mp TO napoje;
 RENAME TABLE pizza_mp TO pizza;
 RENAME TABLE zamowienia_mp TO zamowienia;
+
+
+RENAME TABLE dodatki TO dodatki_mp;
+RENAME TABLE dostawaweekend TO dostawaweekend_mp;
+RENAME TABLE dostawaweekday TO dostawaweekday_mp;
+RENAME TABLE fastfood TO fastfood_mp;
+RENAME TABLE klienci TO klienci_mp;
+RENAME TABLE miejscowosci TO miejscowosci_mp;
+RENAME TABLE napoje TO napoje_mp;
+RENAME TABLE pizza TO pizza_mp;
+RENAME TABLE zamowienia TO zamowienia_mp;
+
+
+
+
+/////////////////////////////////////////////////
+sprawdzić działanie strony, 
+zmienić wyświetlanie listy zamówień

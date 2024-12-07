@@ -12,7 +12,11 @@ const CATEGORY_NAMES: Record<string, string> = {
 
 const CATEGORY_ORDER = ['dostawaweekday', 'dostawaweekend'];
 
-export default function DeliveryManagement() {
+interface DeliveryManagementProps {
+  location: string;
+}
+
+export default function DeliveryManagement({ location }: DeliveryManagementProps) {
   const { rules, loading, error, refetch } = useDeliveryRules();
   const [showAddModal, setShowAddModal] = useState(false);
   const [editingItem, setEditingItem] = useState<any>(null);

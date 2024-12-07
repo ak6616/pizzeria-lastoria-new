@@ -10,14 +10,17 @@ interface DeliveryArea {
 }
 
 export default function Order() {
+  const [selectedLocation, setSelectedLocation] = useState<string>('');
   const [deliveryAreas, setDeliveryAreas] = useState<DeliveryArea[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     async function fetchDeliveryAreas() {
+      if (!selectedLocation) return;
+      
       try {
-        const areas = await getDeliveryAreas('miejsce-piastowe');
+        const areas = await getDeliveryAreas(selectedLocation);
         setDeliveryAreas(areas);
       } catch (err) {
         setError('Nie udało się załadować listy obszarów dostawy');
@@ -26,8 +29,39 @@ export default function Order() {
       }
     }
 
-    fetchDeliveryAreas();
-  }, []);
+    if (selectedLocation) {
+      fetchDeliveryAreas();
+    }
+  }, [selectedLocation]);
+
+  const locations = [
+    { id: 'miejsce-piastowe', name: 'Miejsce Piastowe' },
+    { id: 'haczow', name: 'Haczów' }
+  ];
+
+  if (!selectedLocation) {
+    return (
+      <div className="max-w-4xl mx-auto">
+        <h1 className="text-3xl font-bold mb-8 text-center text-white">
+          Zamów online
+        </h1>
+        <div className="bg-white/90 rounded-lg p-6">
+          <h2 className="text-xl font-semibold mb-4">Wybierz lokalizację:</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {locations.map(location => (
+              <button
+                key={location.id}
+                onClick={() => setSelectedLocation(location.id)}
+                className="p-4 bg-yellow-500 hover:bg-yellow-600 text-white font-bold rounded-md transition"
+              >
+                {location.name}
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   if (loading) {
     return (
@@ -47,9 +81,17 @@ export default function Order() {
 
   return (
     <div className="max-w-4xl mx-auto">
-      <h1 className="text-3xl font-bold mb-8 text-center text-white">
-        Zamów online
-      </h1>
+      <div className="flex justify-between items-center mb-8">
+        <h1 className="text-3xl font-bold text-white">
+          Zamów online - {locations.find(l => l.id === selectedLocation)?.name}
+        </h1>
+        <button
+          onClick={() => setSelectedLocation('')}
+          className="text-white hover:text-yellow-500 transition"
+        >
+          Zmień lokalizację
+        </button>
+      </div>
 
       <div className="bg-white/90 rounded-lg p-6 mb-8">
         <h2 className="text-xl font-semibold mb-4">Dowozimy do:</h2>
@@ -73,7 +115,10 @@ export default function Order() {
         </div>
       </div>
 
-      <OrderForm deliveryAreas={deliveryAreas} />
+      <OrderForm 
+        deliveryAreas={deliveryAreas} 
+        location={selectedLocation}
+      />
     </div>
   );
 }

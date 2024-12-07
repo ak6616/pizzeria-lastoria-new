@@ -7,15 +7,19 @@ import { deleteMenuItem } from '../../services/api';
 
 const CATEGORY_NAMES: Record<string, string> = {
   pizza: 'Pizza',
-  dodatki: 'Dodatki',
   fastfood: 'Fast Food',
-  napoje: 'Napoje'
+  napoje: 'Napoje',
+  dodatki: 'Dodatki'
 };
 
 const CATEGORY_ORDER = ['pizza', 'fastfood', 'dodatki', 'napoje'];
 
-export default function MenuManagement() {
-  const { items, loading, error, refetch } = useMenuItems();
+interface MenuManagementProps {
+  location: string;
+}
+
+export default function MenuManagement({ location }: MenuManagementProps) {
+  const { items, loading, error, refetch } = useMenuItems(location);
   const [showAddModal, setShowAddModal] = useState(false);
   const [editingItem, setEditingItem] = useState<any>(null);
 
@@ -49,7 +53,7 @@ export default function MenuManagement() {
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
+      <div className="flex justify-between items-center mb-8">
         <h2 className="text-xl font-semibold">Menu</h2>
         <button
           onClick={() => setShowAddModal(true)}
@@ -61,47 +65,47 @@ export default function MenuManagement() {
       </div>
 
       {CATEGORY_ORDER.map(category => (
-        <div key={category} className="mb-8">
-          <h3 className="text-lg font-semibold mb-4 text-yellow-600">
-            {CATEGORY_NAMES[category]}
-          </h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {items[category]?.map((item) => (
-              <div
-                key={item.uniqueId}
-                className="border rounded-lg p-4 hover:shadow-md transition"
-              >
-                <div className="flex justify-between items-start">
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <h3 className="font-medium">{item.nazwa}</h3>
+        items[category]?.length > 0 && (
+          <div key={category} className="mb-8">
+            <h3 className="text-xl font-semibold mb-4 text-yellow-600">
+              {CATEGORY_NAMES[category]}
+            </h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {items[category].map((item) => (
+                <div
+                  key={item.uniqueId}
+                  className="border rounded-lg p-4 hover:shadow-md transition"
+                >
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <h4 className="font-medium">{item.nazwa}</h4>
+                      {item.skladniki && (
+                        <p className="text-sm text-gray-600 mt-1">{item.skladniki}</p>
+                      )}
+                      <p className="text-sm font-semibold mt-2">
+                        {item.cena} zł
+                      </p>
                     </div>
-                    {item.skladniki && (
-                      <p className="text-sm text-gray-600 mt-1">{item.skladniki}</p>
-                    )}
-                    <p className="text-sm font-semibold mt-2">
-                      Cena: {item.cena} zł
-                    </p>
-                  </div>
-                  <div className="flex space-x-2">
-                    <button
-                      onClick={() => setEditingItem(item)}
-                      className="p-1 text-blue-500 hover:text-blue-600 transition"
-                    >
-                      <Edit2 className="w-4 h-4" />
-                    </button>
-                    <button
-                      onClick={() => handleDelete(category, item.id)}
-                      className="p-1 text-red-500 hover:text-red-600 transition"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
+                    <div className="flex space-x-2">
+                      <button
+                        onClick={() => setEditingItem(item)}
+                        className="p-1 text-blue-500 hover:text-blue-600 transition"
+                      >
+                        <Edit2 className="w-4 h-4" />
+                      </button>
+                      <button
+                        onClick={() => handleDelete(category, item.id)}
+                        className="p-1 text-red-500 hover:text-red-600 transition"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
-        </div>
+        )
       ))}
 
       {showAddModal && (

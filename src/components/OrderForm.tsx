@@ -3,20 +3,33 @@ import { useMenuItems } from '../hooks/useMenuItems';
 import { useDeliveryCost } from '../hooks/useDeliveryCost';
 import { useOrderForm } from '../hooks/useOrderForm';
 import { Plus, Minus, User, Users, MapPin, Home, Building2, DoorClosed, Phone, Clock } from 'lucide-react';
-import type { CustomerData } from './CustomerDataForm';
+import type { CustomerData } from '../types';
+import RodoTooltip from './RodoTooltip';
 
 interface OrderFormProps {
   deliveryAreas: Array<{ id: number; nazwa: string; ulica: string }>;
+  location: string;
 }
 
-export default function OrderForm({ deliveryAreas }: OrderFormProps) {
-  const [customerData, setCustomerData] = useState<Partial<CustomerData>>({});
+export default function OrderForm({ deliveryAreas, location }: OrderFormProps) {
+  const initialCustomerData: CustomerData = {
+    firstName: '',
+    lastName: '',
+    city: '',
+    street: '',
+    houseNumber: '',
+    apartmentNumber: '',
+    phone: '',
+    deliveryTime: ''
+  };
+
+  const [customerData, setCustomerData] = useState<CustomerData>(initialCustomerData);
   const {
     items: menuItems,
     additionalIngredients,
     loading: menuLoading,
     error: menuError,
-  } = useMenuItems('miejsce-piastowe');
+  } = useMenuItems(location);
 
   const {
     selectedItems,
@@ -31,6 +44,7 @@ export default function OrderForm({ deliveryAreas }: OrderFormProps) {
     handleSubmit,
     getPizzaCount,
     resetForm,
+    setError,
   } = useOrderForm(menuItems, additionalIngredients);
 
   const pizzaCount = getPizzaCount();
@@ -48,6 +62,25 @@ export default function OrderForm({ deliveryAreas }: OrderFormProps) {
   };
 
   const CATEGORY_ORDER = ['pizza', 'fastfood', 'dodatki', 'napoje'];
+
+  const getCustomization = (uniqueId: string) => {
+    return customizations.find(c => c.uniqueId === uniqueId) || {
+      uniqueId,
+      removedIngredients: [],
+      addedIngredients: []
+    };
+  };
+
+  const [rodoAccepted, setRodoAccepted] = useState(false);
+
+  const handleFormSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (!rodoAccepted) {
+      setError('Proszę zaakceptować klauzulę RODO');
+      return;
+    }
+    handleSubmit(customerData, deliveryCost);
+  };
 
   if (success) {
     return (
@@ -84,22 +117,6 @@ export default function OrderForm({ deliveryAreas }: OrderFormProps) {
     );
   }
 
-  const handleFormSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    const formData = new FormData(e.currentTarget);
-    const data: CustomerData = {
-      firstName: formData.get('firstName') as string,
-      lastName: formData.get('lastName') as string,
-      city: formData.get('city') as string,
-      street: formData.get('street') as string,
-      houseNumber: formData.get('houseNumber') as string,
-      apartmentNumber: formData.get('apartmentNumber') as string,
-      phone: formData.get('phone') as string,
-      deliveryTime: formData.get('deliveryTime') as string,
-    };
-    handleSubmit(data, deliveryCost);
-  };
-
   const handleCityChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const selectedValue = e.target.value;
     const [city, street] = selectedValue.split('|');
@@ -107,7 +124,7 @@ export default function OrderForm({ deliveryAreas }: OrderFormProps) {
     setCustomerData(prev => ({
       ...prev,
       city,
-      street: street || '' // Jeśli street jest undefined, ustaw pusty string
+      street: street || ''
     }));
   };
 
@@ -115,6 +132,14 @@ export default function OrderForm({ deliveryAreas }: OrderFormProps) {
     setCustomerData(prev => ({
       ...prev,
       street: e.target.value
+    }));
+  };
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setCustomerData(prev => ({
+      ...prev,
+      [name]: value
     }));
   };
 
@@ -136,6 +161,8 @@ export default function OrderForm({ deliveryAreas }: OrderFormProps) {
             <input
               type="text"
               name="firstName"
+              value={customerData.firstName}
+              onChange={handleInputChange}
               required
               className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-yellow-500 focus:ring-yellow-500"
             />
@@ -149,6 +176,8 @@ export default function OrderForm({ deliveryAreas }: OrderFormProps) {
             <input
               type="text"
               name="lastName"
+              value={customerData.lastName}
+              onChange={handleInputChange}
               required
               className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-yellow-500 focus:ring-yellow-500"
             />
@@ -186,7 +215,7 @@ export default function OrderForm({ deliveryAreas }: OrderFormProps) {
             <input
               type="text"
               name="street"
-              value={customerData.street || ''}
+              value={customerData.street}
               onChange={handleStreetChange}
               className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-yellow-500 focus:ring-yellow-500"
             />
@@ -200,6 +229,8 @@ export default function OrderForm({ deliveryAreas }: OrderFormProps) {
             <input
               type="text"
               name="houseNumber"
+              value={customerData.houseNumber}
+              onChange={handleInputChange}
               required
               className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-yellow-500 focus:ring-yellow-500"
             />
@@ -213,6 +244,8 @@ export default function OrderForm({ deliveryAreas }: OrderFormProps) {
             <input
               type="text"
               name="apartmentNumber"
+              value={customerData.apartmentNumber}
+              onChange={handleInputChange}
               className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-yellow-500 focus:ring-yellow-500"
             />
           </div>
@@ -225,6 +258,8 @@ export default function OrderForm({ deliveryAreas }: OrderFormProps) {
             <input
               type="tel"
               name="phone"
+              value={customerData.phone}
+              onChange={handleInputChange}
               required
               className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-yellow-500 focus:ring-yellow-500"
             />
@@ -238,6 +273,8 @@ export default function OrderForm({ deliveryAreas }: OrderFormProps) {
             <input
               type="time"
               name="deliveryTime"
+              value={customerData.deliveryTime}
+              onChange={handleInputChange}
               className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-yellow-500 focus:ring-yellow-500"
             />
           </div>
@@ -313,9 +350,8 @@ export default function OrderForm({ deliveryAreas }: OrderFormProps) {
                                     >
                                       <input
                                         type="checkbox"
-                                        checked={customizations
-                                          .find((c) => c.uniqueId === item.uniqueId)
-                                          ?.removedIngredients.includes(ingredient)}
+                                        checked={getCustomization(item.uniqueId)
+                                          .removedIngredients.includes(ingredient)}
                                         onChange={() =>
                                           toggleIngredient(item.uniqueId, ingredient)
                                         }
@@ -340,9 +376,8 @@ export default function OrderForm({ deliveryAreas }: OrderFormProps) {
                                   >
                                     <input
                                       type="checkbox"
-                                      checked={customizations
-                                        .find((c) => c.uniqueId === item.uniqueId)
-                                        ?.addedIngredients.includes(ingredient.id)}
+                                      checked={getCustomization(item.uniqueId)
+                                        .addedIngredients.includes(ingredient.id)}
                                       onChange={() =>
                                         toggleAdditionalIngredient(
                                           item.uniqueId,
@@ -385,12 +420,34 @@ export default function OrderForm({ deliveryAreas }: OrderFormProps) {
             </span>
           </div>
 
+          <div className="mb-6">
+            <label className="flex items-start gap-2">
+              <input
+                type="checkbox"
+                checked={rodoAccepted}
+                onChange={(e) => setRodoAccepted(e.target.checked)}
+                required
+                className="mt-1 rounded border-gray-300 text-yellow-500 focus:ring-yellow-500"
+              />
+              <span className="text-sm text-gray-600">
+                Akceptuję{' '}
+                <RodoTooltip>
+                  <span className="text-yellow-600 hover:text-yellow-700 cursor-help underline">
+                    klauzulę RODO
+                  </span>
+                </RodoTooltip>
+                {' '}i wyrażam zgodę na przetwarzanie moich danych osobowych w celu realizacji zamówienia *
+              </span>
+            </label>
+          </div>
+
           <button
             type="submit"
             disabled={
               isSubmitting ||
               !!deliveryError ||
-              Object.keys(selectedItems).length === 0
+              Object.keys(selectedItems).length === 0 ||
+              !rodoAccepted
             }
             className="w-full bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-2 px-4 rounded-md transition disabled:opacity-50 disabled:cursor-not-allowed"
           >

@@ -97,15 +97,29 @@ export function useOrderForm(menuItems: Record<string, MenuItem[]>, additionalIn
     });
   };
 
-  const calculateTotal = (deliveryCost: number | null) => {
+  const calculateTotal = (deliveryCost: number | null = 0) => {
     let total = 0;
 
-    // Oblicz koszt pizzy (cena * ilość)
+    // Sumuj ceny wybranych przedmiotów wraz z dodatkowymi składnikami
     Object.entries(selectedItems).forEach(([uniqueId, quantity]) => {
-      const [category, itemId] = uniqueId.split('_');
-      const item = menuItems[category]?.find((i) => i.id === parseInt(itemId));
+      const item = Object.values(menuItems)
+        .flat()
+        .find((item) => item.uniqueId === uniqueId);
+      
       if (item) {
+        // Dodaj cenę podstawową produktu
         total += item.cena * quantity;
+
+        // Dodaj cenę dodatkowych składników
+        const customization = customizations.find(c => c.uniqueId === uniqueId);
+        if (customization && item.skladniki) { // Sprawdź czy produkt może mieć dodatki
+          customization.addedIngredients.forEach(ingredientId => {
+            const ingredient = additionalIngredients.find(i => i.id === ingredientId);
+            if (ingredient) {
+              total += ingredient.cena * quantity;
+            }
+          });
+        }
       }
     });
 
@@ -114,7 +128,7 @@ export function useOrderForm(menuItems: Record<string, MenuItem[]>, additionalIn
       total += deliveryCost;
     }
 
-    return total;
+    return total.toFixed(2);
   };
 
   const handleSubmit = async (customerData: CustomerData, deliveryCost: number | null) => {
@@ -168,15 +182,15 @@ export function useOrderForm(menuItems: Record<string, MenuItem[]>, additionalIn
       await submitOrder({
         ...customerData,
         items: orderItems,
-        totalPrice,
-        orderDateTime
+        totalPrice: parseFloat(totalPrice),
+        deliveryCost: deliveryCost || 0,
       }, 'miejsce-piastowe');
 
       // Print the order
       printOrder({
         customerData,
         items: orderItems,
-        totalPrice,
+        totalPrice: parseFloat(totalPrice),
         deliveryCost: deliveryCost || 0,
       });
 
@@ -213,5 +227,6 @@ export function useOrderForm(menuItems: Record<string, MenuItem[]>, additionalIn
     handleSubmit,
     getPizzaCount,
     resetForm,
+    setError,
   };
 }

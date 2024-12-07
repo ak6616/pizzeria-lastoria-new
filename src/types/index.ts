@@ -23,3 +23,14 @@ export interface OrderFormData {
   deliveryTime?: string;
   items: { itemId: number; quantity: number }[];
 }
+
+export interface CustomerData {
+  firstName: string;
+  lastName: string;
+  city: string;
+  street: string;
+  houseNumber: string;
+  apartmentNumber: string | '';
+  phone: string;
+  deliveryTime: string | '';
+}
