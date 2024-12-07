@@ -3,22 +3,17 @@ import { X } from 'lucide-react';
 import { updateDeliveryRule } from '../../services/api';
 
 interface EditDeliveryRuleModalProps {
-  rule: {
-    id: number;
-    category: string;
-    nazwa: string;
-    ulica?: string;
-    ilosc: number;
-    koszt?: number;
-  };
+  rule: any;
   onClose: () => void;
   onSuccess: () => void;
+  location: string;
 }
 
 export default function EditDeliveryRuleModal({
   rule,
   onClose,
   onSuccess,
+  location,
 }: EditDeliveryRuleModalProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -31,18 +26,18 @@ export default function EditDeliveryRuleModal({
     const formData = new FormData(e.currentTarget);
     const data = {
       id: rule.id,
-      category: rule.category,
+      category: rule.uniqueId?.split('_')[0] || rule.category,
       nazwa: formData.get('nazwa') as string,
-      ulica: formData.get('nazwa') as string,
-      ilosc: parseFloat(formData.get('cena') as string),
-      koszt: parseFloat(formData.get('cena') as string),
+      ulica: formData.get('ulica') as string,
+      ilosc: parseInt(formData.get('ilosc') as string),
+      koszt: parseFloat(formData.get('koszt') as string),
     };
 
     try {
-      await updateDeliveryRule(data);
+      await updateDeliveryRule(data, location);
       onSuccess();
     } catch (err) {
-      setError('Wystąpił błąd podczas aktualizacji pozycji');
+      setError('Wystąpił błąd podczas aktualizacji reguły dostawy');
     } finally {
       setIsSubmitting(false);
     }

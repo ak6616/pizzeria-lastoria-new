@@ -78,8 +78,17 @@ app.get('/api/menu/:category', async (req, res) => {
 
 app.post('/api/menu', async (req, res) => {
   const { category, nazwa, cena, skladniki } = req.body;
+  const validCategories = [
+    'pizza_mp', 'fastfood_mp', 'napoje_mp', 'dodatki_mp',
+    'pizza_hacz', 'fastfood_hacz', 'napoje_hacz', 'dodatki_hacz'
+  ];
 
-  if (!validCategories.includes(category)) {
+  // Dodaj suffix lokalizacji do kategorii
+  const location = req.query.location || 'miejsce-piastowe';
+  const suffix = location === 'miejsce-piastowe' ? '_mp' : '_hacz';
+  const fullCategory = `${category}${suffix}`;
+
+  if (!validCategories.includes(fullCategory)) {
     return res.status(400).json({ error: 'Invalid category' });
   }
 
@@ -87,13 +96,13 @@ app.post('/api/menu', async (req, res) => {
 
   try {
     const [result] = await connection.execute(
-      `INSERT INTO ${category} (nazwa, cena, skladniki) VALUES (?, ?, ?)`,
-      [nazwa, cena, skladniki]
+      `INSERT INTO ${fullCategory} (nazwa, cena, skladniki) VALUES (?, ?, ?)`,
+      [nazwa, cena, skladniki || null]
     );
     res.json(result);
   } catch (error) {
     console.error('Error adding menu item:', error);
-    res.status(500).json({ error: 'Internal server error' });
+    res.status(500).json({ error: 'Internal server error', details: error.message });
   } finally {
     await connection.end();
   }
@@ -102,6 +111,10 @@ app.post('/api/menu', async (req, res) => {
 app.put('/api/menu/:category/:id', async (req, res) => {
   const { category, id } = req.params;
   const { nazwa, cena, skladniki } = req.body;
+  const validCategories = [
+    'pizza_mp', 'fastfood_mp', 'napoje_mp', 'dodatki_mp',
+    'pizza_hacz', 'fastfood_hacz', 'napoje_hacz', 'dodatki_hacz'
+  ];
 
   if (!validCategories.includes(category)) {
     return res.status(400).json({ error: 'Invalid category' });
@@ -112,12 +125,12 @@ app.put('/api/menu/:category/:id', async (req, res) => {
   try {
     const [result] = await connection.execute(
       `UPDATE ${category} SET nazwa = ?, cena = ?, skladniki = ? WHERE id = ?`,
-      [nazwa, cena, skladniki, id]
+      [nazwa, cena, skladniki || null, id]
     );
     res.json(result);
   } catch (error) {
     console.error('Error updating menu item:', error);
-    res.status(500).json({ error: 'Internal server error' });
+    res.status(500).json({ error: 'Internal server error', details: error.message });
   } finally {
     await connection.end();
   }
@@ -125,6 +138,10 @@ app.put('/api/menu/:category/:id', async (req, res) => {
 
 app.delete('/api/menu/:category/:id', async (req, res) => {
   const { category, id } = req.params;
+  const validCategories = [
+    'pizza_mp', 'fastfood_mp', 'napoje_mp', 'dodatki_mp',
+    'pizza_hacz', 'fastfood_hacz', 'napoje_hacz', 'dodatki_hacz'
+  ];
 
   if (!validCategories.includes(category)) {
     return res.status(400).json({ error: 'Invalid category' });
@@ -174,6 +191,10 @@ app.get('/api/delivery/:category', async (req, res) => {
 
 app.post('/api/delivery', async (req, res) => {
   const { category, nazwa, ulica, ilosc, koszt } = req.body;
+  const validCategories = [
+    'dostawaweekday_mp', 'dostawaweekend_mp',
+    'dostawaweekday_hacz', 'dostawaweekend_hacz'
+  ];
 
   if (!validCategories.includes(category)) {
     return res.status(400).json({ error: 'Invalid category' });
@@ -184,12 +205,12 @@ app.post('/api/delivery', async (req, res) => {
   try {
     const [result] = await connection.execute(
       `INSERT INTO ${category} (nazwa, ulica, ilosc, koszt) VALUES (?, ?, ?, ?)`,
-      [nazwa, ulica, ilosc, koszt]
+      [nazwa, ulica || null, ilosc, koszt]
     );
     res.json(result);
   } catch (error) {
-    console.error('Error adding delivery record:', error);
-    res.status(500).json({ error: 'Internal server error' });
+    console.error('Error adding delivery rule:', error);
+    res.status(500).json({ error: 'Internal server error', details: error.message });
   } finally {
     await connection.end();
   }
@@ -198,6 +219,10 @@ app.post('/api/delivery', async (req, res) => {
 app.put('/api/delivery/:category/:id', async (req, res) => {
   const { category, id } = req.params;
   const { nazwa, ulica, ilosc, koszt } = req.body;
+  const validCategories = [
+    'dostawaweekday_mp', 'dostawaweekend_mp',
+    'dostawaweekday_hacz', 'dostawaweekend_hacz'
+  ];
 
   if (!validCategories.includes(category)) {
     return res.status(400).json({ error: 'Invalid category' });
@@ -208,12 +233,12 @@ app.put('/api/delivery/:category/:id', async (req, res) => {
   try {
     const [result] = await connection.execute(
       `UPDATE ${category} SET nazwa = ?, ulica = ?, ilosc = ?, koszt = ? WHERE id = ?`,
-      [nazwa, ulica, ilosc, koszt, id]
+      [nazwa, ulica || null, ilosc, koszt, id]
     );
     res.json(result);
   } catch (error) {
-    console.error('Error updating delivery record:', error);
-    res.status(500).json({ error: 'Internal server error' });
+    console.error('Error updating delivery rule:', error);
+    res.status(500).json({ error: 'Internal server error', details: error.message });
   } finally {
     await connection.end();
   }
@@ -440,7 +465,7 @@ app.get('/api/delivery-cost:location', async (req, res) => {
       });
     }
 
-    // Znajdź odpowiednią regułę dla ilości pizz
+    // Znajd odpowiednią regułę dla ilości pizz
     // Sortujemy malejąco, aby znaleźć najwyższą pasującą ilość
     const sortedRules = allRules.sort((a, b) => b.ilosc - a.ilosc);
     const applicableRule = sortedRules.find(rule => pizzaCountNum >= rule.ilosc);

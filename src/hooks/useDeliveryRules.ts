@@ -18,15 +18,15 @@ interface DeliveryRuleResponse {
   koszt: number;
 }
 
-export function useDeliveryRules() {
+export function useDeliveryRules(location: string) {
   const [rules, setRules] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   const fetchRules = useCallback(async () => {
     try {
-      const weekdayRules = await getDeliveryRules('dostawaweekday', 'miejsce-piastowe');
-      const weekendRules = await getDeliveryRules('dostawaweekend', 'miejsce-piastowe');
+      const weekdayRules = await getDeliveryRules('dostawaweekday', location);
+      const weekendRules = await getDeliveryRules('dostawaweekend', location);
 
       const formattedRules = [
         ...weekdayRules.map((rule: DeliveryRuleResponse) => ({
@@ -46,7 +46,7 @@ export function useDeliveryRules() {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [location]);
 
   useEffect(() => {
     fetchRules();

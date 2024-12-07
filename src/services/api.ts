@@ -191,14 +191,17 @@ export async function addMenuItem(data: {
   nazwa: string;
   cena: number;
   skladniki?: string;
-}) {
-  const response = await fetch(`${API_BASE_URL}/menu`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(data),
-  });
+}, location: string) {
+  const response = await fetch(
+    `${API_BASE_URL}/menu?location=${location}`,
+    {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
+    }
+  );
 
   if (!response.ok) {
     throw new Error('Failed to add menu item');
@@ -212,9 +215,12 @@ export async function updateMenuItem(data: {
   nazwa: string;
   cena: number;
   skladniki?: string;
-}) {
+}, location: string) {
+  const baseCategory = data.category.replace(/_mp$|_hacz$/, '');
+  const suffix = getLocationSuffix(location);
+  
   const response = await fetch(
-    `${API_BASE_URL}/menu/${data.category}/${data.id}`,
+    `${API_BASE_URL}/menu/${baseCategory}${suffix}/${data.id}`,
     {
       method: 'PUT',
       headers: {
@@ -230,13 +236,21 @@ export async function updateMenuItem(data: {
   return response.json();
 }
 
-export async function deleteMenuItem(category: string, id: number) {
-  const validCategories = ['pizza', 'fastfood', 'napoje', 'dodatki'];
-  if (!validCategories.includes(category)) {
+export async function deleteMenuItem(category: string, id: number, location: string) {
+  const baseCategory = category.replace(/_mp$|_hacz$/, '');
+  const suffix = getLocationSuffix(location);
+  const fullCategory = `${baseCategory}${suffix}`;
+
+  const validCategories = [
+    'pizza_mp', 'fastfood_mp', 'napoje_mp', 'dodatki_mp',
+    'pizza_hacz', 'fastfood_hacz', 'napoje_hacz', 'dodatki_hacz'
+  ];
+  
+  if (!validCategories.includes(fullCategory)) {
     throw new Error('Invalid category');
   }
 
-  const response = await fetch(`${API_BASE_URL}/menu/${category}/${id}`, {
+  const response = await fetch(`${API_BASE_URL}/menu/${fullCategory}/${id}`, {
     method: 'DELETE',
   });
 
@@ -262,14 +276,23 @@ export async function addDeliveryRule(data: {
   ulica?: string;
   ilosc: number;
   koszt: number;
-}) {
-  const response = await fetch(`${API_BASE_URL}/delivery`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(data),
-  });
+}, location: string) {
+  const suffix = getLocationSuffix(location);
+  const fullCategory = `${data.category}${suffix}`;
+
+  const response = await fetch(
+    `${API_BASE_URL}/delivery?location=${location}`,
+    {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        ...data,
+        category: fullCategory
+      }),
+    }
+  );
 
   if (!response.ok) {
     throw new Error('Failed to add delivery rule');
@@ -284,9 +307,12 @@ export async function updateDeliveryRule(data: {
   ulica?: string;
   ilosc: number;
   koszt: number;
-}) {
+}, location: string) {
+  const suffix = getLocationSuffix(location);
+  const fullCategory = `${data.category}${suffix}`;
+
   const response = await fetch(
-    `${API_BASE_URL}/delivery/${data.category}/${data.id}`,
+    `${API_BASE_URL}/delivery/${fullCategory}/${data.id}`,
     {
       method: 'PUT',
       headers: {

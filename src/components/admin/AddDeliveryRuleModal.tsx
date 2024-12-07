@@ -5,11 +5,13 @@ import { addDeliveryRule } from '../../services/api';
 interface AddDeliveryRuleModalProps {
   onClose: () => void;
   onSuccess: () => void;
+ location: string;
 }
 
 export default function AddDeliveryRuleModal({
   onClose,
   onSuccess,
+  location,
 }: AddDeliveryRuleModalProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -24,15 +26,15 @@ export default function AddDeliveryRuleModal({
       category: formData.get('category') as string,
       nazwa: formData.get('nazwa') as string,
       ulica: formData.get('ulica') as string,
-      ilosc: parseFloat(formData.get('ilosc') as string),
+      ilosc: parseInt(formData.get('ilosc') as string),
       koszt: parseFloat(formData.get('koszt') as string),
     };
 
     try {
-      await addDeliveryRule(data);
+      await addDeliveryRule(data, location);
       onSuccess();
     } catch (err) {
-      setError('Wystąpił błąd podczas dodawania pozycji');
+      setError('Wystąpił błąd podczas dodawania reguły dostawy');
     } finally {
       setIsSubmitting(false);
     }
@@ -141,3 +143,4 @@ export default function AddDeliveryRuleModal({
     </div>
   );
 }
+

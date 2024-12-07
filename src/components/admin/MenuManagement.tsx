@@ -26,7 +26,7 @@ export default function MenuManagement({ location }: MenuManagementProps) {
   const handleDelete = async (category: string, id: number) => {
     if (window.confirm('Czy na pewno chcesz usunąć tę pozycję?')) {
       try {
-        await deleteMenuItem(category, id);
+        await deleteMenuItem(category, id, location);
         await refetch();
       } catch (err) {
         console.error('Error deleting menu item:', err);
@@ -115,6 +115,7 @@ export default function MenuManagement({ location }: MenuManagementProps) {
             setShowAddModal(false);
             await refetch();
           }}
+          location={location}
         />
       )}
 
@@ -126,6 +127,7 @@ export default function MenuManagement({ location }: MenuManagementProps) {
             setEditingItem(null);
             await refetch();
           }}
+          location={location}
         />
       )}
     </div>

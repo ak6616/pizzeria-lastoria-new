@@ -17,7 +17,7 @@ interface DeliveryManagementProps {
 }
 
 export default function DeliveryManagement({ location }: DeliveryManagementProps) {
-  const { rules, loading, error, refetch } = useDeliveryRules();
+  const { rules, loading, error, refetch } = useDeliveryRules(location);
   const [showAddModal, setShowAddModal] = useState(false);
   const [editingItem, setEditingItem] = useState<any>(null);
 
@@ -39,6 +39,14 @@ export default function DeliveryManagement({ location }: DeliveryManagementProps
         alert('Wystąpił błąd podczas usuwania pozycji');
       }
     }
+  };
+
+  const handleEdit = (rule: any) => {
+    const editData = {
+      ...rule,
+      category: rule.uniqueId?.split('_')[0] || 'dostawaweekday'
+    };
+    setEditingItem(editData);
   };
 
   if (loading) {
@@ -98,7 +106,7 @@ export default function DeliveryManagement({ location }: DeliveryManagementProps
                   </div>
                   <div className="flex space-x-2">
                     <button
-                      onClick={() => setEditingItem(rule)}
+                      onClick={() => handleEdit(rule)}
                       className="p-1 text-blue-500 hover:text-blue-600 transition"
                     >
                       <Edit2 className="w-4 h-4" />
@@ -135,6 +143,7 @@ export default function DeliveryManagement({ location }: DeliveryManagementProps
             setEditingItem(null);
             await refetch();
           }}
+          location={location}
         />
       )}
     </div>

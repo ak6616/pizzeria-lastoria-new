@@ -57,11 +57,10 @@ export default function OrderForm({ deliveryAreas, location }: OrderFormProps) {
   const CATEGORY_NAMES: Record<string, string> = {
     pizza: 'Pizza',
     fastfood: 'Fast Food',
-    napoje: 'Napoje',
-    dodatki: 'Dodatki'
+    napoje: 'Napoje'
   };
 
-  const CATEGORY_ORDER = ['pizza', 'fastfood', 'dodatki', 'napoje'];
+  const CATEGORY_ORDER = ['pizza', 'fastfood', 'napoje'];
 
   const getCustomization = (uniqueId: string) => {
     return customizations.find(c => c.uniqueId === uniqueId) || {

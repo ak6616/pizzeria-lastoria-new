@@ -5,9 +5,10 @@ import { addMenuItem } from '../../services/api';
 interface AddMenuItemModalProps {
   onClose: () => void;
   onSuccess: () => void;
+  location: string;
 }
 
-export default function AddMenuItemModal({ onClose, onSuccess }: AddMenuItemModalProps) {
+export default function AddMenuItemModal({ onClose, onSuccess, location }: AddMenuItemModalProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -25,7 +26,7 @@ export default function AddMenuItemModal({ onClose, onSuccess }: AddMenuItemModa
     };
 
     try {
-      await addMenuItem(data);
+      await addMenuItem(data, location);
       onSuccess();
     } catch (err) {
       setError('Wystąpił błąd podczas dodawania pozycji');
@@ -61,6 +62,7 @@ export default function AddMenuItemModal({ onClose, onSuccess }: AddMenuItemModa
               className="w-full rounded-md border-gray-300 shadow-sm focus:border-yellow-500 focus:ring-yellow-500"
             >
               <option value="pizza">Pizza</option>
+              <option value="dodatki">Dodatki</option>
               <option value="fastfood">Fastfood</option>
               <option value="napoje">Napoje</option>
             </select>

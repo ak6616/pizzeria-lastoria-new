@@ -3,18 +3,13 @@ import { X } from 'lucide-react';
 import { updateMenuItem } from '../../services/api';
 
 interface EditMenuItemModalProps {
-  item: {
-    id: number;
-    category: string;
-    nazwa: string;
-    cena: number;
-    skladniki?: string;
-  };
+  item: any;
   onClose: () => void;
   onSuccess: () => void;
+  location: string;
 }
 
-export default function EditMenuItemModal({ item, onClose, onSuccess }: EditMenuItemModalProps) {
+export default function EditMenuItemModal({ item, onClose, onSuccess, location }: EditMenuItemModalProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -33,7 +28,7 @@ export default function EditMenuItemModal({ item, onClose, onSuccess }: EditMenu
     };
 
     try {
-      await updateMenuItem(data);
+      await updateMenuItem(data, location);
       onSuccess();
     } catch (err) {
       setError('Wystąpił błąd podczas aktualizacji pozycji');
