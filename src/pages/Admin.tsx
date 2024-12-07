@@ -4,15 +4,28 @@ import MenuManagement from '../components/admin/MenuManagement';
 import DeliveryManagement from '../components/admin/DeliveryManagement';
 import NewsManagement from '../components/admin/NewsManagement';
 import GalleryManagement from '../components/admin/GalleryManagement';
+import LoginForm from '../components/admin/LoginForm';
+import { useAuth } from '../hooks/useAuth';
 
 export default function AdminPanel() {
   const [selectedLocation, setSelectedLocation] = useState<string>('');
   const [selectedSection, setSelectedSection] = useState<string>('');
+  const { isAuthenticated, login } = useAuth();
+
+  console.log('isAuthenticated:', isAuthenticated);
 
   const locations = [
     { id: 'miejsce-piastowe', name: 'Miejsce Piastowe' },
     { id: 'haczow', name: 'Haczów' }
   ];
+
+  if (!isAuthenticated) {
+    return (
+      <div className="max-w-4xl mx-auto p-6">
+        <LoginForm onLoginSuccess={login} />
+      </div>
+    );
+  }
 
   if (!selectedLocation) {
     return (

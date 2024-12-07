@@ -317,3 +317,36 @@ export async function deleteDeliveryRule(category: string, id: number) {
   }
   return response.json();
 }
+
+interface LoginCredentials {
+  username: string;
+  password: string;
+}
+
+export async function login(credentials: LoginCredentials) {
+  const response = await fetch('/api/login', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(credentials),
+  });
+
+  if (!response.ok) {
+    throw new Error('Login failed');
+  }
+
+  return response.json();
+}
+
+export async function logout() {
+  const response = await fetch('/api/logout', {
+    method: 'POST',
+  });
+
+  if (!response.ok) {
+    throw new Error('Logout failed');
+  }
+
+  return response.json();
+}

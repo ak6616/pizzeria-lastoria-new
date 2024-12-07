@@ -3,11 +3,27 @@ process.noDeprecation = true;
 import express from 'express';
 import cors from 'cors';
 import mysql from 'mysql2/promise';
+import bcrypt from 'bcrypt';
+import session from 'express-session';
 
 const app = express();
 const port = 3000;
-app.use(cors());
+app.use(cors({
+  origin: 'http://localhost:5173',
+  credentials: true
+}));
 app.use(express.json());
+
+// Dodaj obsługę sesji
+app.use(session({
+  secret: 'twoj-tajny-klucz',
+  resave: false,
+  saveUninitialized: false,
+  cookie: { 
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'lax'
+  }
+}));
 
 const dbConfig = {
   host: 'sql7.freesqldatabase.com',
@@ -648,6 +664,54 @@ app.delete('/api/orders:location/:id', async (req, res) => {
   } finally {
     await connection.end();
   }
+});
+
+// Endpoint logowania
+app.post('/api/login', async (req, res) => {
+  const { username, password } = req.body;
+  const connection = await createConnection();
+
+  try {
+    const [users] = await connection.execute(
+      'SELECT * FROM users WHERE username = ?',
+      [username]
+    );
+
+    if (users.length === 0) {
+      return res.status(401).json({ error: 'Nieprawidłowe dane logowania' });
+    }
+
+    const user = users[0];
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+
+    if (!isPasswordValid) {
+      return res.status(401).json({ error: 'Nieprawidłowe dane logowania' });
+    }
+
+    req.session.isAuthenticated = true;
+    res.json({ success: true });
+  } catch (error) {
+    console.error('Error during login:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  } finally {
+    await connection.end();
+  }
+});
+
+// Endpoint sprawdzania statusu autoryzacji
+app.get('/api/check-auth', (req, res) => {
+  if (req.session.isAuthenticated) {
+    res.status(200).end();
+  } else {
+    res.status(401).end();
+  }
+});
+
+// Endpoint wylogowania
+app.post('/api/logout', (req, res) => {
+  req.session.destroy(() => {
+    res.json({ success: true });
+  });
 });
 
 app.listen(port, () => {
