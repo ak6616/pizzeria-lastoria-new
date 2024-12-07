@@ -670,22 +670,15 @@ app.delete('/api/orders:location/:id', async (req, res) => {
 app.post('/api/login', async (req, res) => {
   const { username, password } = req.body;
   const connection = await createConnection();
-
+  
   try {
     const [users] = await connection.execute(
-      'SELECT * FROM users WHERE username = ?',
-      [username]
+      'SELECT * FROM users WHERE username = ? AND password = ?',
+      [username, password]
     );
 
     if (users.length === 0) {
-      return res.status(401).json({ error: 'Nieprawidłowe dane logowania' });
-    }
-
-    const user = users[0];
-    const isPasswordValid = await bcrypt.compare(password, user.password);
-
-    if (!isPasswordValid) {
-      return res.status(401).json({ error: 'Nieprawidłowe dane logowania' });
+      return res.status(401).json({ error: 'Nieprawidłowy login lub hasło' });
     }
 
     req.session.isAuthenticated = true;
@@ -717,3 +710,4 @@ app.post('/api/logout', (req, res) => {
 app.listen(port, () => {
   console.log(`Server running on port ${port}`);
 });
+

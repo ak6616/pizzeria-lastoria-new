@@ -324,14 +324,18 @@ interface LoginCredentials {
 }
 
 export async function login(credentials: LoginCredentials) {
-  const response = await fetch('/api/login', {
+  const response = await fetch(`${API_BASE_URL}/login`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify(credentials),
+    body: JSON.stringify({
+      username: credentials.username,
+      password: credentials.password
+    }),
+    credentials: 'include'
   });
-
+  
   if (!response.ok) {
     throw new Error('Login failed');
   }

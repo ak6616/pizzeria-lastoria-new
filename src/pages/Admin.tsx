@@ -12,7 +12,7 @@ export default function AdminPanel() {
   const [selectedSection, setSelectedSection] = useState<string>('');
   const { isAuthenticated, login } = useAuth();
 
-  console.log('isAuthenticated:', isAuthenticated);
+  
 
   const locations = [
     { id: 'miejsce-piastowe', name: 'Miejsce Piastowe' },
@@ -22,7 +22,7 @@ export default function AdminPanel() {
   if (!isAuthenticated) {
     return (
       <div className="max-w-4xl mx-auto p-6">
-        <LoginForm onLoginSuccess={login} />
+        <LoginForm onLogin={login} />
       </div>
     );
   }

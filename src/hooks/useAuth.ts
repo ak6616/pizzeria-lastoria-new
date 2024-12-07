@@ -1,31 +1,17 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
+import { login as apiLogin } from '../services/api';
 
-interface AuthHook {
-  isAuthenticated: boolean;
-  login: () => void;
-  logout: () => void;
-}
+export const useAuth = () => {
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
-export const useAuth = (): AuthHook => {
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
-
-  useEffect(() => {
-    const checkAuth = async () => {
-      try {
-        const response = await fetch('/api/check-auth', {
-          credentials: 'include'
-        });
-        setIsAuthenticated(response.ok);
-      } catch (err) {
-        setIsAuthenticated(false);
-      }
-    };
-    
-    checkAuth();
-  }, []);
-
-  const login = () => {
-    setIsAuthenticated(true);
+  const login = async (username: string, password: string) => {
+    try {
+      await apiLogin({ username, password });
+      setIsAuthenticated(true);
+      return true;
+    } catch (err) {
+      return false;
+    }
   };
 
   const logout = () => {

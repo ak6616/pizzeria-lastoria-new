@@ -1,17 +1,16 @@
 import React, { useState } from 'react';
-import { login } from '../../services/api';
 
 interface LoginFormProps {
-  onLoginSuccess: () => void;
+  onLogin: (username: string, password: string) => Promise<boolean>;
 }
 
-export default function LoginForm({ onLoginSuccess }: LoginFormProps) {
-  const [error, setError] = useState<string | null>(null);
+export default function LoginForm({ onLogin }: LoginFormProps) {
+  const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setError(null);
+    setError('');
     setIsLoading(true);
 
     const formData = new FormData(e.currentTarget);
@@ -19,10 +18,12 @@ export default function LoginForm({ onLoginSuccess }: LoginFormProps) {
     const password = formData.get('password') as string;
 
     try {
-      await login({ username, password });
-      onLoginSuccess();
+      const success = await onLogin(username, password);
+      if (!success) {
+        setError('Nieprawidłowa nazwa użytkownika lub hasło');
+      }
     } catch (err) {
-      setError('Nieprawidłowa nazwa użytkownika lub hasło');
+      setError('Wystąpił błąd podczas logowania');
     } finally {
       setIsLoading(false);
     }
