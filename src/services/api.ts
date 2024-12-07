@@ -173,7 +173,7 @@ export async function deleteOrder(id: number, location: string) {
   });
 
   if (!response.ok) {
-    throw new Error('Failed to delete menu item');
+    throw new Error('Failed to delete order');
   }
   return response.json();
 }

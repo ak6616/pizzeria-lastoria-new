@@ -1,3 +1,5 @@
+process.noDeprecation = true;
+
 import express from 'express';
 import cors from 'cors';
 import mysql from 'mysql2/promise';
@@ -619,6 +621,29 @@ app.get('/api/orders/:location', async (req, res) => {
     res.json(rows);
   } catch (error) {
     console.error('Error fetching orders:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  } finally {
+    await connection.end();
+  }
+});
+
+app.delete('/api/orders:location/:id', async (req, res) => {
+  const connection = await createConnection();
+  const { location, id } = req.params;
+
+  try {
+    const [result] = await connection.execute(
+      `DELETE FROM zamowienia${location} WHERE id = ?`,
+      [id]
+    );
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ error: 'Order not found' });
+    }
+
+    res.json({ message: 'Order deleted successfully' });
+  } catch (error) {
+    console.error('Error deleting order:', error);
     res.status(500).json({ error: 'Internal server error' });
   } finally {
     await connection.end();

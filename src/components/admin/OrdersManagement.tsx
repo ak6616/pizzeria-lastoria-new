@@ -21,7 +21,7 @@ interface OrdersManagementProps {
 }
 
 export default function OrdersManagement({ location }: OrdersManagementProps) {
-  const { orders, loading, error, refetch } = useOrders();
+  const { orders, loading, error, refetch } = useOrders(location);
 
   const handleDelete = async (id: number) => {
     if (window.confirm('Czy na pewno chcesz usunąć to zamówienie?')) {
@@ -53,9 +53,9 @@ export default function OrdersManagement({ location }: OrdersManagementProps) {
 
       // Walidacja i mapowanie każdego elementu
       return items.map(item => ({
-        name: String(item.name || ''),
-        quantity: Number(item.quantity || 0),
-        price: Number(item.price || 0),
+        name: String(item.name),
+        quantity: Number(item.quantity),
+        price: Number(item.price ),
         removedIngredients: Array.isArray(item.removedIngredients) ? item.removedIngredients : [],
         addedIngredients: Array.isArray(item.addedIngredients) ? item.addedIngredients : []
       }));
@@ -67,10 +67,10 @@ export default function OrdersManagement({ location }: OrdersManagementProps) {
     }
   };
 
-  const formatOrderItems = (items: OrderItem[]) => {
+  const formatOrderItems = (items: OrderItem[], orderId: number) => {
     return items.map((item, index) => (
       <div 
-        key={`${item.name}-${item.quantity}-${index}`} 
+        key={`order-${orderId}-item-${index}`} 
         className="mb-4 border-b pb-2 last:border-b-0"
       >
         <div className="flex justify-between items-start">
@@ -185,7 +185,7 @@ export default function OrdersManagement({ location }: OrdersManagementProps) {
 
                 <div className="bg-gray-50 p-3 rounded-lg">
                   <div className="text-sm text-gray-600 mb-2">Zamówione produkty:</div>
-                  {formatOrderItems(parseOrderItems(order.zamowioneProdukty))}
+                  {formatOrderItems(parseOrderItems(order.zamowioneProdukty), order.id)}
                 </div>
               </div>
 

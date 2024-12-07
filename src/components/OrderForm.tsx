@@ -45,7 +45,7 @@ export default function OrderForm({ deliveryAreas, location }: OrderFormProps) {
     getPizzaCount,
     resetForm,
     setError,
-  } = useOrderForm(menuItems, additionalIngredients);
+  } = useOrderForm(menuItems, additionalIngredients, location);
 
   const pizzaCount = getPizzaCount();
   const { deliveryCost, error: deliveryError } = useDeliveryCost(

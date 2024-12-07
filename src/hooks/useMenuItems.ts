@@ -2,12 +2,13 @@ import { useState, useEffect, useCallback } from 'react';
 import { getMenuItems, getAdditionalIngredients } from '../services/api';
 
 export interface MenuItem {
-  uniqueId: string;
   id: number;
+  category: string;
   nazwa: string;
   cena: number;
   skladniki?: string;
-  category: string;
+  uniqueId: string;
+  location: string;
 }
 
 export interface AdditionalIngredient {

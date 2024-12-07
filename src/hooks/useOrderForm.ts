@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { submitOrder } from '../services/api';
-import { printOrder } from '../utils/printOrder';
 import type { CustomerData } from '../components/CustomerDataForm';
 import type { MenuItem } from '../hooks/useMenuItems';
 
@@ -24,7 +23,11 @@ interface OrderItem {
   }>;
 }
 
-export function useOrderForm(menuItems: Record<string, MenuItem[]>, additionalIngredients: any[]) {
+export function useOrderForm(
+  menuItems: Record<string, MenuItem[]>, 
+  additionalIngredients: any[],
+  location: string
+) {
   const [selectedItems, setSelectedItems] = useState<Record<string, number>>({});
   const [customizations, setCustomizations] = useState<Customization[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -145,10 +148,16 @@ export function useOrderForm(menuItems: Record<string, MenuItem[]>, additionalIn
       const orderItems = Object.entries(selectedItems)
         .filter(([_, quantity]) => quantity > 0)
         .map(([uniqueId, quantity]) => {
-          const [category, itemId] = uniqueId.split('_');
-          const item = menuItems[category]?.find(
-            (i) => i.id === parseInt(itemId)
-          );
+          // Zmiana sposobu wyszukiwania przedmiotu
+          const item = Object.values(menuItems)
+            .flat()
+            .find(menuItem => menuItem.uniqueId === uniqueId);
+
+          if (!item) {
+            console.error(`Nie znaleziono przedmiotu dla uniqueId: ${uniqueId}`);
+            return null;
+          }
+
           const customization = customizations.find(
             (c) => c.uniqueId === uniqueId
           );
@@ -158,41 +167,34 @@ export function useOrderForm(menuItems: Record<string, MenuItem[]>, additionalIn
               const ingredient = additionalIngredients.find((i) => i.id === id);
               return {
                 id,
-                name: ingredient?.nazwa,
-                price: ingredient?.cena,
+                name: ingredient?.nazwa || '',
+                price: ingredient?.cena || 0,
               };
             }) || [];
 
           return {
-            id: parseInt(itemId),
-            category,
-            name: item?.nazwa || '',  // Dodaj wartość domyślną
-            quantity: quantity || 0,   // Dodaj wartość domyślną
-            price: item?.cena || 0,    // Dodaj wartość domyślną
+            id: item.id,
+            category: item.category,
+            name: item.nazwa,
+            quantity: quantity,
+            price: item.cena,
             removedIngredients: customization?.removedIngredients || [],
-            addedIngredients: addedIngredientsDetails || []
+            addedIngredients: addedIngredientsDetails
           };
-        });
+        })
+        .filter((item): item is NonNullable<typeof item> => item !== null); // Usuń null z tablicy
 
       const totalPrice = calculateTotal(deliveryCost);
-
-      // Dodaj datę zamówienia
       const orderDateTime = new Date().toISOString();
 
       await submitOrder({
         ...customerData,
         items: orderItems,
+        orderDateTime,
         totalPrice: parseFloat(totalPrice),
         deliveryCost: deliveryCost || 0,
-      }, 'miejsce-piastowe');
-
-      // Print the order
-      printOrder({
-        customerData,
-        items: orderItems,
-        totalPrice: parseFloat(totalPrice),
-        deliveryCost: deliveryCost || 0,
-      });
+        location,
+      }, location);
 
       setSuccess(true);
       setSelectedItems({});

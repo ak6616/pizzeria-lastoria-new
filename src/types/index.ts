@@ -1,9 +1,10 @@
 export interface MenuItem {
   id: number;
-  name: string;
-  description: string;
-  price: number;
-  category: 'pizza' | 'burger' | 'extras' | 'drinks';
+  nazwa: string;
+  cena: number;
+  skladniki?: string;
+  category: string;
+  uniqueId: string;
 }
 
 export interface Location {

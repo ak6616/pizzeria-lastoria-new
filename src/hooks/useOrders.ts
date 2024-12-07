@@ -16,14 +16,14 @@ export interface Orders {
   suma: number;
 }
 
-export function useOrders() {
+export function useOrders(location: string) {
   const [orders, setOrders] = useState<Orders[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   const fetchOrders = useCallback(async () => {
     try {
-      const data = await getOrders('miejsce-piastowe');
+      const data = await getOrders(location);
       setOrders(data);
       setError(null);
     } catch (err) {
@@ -31,7 +31,7 @@ export function useOrders() {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [location]);
 
   useEffect(() => {
     fetchOrders();
