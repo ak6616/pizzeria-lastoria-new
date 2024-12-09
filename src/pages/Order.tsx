@@ -81,43 +81,45 @@ export default function Order() {
 
   if (!selectedLocation) {
     return (
-      <div className="max-w-4xl mx-auto">
-        <h1 className="text-3xl font-bold mb-8 text-center text-white">
-          Zamów online
-        </h1>
-        
-        <div className="bg-white/90 rounded-lg p-6 mb-6">
-          <h2 className="text-xl font-semibold mb-4">Godziny dowozu:</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <h3 className="font-semibold text-lg mb-2">Miejsce Piastowe</h3>
-              <p className="text-gray-700">
-                Poniedziałek - Piątek: 11:00 - 22:00<br />
-                Soboty, Niedziele, Święta: 16:00 - 22:00
-              </p>
-            </div>
-            <div>
-              <h3 className="font-semibold text-lg mb-2">Haczów</h3>
-              <p className="text-gray-700">
-                Poniedziałek - Piątek: 12:00 - 22:00<br />
-                Soboty, Niedziele, Święta: 16:00 - 22:00
-              </p>
+      <div className="pt-20">
+        <div className="max-w-4xl mx-auto">
+          <h1 className="text-3xl font-bold mb-8 text-center text-white">
+            Zamów online
+          </h1>
+          
+          <div className="bg-white/90 rounded-lg p-6 mb-6">
+            <h2 className="text-xl font-semibold mb-4">Godziny dowozu:</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <h3 className="font-semibold text-lg mb-2">Miejsce Piastowe</h3>
+                <p className="text-gray-700">
+                  Poniedziałek - Piątek: 11:00 - 22:00<br />
+                  Soboty, Niedziele, Święta: 16:00 - 22:00
+                </p>
+              </div>
+              <div>
+                <h3 className="font-semibold text-lg mb-2">Haczów</h3>
+                <p className="text-gray-700">
+                  Poniedziałek - Piątek: 12:00 - 22:00<br />
+                  Soboty, Niedziele, Święta: 16:00 - 22:00
+                </p>
+              </div>
             </div>
           </div>
-        </div>
 
-        <div className="bg-white/90 rounded-lg p-6">
-          <h2 className="text-xl font-semibold mb-4">Wybierz lokalizację:</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {locations.map(location => (
-              <button
-                key={location.id}
-                onClick={() => setSelectedLocation(location.id)}
-                className="p-4 bg-yellow-500 hover:bg-yellow-600 text-white font-bold rounded-md transition"
-              >
-                {location.name}
-              </button>
-            ))}
+          <div className="bg-white/90 rounded-lg p-6">
+            <h2 className="text-xl font-semibold mb-4">Wybierz lokalizację:</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {locations.map(location => (
+                <button
+                  key={location.id}
+                  onClick={() => setSelectedLocation(location.id)}
+                  className="p-4 bg-yellow-500 hover:bg-yellow-600 text-white font-bold rounded-md transition"
+                >
+                  {location.name}
+                </button>
+              ))}
+            </div>
           </div>
         </div>
       </div>

@@ -143,7 +143,36 @@ export async function calculateDeliveryCost(
   return response.json();
 }
 ///////////////////zamówienia
-export async function submitOrder(data: any, location: string) {
+interface OrderItem {
+  uniqueId: string;
+  id: number;
+  category: string;
+  name: string;
+  quantity: number;
+  price: number;
+  removedIngredients: string[];
+  addedIngredients: Array<{
+    id: string | number;
+    name: string;
+    price: number;
+  }>;
+}
+
+export async function submitOrder(data: {
+  firstName: string;
+  lastName: string;
+  city: string;
+  street: string;
+  houseNumber: string;
+  apartmentNumber?: string;
+  phone: string;
+  deliveryTime?: string;
+  items: OrderItem[];
+  totalPrice: number;
+  orderDateTime: string;
+  deliveryCost: number;
+  location: string;
+}, location: string) {
   const suffix = getLocationSuffix(location);
   const response = await fetch(`${API_BASE_URL}/orders/${suffix}`, {
     method: 'POST',
@@ -167,8 +196,7 @@ export async function getOrders(location: string) {
   return response.json();
 }
 export async function deleteOrder(id: number, location: string) {
-  const suffix = getLocationSuffix(location);
-  const response = await fetch(`${API_BASE_URL}/orders${suffix}/${id}`, {
+  const response = await fetch(`${API_BASE_URL}/orders/${location}/${id}`, {
     method: 'DELETE',
   });
 
@@ -378,5 +406,13 @@ export async function logout() {
     throw new Error('Logout failed');
   }
 
+  return response.json();
+}
+
+export async function getActiveOrdersCount(location: string) {
+  const response = await fetch(`${API_BASE_URL}/orders/${location}/count`);
+  if (!response.ok) {
+    throw new Error('Failed to fetch orders count');
+  }
   return response.json();
 }

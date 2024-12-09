@@ -3,21 +3,24 @@ import { submitOrder } from '../services/api';
 import type { CustomerData } from '../components/CustomerDataForm';
 import type { MenuItem } from '../hooks/useMenuItems';
 
-interface Customization {
+interface ProductCustomization {
   uniqueId: string;
+  instanceId: string;
   removedIngredients: string[];
-  addedIngredients: number[];
+  addedIngredients: (string | number)[];
+  notes?: string;
 }
 
 interface OrderItem {
+  uniqueId: string;
   id: number;
   category: string;
   name: string;
   quantity: number;
   price: number;
-  removedIngredients?: string[];
-  addedIngredients?: Array<{
-    id: number;
+  removedIngredients: string[];
+  addedIngredients: Array<{
+    id: string | number;
     name: string;
     price: number;
   }>;
@@ -29,33 +32,46 @@ export function useOrderForm(
   location: string
 ) {
   const [selectedItems, setSelectedItems] = useState<Record<string, number>>({});
-  const [customizations, setCustomizations] = useState<Customization[]>([]);
+  const [customizations, setCustomizations] = useState<ProductCustomization[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
 
   const updateQuantity = (uniqueId: string, quantity: number) => {
-    const newQuantity = Math.max(0, quantity);
-    if (newQuantity === 0) {
-      const newSelectedItems = { ...selectedItems };
-      delete newSelectedItems[uniqueId];
-      setSelectedItems(newSelectedItems);
-    } else {
-      setSelectedItems((prev) => ({
-        ...prev,
-        [uniqueId]: newQuantity,
-      }));
+    if (quantity < 0) return;
+    
+    setSelectedItems(prev => {
+      const updated = { ...prev };
+      if (quantity === 0) {
+        delete updated[uniqueId];
+      } else {
+        updated[uniqueId] = quantity;
+      }
+      return updated;
+    });
+
+    // Dodaj lub usuń customizację w zależności od ilości
+    if (quantity === 0) {
+      setCustomizations(prev => prev.filter(c => c.uniqueId !== uniqueId));
+    } else if (!customizations.find(c => c.uniqueId === uniqueId)) {
+      setCustomizations(prev => [...prev, {
+        uniqueId,
+        instanceId: '',
+        removedIngredients: [],
+        addedIngredients: [],
+      }]);
     }
   };
 
-  const toggleIngredient = (uniqueId: string, ingredient: string) => {
+  const toggleIngredient = (uniqueId: string, instanceId: string, ingredient: string) => {
     setCustomizations((prev) => {
-      const existing = prev.find((c) => c.uniqueId === uniqueId);
+      const existing = prev.find((c) => c.instanceId === instanceId);
       if (!existing) {
         return [
           ...prev,
           {
             uniqueId,
+            instanceId,
             removedIngredients: [ingredient],
             addedIngredients: [],
           },
@@ -67,21 +83,22 @@ export function useOrderForm(
         : [...existing.removedIngredients, ingredient];
 
       return prev.map((c) =>
-        c.uniqueId === uniqueId
+        c.instanceId === instanceId
           ? { ...c, removedIngredients: updatedIngredients }
           : c
       );
     });
   };
 
-  const toggleAdditionalIngredient = (uniqueId: string, ingredientId: number) => {
+  const toggleAdditionalIngredient = (uniqueId: string, instanceId: string, ingredientId: number) => {
     setCustomizations((prev) => {
-      const existing = prev.find((c) => c.uniqueId === uniqueId);
+      const existing = prev.find((c) => c.instanceId === instanceId);
       if (!existing) {
         return [
           ...prev,
           {
             uniqueId,
+            instanceId,
             removedIngredients: [],
             addedIngredients: [ingredientId],
           },
@@ -93,7 +110,7 @@ export function useOrderForm(
         : [...existing.addedIngredients, ingredientId];
 
       return prev.map((c) =>
-        c.uniqueId === uniqueId
+        c.instanceId === instanceId
           ? { ...c, addedIngredients: updatedIngredients }
           : c
       );
@@ -145,25 +162,25 @@ export function useOrderForm(
         throw new Error('Proszę wypełnić wszystkie wymagane pola');
       }
 
+      // Tworzymy tablicę wszystkich pojedynczych produktów z ich customizacjami
       const orderItems = Object.entries(selectedItems)
         .filter(([_, quantity]) => quantity > 0)
-        .map(([uniqueId, quantity]) => {
-          // Zmiana sposobu wyszukiwania przedmiotu
+        .flatMap(([uniqueId, quantity]) => {
           const item = Object.values(menuItems)
             .flat()
             .find(menuItem => menuItem.uniqueId === uniqueId);
 
           if (!item) {
             console.error(`Nie znaleziono przedmiotu dla uniqueId: ${uniqueId}`);
-            return null;
+            return [];
           }
 
-          const customization = customizations.find(
-            (c) => c.uniqueId === uniqueId
-          );
+          // Tworzymy osobny wpis dla każdej sztuki produktu
+          return Array(quantity).fill(null).map((_, index) => {
+            const instanceId = `${uniqueId}_${index}`;
+            const customization = customizations.find(c => c.instanceId === instanceId);
 
-          const addedIngredientsDetails =
-            customization?.addedIngredients.map((id) => {
+            const addedIngredientsDetails = customization?.addedIngredients.map((id) => {
               const ingredient = additionalIngredients.find((i) => i.id === id);
               return {
                 id,
@@ -172,17 +189,19 @@ export function useOrderForm(
               };
             }) || [];
 
-          return {
-            id: item.id,
-            category: item.category,
-            name: item.nazwa,
-            quantity: quantity,
-            price: item.cena,
-            removedIngredients: customization?.removedIngredients || [],
-            addedIngredients: addedIngredientsDetails
-          };
-        })
-        .filter((item): item is NonNullable<typeof item> => item !== null); // Usuń null z tablicy
+            return {
+              uniqueId,
+              instanceId,
+              id: item.id,
+              category: item.category,
+              name: item.nazwa,
+              quantity: 1, // każdy produkt ma ilość 1
+              price: item.cena,
+              removedIngredients: customization?.removedIngredients || [],
+              addedIngredients: addedIngredientsDetails
+            };
+          });
+        });
 
       const totalPrice = calculateTotal(deliveryCost);
       const orderDateTime = new Date().toISOString();
@@ -230,5 +249,6 @@ export function useOrderForm(
     getPizzaCount,
     resetForm,
     setError,
+    setCustomizations,
   };
 }

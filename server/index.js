@@ -668,13 +668,14 @@ app.get('/api/orders/:location', async (req, res) => {
   }
 });
 
-app.delete('/api/orders:location/:id', async (req, res) => {
+app.delete('/api/orders/:location/:id', async (req, res) => {
   const connection = await createConnection();
   const { location, id } = req.params;
+  const suffix = location === 'haczow' ? '_hacz' : '_mp';
 
   try {
     const [result] = await connection.execute(
-      `DELETE FROM zamowienia${location} WHERE id = ?`,
+      `DELETE FROM zamowienia${suffix} WHERE id = ?`,
       [id]
     );
 
@@ -730,6 +731,24 @@ app.post('/api/logout', (req, res) => {
   req.session.destroy(() => {
     res.json({ success: true });
   });
+});
+
+app.get('/api/orders/:location/count', async (req, res) => {
+  const connection = await createConnection();
+  const { location } = req.params;
+  const suffix = location === 'haczow' ? '_hacz' : '_mp';
+
+  try {
+    const [result] = await connection.execute(
+      `SELECT COUNT(*) as count FROM zamowienia${suffix}`
+    );
+    res.json({ count: result[0].count });
+  } catch (error) {
+    console.error('Error counting orders:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  } finally {
+    await connection.end();
+  }
 });
 
 app.listen(port, () => {
