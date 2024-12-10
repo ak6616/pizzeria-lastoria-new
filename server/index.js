@@ -9,7 +9,9 @@ import session from 'express-session';
 const app = express();
 const port = 3000;
 app.use(cors({
-  origin: 'http://localhost:5173',
+  origin: process.env.NODE_ENV === 'production' 
+    ? ['https://twoja-domena.vercel.app', 'http://localhost:5173']
+    : 'http://localhost:5173',
   credentials: true
 }));
 app.use(express.json());
@@ -25,12 +27,15 @@ app.use(session({
   }
 }));
 
+// Dodaj obsługę preflight requests
+app.options('*', cors());
+
 const dbConfig = {
-  host: 'sql7.freesqldatabase.com',
-  user: 'sql7748578',
-  password: 'taIVSCuIAz',
-  database: 'sql7748578',
-  port: 3306,
+  host: process.env.DB_HOST || 'sql7.freesqldatabase.com',
+  user: process.env.DB_USER || 'sql7748578',
+  password: process.env.DB_PASSWORD || 'taIVSCuIAz',
+  database: process.env.DB_NAME || 'sql7748578',
+  port: parseInt(process.env.DB_PORT || '3306'),
   connectTimeout: 60000,
   waitForConnections: true,
   connectionLimit: 10,
