@@ -8,39 +8,17 @@
     {
       "src": "package.json",
       "use": "@vercel/static-build",
-      "config": {
-        "distDir": "dist"
-      }
+      "config": { "distDir": "dist" }
     }
   ],
   "routes": [
     {
       "src": "/api/(.*)",
-      "dest": "/server/index.js",
-      "headers": {
-        "Access-Control-Allow-Origin": "https://pizzeria-lastoria.vercel.app",
-        "Access-Control-Allow-Methods": "GET,POST,PUT,DELETE,OPTIONS",
-        "Access-Control-Allow-Headers": "Content-Type, Authorization"
-      }
-    },
-    {
-      "src": "^/assets/(.*)",
-      "dest": "/dist/assets/$1"
-    },
-    {
-      "handle": "filesystem"
+      "dest": "server/index.js"
     },
     {
       "src": "/(.*)",
-      "dest": "/index.html"
+      "dest": "/"
     }
-  ],
-  "env": {
-    "DB_HOST": "db_host",
-    "DB_USER": "db_user",
-    "DB_PASSWORD": "db_password",
-    "DB_NAME": "db_name",
-    "DB_PORT": "db_port",
-    "NODE_ENV": "production"
-  }
+  ]
 } 
