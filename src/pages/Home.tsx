@@ -1,11 +1,6 @@
-
-import { motion } from 'framer-motion';
-const pizzaImages = [
-  'https://images.unsplash.com/photo-1513104890138-7c749659a591',
-  'https://images.unsplash.com/photo-1565299624946-b28f40a0ae38',
-  'https://images.unsplash.com/photo-1593560708920-61dd98c46a4e',
-  'https://i.postimg.cc/Vk1KW4Lg/10.jpg'
-];
+import { motion, useAnimationControls } from 'framer-motion';
+import { useEffect } from 'react';
+import { useGallery } from '../hooks/useGallery';
 
 const locations = [
   {
@@ -27,6 +22,27 @@ const locations = [
 ];
 
 export default function Home() {
+  const controls = useAnimationControls();
+  const { images, loading } = useGallery();
+
+  useEffect(() => {
+    const animate = async () => {
+      await controls.start({
+        x: [0, -400 * (images.length - 1), 0],
+        transition: {
+          duration: 120,
+          ease: "linear",
+          repeat: Infinity,
+          repeatType: "loop"
+        }
+      });
+    };
+    
+    if (images.length > 0) {
+      animate();
+    }
+  }, [controls, images]);
+
   return (
     <div className="text-center text-white">
       <div className="max-w-4xl mx-auto">
@@ -34,19 +50,24 @@ export default function Home() {
         <h1 className="text-5xl font-bold mb-6">Pizzeria Lastoria</h1>
 
         <div className="mb-12 overflow-hidden">
-          <div className="flex space-x-4">
-            {pizzaImages.map((src, index) => (
-              <motion.img
-                key={index}
-                src={`${src}?auto=format&fit=crop&w=400&q=80`}
-                alt={`Pizza ${index + 1}`}
-                className="w-1/3 h-64 object-cover rounded-lg"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: index * 0.2 }}
-              />
-            ))}
-          </div>
+          {!loading && (
+            <motion.div 
+              className="flex space-x-4"
+              animate={controls}
+            >
+              {[...images, ...images].map((image, index) => (
+                <motion.img
+                  key={index}
+                  src={image.link}
+                  alt={`Zdjęcie ${index + 1}`}
+                  className="w-[400px] h-64 object-cover rounded-lg flex-shrink-0"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: index * 0.2 }}
+                />
+              ))}
+            </motion.div>
+          )}
         </div>
 
         <div className="bg-white/10 p-8 rounded-lg mb-12">
