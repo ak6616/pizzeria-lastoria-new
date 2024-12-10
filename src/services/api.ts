@@ -1,4 +1,6 @@
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
+const API_BASE_URL = import.meta.env.PROD 
+  ? 'https://pizzeria-lastoria.onrender.com/api'
+  : 'http://localhost:3000/api';
 
 // type LocationSuffix = '_mp' | '_hacz';
 
