@@ -4,6 +4,7 @@ const pizzaImages = [
   'https://images.unsplash.com/photo-1513104890138-7c749659a591',
   'https://images.unsplash.com/photo-1565299624946-b28f40a0ae38',
   'https://images.unsplash.com/photo-1593560708920-61dd98c46a4e',
+  'https://i.postimg.cc/Vk1KW4Lg/10.jpg'
 ];
 
 const locations = [
