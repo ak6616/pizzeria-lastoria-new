@@ -2,7 +2,10 @@ services:
   - type: web
     name: pizzeria-lastoria
     env: node
-    buildCommand: npm ci && npm run build
+    buildCommand: |
+      npm ci
+      npm run build
+      cp -r dist server/
     startCommand: npm start
     envVars:
       - key: NODE_ENV

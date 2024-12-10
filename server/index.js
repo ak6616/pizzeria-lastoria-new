@@ -4,9 +4,18 @@ import express from 'express';
 import cors from 'cors';
 import mysql from 'mysql2/promise';
 import session from 'express-session';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const app = express();
 const port = process.env.PORT || 3000;
+
+// Serwuj pliki statyczne z folderu dist
+app.use(express.static(path.join(__dirname, '../dist')));
+
 app.use(cors({
   origin: process.env.NODE_ENV === 'production' 
     ? ['https://pizzeria-lastoria.onrender.com']
@@ -769,6 +778,14 @@ app.get('/api/orders/:location/count', async (req, res) => {
     res.status(500).json({ error: 'Internal server error' });
   } finally {
     await connection.release();
+  }
+});
+
+// Obsługa wszystkich pozostałych ścieżek - przekieruj do index.html
+app.get('*', (req, res) => {
+  // Nie przekierowuj żądań API
+  if (!req.url.startsWith('/api')) {
+    res.sendFile(path.join(__dirname, '../dist/index.html'));
   }
 });
 
