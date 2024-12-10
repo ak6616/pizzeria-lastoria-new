@@ -5,6 +5,7 @@ import cors from 'cors';
 import mysql from 'mysql2/promise';
 import bcrypt from 'bcrypt';
 import session from 'express-session';
+import { SpeedInsights } from "@vercel/speed-insights/next"
 
 const app = express();
 const port = 3000;
