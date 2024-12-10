@@ -1,6 +1,6 @@
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
 
-type LocationSuffix = '_mp' | '_hacz';
+// type LocationSuffix = '_mp' | '_hacz';
 
 const getLocationSuffix = (location: string): string => {
   switch (location) {

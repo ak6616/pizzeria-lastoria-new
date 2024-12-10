@@ -3,17 +3,17 @@ process.noDeprecation = true;
 import express from 'express';
 import cors from 'cors';
 import mysql from 'mysql2/promise';
-import bcrypt from 'bcrypt';
 import session from 'express-session';
-import { SpeedInsights } from "@vercel/speed-insights/next"
 
 const app = express();
-const port = 3000;
+const port = process.env.PORT || 3000;
 app.use(cors({
   origin: process.env.NODE_ENV === 'production' 
     ? ['https://twoja-domena.vercel.app', 'http://localhost:5173']
-    : 'http://localhost:5173',
-  credentials: true
+    : ['http://localhost:5173'],
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
 }));
 app.use(express.json());
 
@@ -28,30 +28,44 @@ app.use(session({
   }
 }));
 
-// Dodaj obsługę preflight requests
+// Upewnij się, że preflight requests są obsługiwane prawidłowo
 app.options('*', cors());
 
-const dbConfig = {
+const pool = mysql.createPool({
   host: process.env.DB_HOST || 'sql7.freesqldatabase.com',
   user: process.env.DB_USER || 'sql7748578',
   password: process.env.DB_PASSWORD || 'taIVSCuIAz',
   database: process.env.DB_NAME || 'sql7748578',
   port: parseInt(process.env.DB_PORT || '3306'),
-  connectTimeout: 60000,
   waitForConnections: true,
-  connectionLimit: 10,
-  maxIdle: 10,
-  idleTimeout: 60000,
+  connectionLimit: 5,
   queueLimit: 0,
   enableKeepAlive: true,
-  keepAliveInitialDelay: 0,
-};
+  keepAliveInitialDelay: 0
+});
 
-async function createConnection() {
+const DEBUG = true; // łatwe włączanie/wyłączanie logowania
+
+// Middleware do logowania wszystkich zapytań
+app.use((req, res, next) => {
+  if (DEBUG) {
+    console.log(`${new Date().toISOString()} ${req.method} ${req.url}`);
+    console.log('Headers:', req.headers);
+    if (req.body && Object.keys(req.body).length > 0) {
+      console.log('Body:', req.body);
+    }
+  }
+  next();
+});
+
+async function getConnection() {
   try {
-    return await mysql.createConnection(dbConfig);
+    if (DEBUG) {
+      console.log('Pobieranie połączenia z puli');
+    }
+    return await pool.getConnection();
   } catch (error) {
-    console.error('Error connecting to the database:', error);
+    console.error('Błąd podczas pobierania połączenia:', error);
     throw error;
   }
 }
@@ -60,25 +74,26 @@ async function createConnection() {
 
 app.get('/api/menu/:category', async (req, res) => {
   const { category } = req.params;
+  if (DEBUG) console.log(`Otrzymano zapytanie o kategorię: ${category}`);
+  
   const validCategories = [
     'pizza_mp', 'fastfood_mp', 'napoje_mp', 'dodatki_mp',
     'pizza_hacz', 'fastfood_hacz', 'napoje_hacz', 'dodatki_hacz'
   ];
   
   if (!validCategories.includes(category)) {
+    if (DEBUG) console.log(`Nieprawidłowa kategoria: ${category}`);
     return res.status(400).json({ error: 'Invalid category' });
   }
 
-  const connection = await createConnection();
-
   try {
-    const [rows] = await connection.execute(`SELECT * FROM ${category}`);
+    const [rows] = await pool.execute(`SELECT * FROM ${category}`);
+    if (DEBUG) console.log(`Znaleziono ${rows.length} rekordów`);
+    
     res.json(rows);
   } catch (error) {
-    console.error(`Error fetching ${category}:`, error);
+    console.error(`Błąd podczas pobierania ${category}:`, error);
     res.status(500).json({ error: 'Internal server error' });
-  } finally {
-    await connection.end();
   }
 });
 
@@ -98,7 +113,7 @@ app.post('/api/menu', async (req, res) => {
     return res.status(400).json({ error: 'Invalid category' });
   }
 
-  const connection = await createConnection();
+  const connection = await getConnection();
 
   try {
     const [result] = await connection.execute(
@@ -110,7 +125,7 @@ app.post('/api/menu', async (req, res) => {
     console.error('Error adding menu item:', error);
     res.status(500).json({ error: 'Internal server error', details: error.message });
   } finally {
-    await connection.end();
+    await connection.release();
   }
 });
 
@@ -126,7 +141,7 @@ app.put('/api/menu/:category/:id', async (req, res) => {
     return res.status(400).json({ error: 'Invalid category' });
   }
 
-  const connection = await createConnection();
+  const connection = await getConnection();
 
   try {
     const [result] = await connection.execute(
@@ -138,7 +153,7 @@ app.put('/api/menu/:category/:id', async (req, res) => {
     console.error('Error updating menu item:', error);
     res.status(500).json({ error: 'Internal server error', details: error.message });
   } finally {
-    await connection.end();
+    await connection.release();
   }
 });
 
@@ -153,7 +168,7 @@ app.delete('/api/menu/:category/:id', async (req, res) => {
     return res.status(400).json({ error: 'Invalid category' });
   }
 
-  const connection = await createConnection();
+  const connection = await getConnection();
 
   try {
     const [result] = await connection.execute(
@@ -165,7 +180,7 @@ app.delete('/api/menu/:category/:id', async (req, res) => {
     console.error('Error deleting menu item:', error);
     res.status(500).json({ error: 'Internal server error' });
   } finally {
-    await connection.end();
+    await connection.release();
   }
 });
 /////////////////////////////////// Dostawa
@@ -181,7 +196,7 @@ app.get('/api/delivery/:category', async (req, res) => {
     return res.status(400).json({ error: 'Invalid category' });
   }
 
-  const connection = await createConnection();
+  const connection = await getConnection();
 
   try {
     const [rows] = await connection.execute(`SELECT * FROM ${category}`);
@@ -191,7 +206,7 @@ app.get('/api/delivery/:category', async (req, res) => {
     console.error(`Error fetching ${category}:`, error);
     res.status(500).json({ error: 'Internal server error' });
   } finally {
-    await connection.end();
+    await connection.release();
   }
 });
 
@@ -206,7 +221,7 @@ app.post('/api/delivery', async (req, res) => {
     return res.status(400).json({ error: 'Invalid category' });
   }
 
-  const connection = await createConnection();
+  const connection = await getConnection();
 
   try {
     const [result] = await connection.execute(
@@ -218,7 +233,7 @@ app.post('/api/delivery', async (req, res) => {
     console.error('Error adding delivery rule:', error);
     res.status(500).json({ error: 'Internal server error', details: error.message });
   } finally {
-    await connection.end();
+    await connection.release();
   }
 });
 
@@ -234,7 +249,7 @@ app.put('/api/delivery/:category/:id', async (req, res) => {
     return res.status(400).json({ error: 'Invalid category' });
   }
 
-  const connection = await createConnection();
+  const connection = await getConnection();
 
   try {
     const [result] = await connection.execute(
@@ -246,7 +261,7 @@ app.put('/api/delivery/:category/:id', async (req, res) => {
     console.error('Error updating delivery rule:', error);
     res.status(500).json({ error: 'Internal server error', details: error.message });
   } finally {
-    await connection.end();
+    await connection.release();
   }
 });
 
@@ -257,7 +272,7 @@ app.delete('/api/delivery/:category/:id', async (req, res) => {
     return res.status(400).json({ error: 'Invalid category' });
   }
 
-  const connection = await createConnection();
+  const connection = await getConnection();
 
   try {
     const [result] = await connection.execute(
@@ -269,14 +284,14 @@ app.delete('/api/delivery/:category/:id', async (req, res) => {
     console.error('Error deleting delivery record:', error);
     res.status(500).json({ error: 'Internal server error' });
   } finally {
-    await connection.end();
+    await connection.release();
   }
 });
 
 ////////////////////////////////// Aktualności
 
 app.get('/api/news', async (req, res) => {
-  const connection = await createConnection();
+  const connection = await getConnection();
 
   try {
     const [rows] = await connection.execute(
@@ -287,13 +302,13 @@ app.get('/api/news', async (req, res) => {
     console.error('Error fetching news:', error);
     res.status(500).json({ error: 'Internal server error' });
   } finally {
-    await connection.end();
+    await connection.release();
   }
 });
 
 app.post('/api/news', async (req, res) => {
   const { tytul, tekst, data } = req.body;
-  const connection = await createConnection();
+  const connection = await getConnection();
 
   try {
     const [result] = await connection.execute(
@@ -305,14 +320,14 @@ app.post('/api/news', async (req, res) => {
     console.error('Error adding news:', error);
     res.status(500).json({ error: 'Internal server error' });
   } finally {
-    await connection.end();
+    await connection.release();
   }
 });
 
 app.put('/api/news/:id', async (req, res) => {
   const { id } = req.params;
   const { tytul, tekst } = req.body;
-  const connection = await createConnection();
+  const connection = await getConnection();
 
   try {
     const [result] = await connection.execute(
@@ -324,13 +339,13 @@ app.put('/api/news/:id', async (req, res) => {
     console.error('Error updating news:', error);
     res.status(500).json({ error: 'Internal server error' });
   } finally {
-    await connection.end();
+    await connection.release();
   }
 });
 
 app.delete('/api/news/:id', async (req, res) => {
   const { id } = req.params;
-  const connection = await createConnection();
+  const connection = await getConnection();
 
   try {
     const [result] = await connection.execute(
@@ -342,7 +357,7 @@ app.delete('/api/news/:id', async (req, res) => {
     console.error('Error deleting news:', error);
     res.status(500).json({ error: 'Internal server error' });
   } finally {
-    await connection.end();
+    await connection.release();
   }
 });
 
@@ -350,7 +365,7 @@ app.delete('/api/news/:id', async (req, res) => {
 
 app.post('/api/gallery', async (req, res) => {
   const { link } = req.body;
-  const connection = await createConnection();
+  const connection = await getConnection();
 
   try {
     const [result] = await connection.execute(
@@ -362,13 +377,13 @@ app.post('/api/gallery', async (req, res) => {
     console.error('Error adding image:', error);
     res.status(500).json({ error: 'Internal server error' });
   } finally {
-    await connection.end();
+    await connection.release();
   }
 });
 
 app.delete('/api/gallery/:id', async (req, res) => {
   const { id } = req.params;
-  const connection = await createConnection();
+  const connection = await getConnection();
 
   try {
     const [result] = await connection.execute(
@@ -380,12 +395,12 @@ app.delete('/api/gallery/:id', async (req, res) => {
     console.error('Error deleting image:', error);
     res.status(500).json({ error: 'Internal server error' });
   } finally {
-    await connection.end();
+    await connection.release();
   }
 });
 
 app.get('/api/gallery', async (req, res) => {
-  const connection = await createConnection();
+  const connection = await getConnection();
 
   try {
     const [rows] = await connection.execute('SELECT * FROM galeria');
@@ -394,7 +409,7 @@ app.get('/api/gallery', async (req, res) => {
     console.error('Error fetching gallery images:', error);
     res.status(500).json({ error: 'Internal server error' });
   } finally {
-    await connection.end();
+    await connection.release();
   }
 });
 
@@ -408,7 +423,7 @@ app.get('/api/delivery-areas:location', async (req, res) => {
     return res.status(400).json({ error: 'Invalid location' });
   }
 
-  const connection = await createConnection();
+  const connection = await getConnection();
 
   try {
     const [rows] = await connection.execute(`SELECT * FROM miejscowosci${location}`);
@@ -417,14 +432,14 @@ app.get('/api/delivery-areas:location', async (req, res) => {
     console.error('Error fetching delivery areas:', error);
     res.status(500).json({ error: 'Internal server error' });
   } finally {
-    await connection.end();
+    await connection.release();
   }
 });
 
 /////////////////////// Koszt dostawy
 
 app.get('/api/delivery-cost:location', async (req, res) => {
-  const connection = await createConnection();
+  const connection = await getConnection();
   const { city, street, pizzaCount } = req.query;
   const { location } = req.params;
   const validLocations = ['_mp', '_hacz'];
@@ -492,12 +507,12 @@ app.get('/api/delivery-cost:location', async (req, res) => {
     console.error('Error calculating delivery cost:', error);
     res.status(500).json({ error: 'Internal server error' });
   } finally {
-    await connection.end();
+    await connection.release();
   }
 });
 
 app.post('/api/orders', async (req, res) => {
-  const connection = await createConnection();
+  const connection = await getConnection();
   const orderData = req.body;
 
   try {
@@ -567,12 +582,12 @@ app.post('/api/orders', async (req, res) => {
       details: error.message 
     });
   } finally {
-    await connection.end();
+    await connection.release();
   }
 });
 
 app.get('/api/orders', async (req, res) => {
-  const connection = await createConnection();
+  const connection = await getConnection();
 
   try {
     const [rows] = await connection.execute(
@@ -583,13 +598,13 @@ app.get('/api/orders', async (req, res) => {
     console.error('Error fetching orders:', error);
     res.status(500).json({ error: 'Internal server error' });
   } finally {
-    await connection.end();
+    await connection.release();
   }
 });
 
 app.delete('/api/orders/:id', async (req, res) => {
   const { id } = req.params;
-  const connection = await createConnection();
+  const connection = await getConnection();
 
   try {
     const [result] = await connection.execute(
@@ -601,13 +616,13 @@ app.delete('/api/orders/:id', async (req, res) => {
     console.error('Error deleting order:', error);
     res.status(500).json({ error: 'Internal server error' });
   } finally {
-    await connection.end();
+    await connection.release();
   }
 });
 
 // Endpoint dla zamówień z różnych lokalizacji
 app.post('/api/orders/:location', async (req, res) => {
-  const connection = await createConnection();
+  const connection = await getConnection();
   const { location } = req.params;
   
   try {
@@ -651,12 +666,12 @@ app.post('/api/orders/:location', async (req, res) => {
       details: error.message 
     });
   } finally {
-    await connection.end();
+    await connection.release();
   }
 });
 
 app.get('/api/orders/:location', async (req, res) => {
-  const connection = await createConnection();
+  const connection = await getConnection();
   const { location } = req.params;
 
   try {
@@ -670,12 +685,12 @@ app.get('/api/orders/:location', async (req, res) => {
     console.error('Error fetching orders:', error);
     res.status(500).json({ error: 'Internal server error' });
   } finally {
-    await connection.end();
+    await connection.release();
   }
 });
 
 app.delete('/api/orders/:location/:id', async (req, res) => {
-  const connection = await createConnection();
+  const connection = await getConnection();
   const { location, id } = req.params;
   const suffix = location === 'haczow' ? '_hacz' : '_mp';
 
@@ -694,14 +709,14 @@ app.delete('/api/orders/:location/:id', async (req, res) => {
     console.error('Error deleting order:', error);
     res.status(500).json({ error: 'Internal server error' });
   } finally {
-    await connection.end();
+    await connection.release();
   }
 });
 
 // Endpoint logowania
 app.post('/api/login', async (req, res) => {
   const { username, password } = req.body;
-  const connection = await createConnection();
+  const connection = await getConnection();
   
   try {
     const [users] = await connection.execute(
@@ -719,7 +734,7 @@ app.post('/api/login', async (req, res) => {
     console.error('Error during login:', error);
     res.status(500).json({ error: 'Internal server error' });
   } finally {
-    await connection.end();
+    await connection.release();
   }
 });
 
@@ -740,7 +755,7 @@ app.post('/api/logout', (req, res) => {
 });
 
 app.get('/api/orders/:location/count', async (req, res) => {
-  const connection = await createConnection();
+  const connection = await getConnection();
   const { location } = req.params;
   const suffix = location === 'haczow' ? '_hacz' : '_mp';
 
@@ -753,11 +768,26 @@ app.get('/api/orders/:location/count', async (req, res) => {
     console.error('Error counting orders:', error);
     res.status(500).json({ error: 'Internal server error' });
   } finally {
-    await connection.end();
+    await connection.release();
   }
 });
 
-app.listen(port, () => {
+const server = app.listen(port, () => {
   console.log(`Server running on port ${port}`);
+}).on('error', (err) => {
+  if (err.code === 'EADDRINUSE') {
+    console.error(`Port ${port} jest już w użyciu. Upewnij się, że żaden inny proces nie używa tego portu.`);
+  } else {
+    console.error('Błąd podczas uruchamiania serwera:', err);
+  }
+  process.exit(1);
+});
+
+// Dodaj obsługę zamknięcia
+process.on('SIGTERM', () => {
+  server.close(() => {
+    console.log('Serwer został zamknięty');
+    process.exit(0);
+  });
 });
 
