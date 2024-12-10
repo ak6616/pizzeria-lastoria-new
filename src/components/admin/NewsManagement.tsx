@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Edit2, Trash2, Plus } from 'lucide-react';
 import { useNews } from '../../hooks/useNews';
 import AddNewsModal from './AddNewsModal';

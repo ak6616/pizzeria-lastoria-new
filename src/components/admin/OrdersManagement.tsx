@@ -1,4 +1,3 @@
-import React from 'react';
 import { Trash2 } from 'lucide-react';
 import { useOrders } from '../../hooks/useOrders';
 import { deleteOrder } from '../../services/api';

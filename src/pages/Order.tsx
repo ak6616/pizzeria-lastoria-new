@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import OrderForm from '../components/OrderForm';
 import { getDeliveryAreas } from '../services/api';
 import { MapPin, Home } from 'lucide-react';

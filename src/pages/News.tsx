@@ -1,4 +1,4 @@
-import React from 'react';
+
 import { useNews } from '../hooks/useNews';
 import { format } from 'date-fns';
 import { pl } from 'date-fns/locale';

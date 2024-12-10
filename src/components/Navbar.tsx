@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { ChevronDown, Menu, X } from 'lucide-react';
 
@@ -29,7 +29,7 @@ export default function Navbar() {
         <div className="flex items-center justify-between h-16">
           <Link to="/" className="flex items-center space-x-2 shrink-0">
             <img
-              src="logo.png"
+              src="https://i.postimg.cc/qqVsMMNw/logo.png"
               alt="logo-lastoria"
               className="w-[60px] h-auto"
             />

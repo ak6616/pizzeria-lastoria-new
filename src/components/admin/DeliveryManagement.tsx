@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Edit2, Trash2, Plus } from 'lucide-react';
 import { useDeliveryRules } from '../../hooks/useDeliveryRules';
 import AddDeliveryRuleModal from './AddDeliveryRuleModal';
@@ -132,6 +132,7 @@ export default function DeliveryManagement({ location }: DeliveryManagementProps
             setShowAddModal(false);
             await refetch();
           }}
+          location={location}
         />
       )}
 

@@ -11,7 +11,7 @@ interface ProductCustomization {
   notes?: string;
 }
 
-interface OrderItem {
+export interface OrderItem {
   uniqueId: string;
   id: number;
   category: string;
