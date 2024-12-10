@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { ChevronDown, Menu, X } from 'lucide-react';
-import logo from '../assets/logo.png';
+import logo from '/logo.png';
 
 const locations = [
   { name: 'Haczów', href: '/menu/haczow' },
@@ -30,7 +30,7 @@ export default function Navbar() {
         <div className="flex items-center justify-between h-16">
           <Link to="/" className="flex items-center">
             <img 
-              src={logo} 
+              src="/logo.png" 
               alt="La Storia Logo" 
               className="h-12 w-auto"
             />
