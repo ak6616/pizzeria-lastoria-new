@@ -9,7 +9,7 @@ const app = express();
 const port = process.env.PORT || 3000;
 const corsOptions = {
   origin: process.env.NODE_ENV === 'production' 
-    ? ['https://pizzeria-lastoria.vercel.app/']
+    ? ['https://pizzeria-lastoria.vercel.app']
     : ['http://localhost:5173'],
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
@@ -790,6 +790,15 @@ process.on('SIGTERM', () => {
   server.close(() => {
     console.log('Serwer został zamknięty');
     process.exit(0);
+  });
+});
+
+// Dodaj obsługę błędów
+app.use((err, req, res, next) => {
+  console.error('Error:', err);
+  res.status(500).json({ 
+    error: 'Internal Server Error',
+    message: process.env.NODE_ENV === 'development' ? err.message : undefined
   });
 });
 
