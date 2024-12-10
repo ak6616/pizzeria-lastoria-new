@@ -120,35 +120,40 @@ export function useOrderForm(
   const calculateTotal = (deliveryCost: number | null = 0) => {
     let total = 0;
 
-    // Sumuj ceny wybranych przedmiotów wraz z dodatkowymi składnikami
+    // Iteruj po każdym produkcie w zamówieniu
     Object.entries(selectedItems).forEach(([uniqueId, quantity]) => {
       const item = Object.values(menuItems)
         .flat()
         .find((item) => item.uniqueId === uniqueId);
       
       if (item) {
-        // Dodaj cenę podstawową produktu
-        total += item.cena * quantity;
+        // Dla każdej sztuki produktu
+        for (let i = 0; i < quantity; i++) {
+          const instanceId = `${uniqueId}_${i}`;
+          const customization = customizations.find(c => c.instanceId === instanceId);
+          
+          // Dodaj cenę podstawową produktu
+          total += Number(item.cena);
 
-        // Dodaj cenę dodatkowych składników
-        const customization = customizations.find(c => c.uniqueId === uniqueId);
-        if (customization && item.skladniki) { // Sprawdź czy produkt może mieć dodatki
-          customization.addedIngredients.forEach(ingredientId => {
-            const ingredient = additionalIngredients.find(i => i.id === ingredientId);
-            if (ingredient) {
-              total += ingredient.cena * quantity;
-            }
-          });
+          // Dodaj cenę dodatkowych składników dla tej konkretnej sztuki
+          if (customization) {
+            customization.addedIngredients.forEach(ingredientId => {
+              const ingredient = additionalIngredients.find(i => i.id === ingredientId);
+              if (ingredient) {
+                total += Number(ingredient.cena);
+              }
+            });
+          }
         }
       }
     });
 
     // Dodaj koszt dostawy (jeśli nie jest null)
     if (deliveryCost !== null) {
-      total += deliveryCost;
+      total += Number(deliveryCost);
     }
 
-    return total.toFixed(2);
+    return Number(total).toFixed(2);
   };
 
   const handleSubmit = async (customerData: CustomerData, deliveryCost: number | null) => {
