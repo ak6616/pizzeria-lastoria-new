@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Pizza, ChevronDown, Menu, X } from 'lucide-react';
+import { ChevronDown, Menu, X } from 'lucide-react';
 
 const locations = [
   { name: 'Haczów', href: '/menu/haczow' },
@@ -99,12 +99,6 @@ export default function Navbar() {
               className="text-white hover:text-yellow-200 transition-colors"
             >
               Zamów online
-            </Link>
-            <Link
-              to="/admin"
-              className="text-white hover:text-yellow-200 transition-colors"
-            >
-              Panel Admina
             </Link>
           </div>
         </div>
