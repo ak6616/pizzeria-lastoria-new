@@ -1,7 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { ChevronDown, Menu, X } from 'lucide-react';
-import logo from '/logo.png';
 
 const locations = [
   { name: 'Haczów', href: '/menu/haczow' },
@@ -28,12 +27,15 @@ export default function Navbar() {
     <nav className="bg-white/10 backdrop-blur-md sticky top-0 z-50">
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">
-          <Link to="/" className="flex items-center">
-            <img 
-              src="/logo.png" 
-              alt="La Storia Logo" 
-              className="h-12 w-auto"
+          <Link to="/" className="flex items-center space-x-2 shrink-0">
+            <img
+              src="logo.png"
+              alt="logo-lastoria"
+              className="w-[60px] h-auto"
             />
+            <span className="text-xl font-bold text-white hidden sm:inline">
+              Pizzeria Lastoria
+            </span>
           </Link>
 
           <button
