@@ -1,4 +1,6 @@
-const API_BASE_URL = import.meta.env.VITE_API_URL || '/api';
+const API_BASE_URL = import.meta.env.PROD 
+  ? 'https://pizzeria-lastoria.vercel.app/api'
+  : '/api';
 
 // type LocationSuffix = '_mp' | '_hacz';
 
