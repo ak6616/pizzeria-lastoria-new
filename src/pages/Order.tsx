@@ -76,7 +76,7 @@ export default function Order() {
 
   const locations = [
     { id: 'miejsce-piastowe', name: 'Miejsce Piastowe' },
-    { id: 'haczow', name: 'Haczów' }
+    // { id: 'haczow', name: 'Haczów' }
   ];
 
   if (!selectedLocation) {
