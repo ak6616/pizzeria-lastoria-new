@@ -148,13 +148,6 @@ export default function Navbar() {
             >
               Zamów online
             </Link>
-            <Link
-              to="/admin"
-              className="block text-white hover:text-yellow-200 transition-colors py-2"
-              onClick={() => setIsMobileMenuOpen(false)}
-            >
-              Panel Admina
-            </Link>
           </div>
         )}
       </div>
