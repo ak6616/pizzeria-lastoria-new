@@ -8,12 +8,12 @@ interface PrinterSettings {
 }
 
 const PRINTER_SETTINGS: PrinterSettings = {
-  'haczow': {
-    ip: '192.168.1.100',
-    port: 9100
-  },
+  // 'haczow': {
+  //   ip: '192.168.1.100',
+  //   port: 9100
+  // },
   'miejsce-piastowe': {
-    ip: '192.168.1.101',
+    ip: '193.192.177.167',
     port: 9100
   }
 };
