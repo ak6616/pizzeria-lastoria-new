@@ -76,7 +76,7 @@ export default function Order() {
 
   const locations = [
     { id: 'miejsce-piastowe', name: 'Miejsce Piastowe' },
-    { id: 'haczow', name: 'Haczów' }
+    // { id: 'haczow', name: 'Haczów' }
   ];
 
   if (!selectedLocation) {
@@ -109,7 +109,7 @@ export default function Order() {
 
           <div className="bg-white/90 rounded-lg p-6">
             <h2 className="text-xl font-semibold mb-4">Wybierz lokalizację:</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-1 gap-4">
               {locations.map(location => (
                 <button
                   key={location.id}
