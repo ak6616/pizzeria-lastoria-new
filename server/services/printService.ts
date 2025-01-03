@@ -27,7 +27,7 @@ export async function printOrder(data: PrintOrderData) {
   // Konfiguracja drukarki
   const myPrinter = new printer({
     type: types.ZPL, // Używamy protokołu ZPL
-    interface: "tcp://192.168.0.100", // Adres IP drukarki
+    interface: "tcp://193.192.177.167", // Adres IP drukarki
     characterSet: PC852_LATIN2,
     width: 57
   });
