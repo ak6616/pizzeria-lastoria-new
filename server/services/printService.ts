@@ -1,8 +1,8 @@
-import { printer, types } from 'node-thermal-printer';
+import net from 'net';
 import { format } from 'date-fns';
 import { pl } from 'date-fns/locale';
 import type { CustomerData } from '../../src/components/CustomerDataForm.tsx';
-import {htmltotext} from "html-to-text";
+import {htmlToText} from "html-to-text";
 
 interface OrderItem {
   name: string;
@@ -24,38 +24,35 @@ interface PrintOrderData {
 
 export async function printOrder(data: PrintOrderData) {
 
-  // Konfiguracja drukarki
-  const myPrinter = new printer({
-    type: types.ZPL, // Używamy protokołu ZPL
-    interface: "tcp://193.192.177.167", // Adres IP drukarki
-    characterSet: PC852_LATIN2,
-    width: 57
-  });
+  const printerIP = '193.192.177.167';
+  const printerPort = 9100; // Typowy port dla drukarek sieciowych
 
-const currentDate = format(new Date(), 'dd.MM.yyyy HH:mm', { locale: pl });
+  const currentDate = format(new Date(), 'dd.MM.yyyy HH:mm', { locale: pl });
 
-async function printFromHTML(htmlContent) {
-  try {
-    // Konwersja HTML na tekst
-    const textContent = htmltotext.convert(htmlContent, {
-      wordwrap: 130, // Opcjonalne łamanie linii
-    });
+  async function printFromHTML(htmlContent: string) {
+    try {
+      const textContent = htmlToText(htmlContent, {
+        wordwrap: 130,
+      });
 
-    // Inicjalizacja drukarki
-    myPrinter.alignCenter(); // Wyśrodkowanie tekstu
-    myPrinter.println(textContent); // Wstawienie treści HTML jako tekstu
-    myPrinter.alignCenter();
-    myPrinter.cut(); // Cięcie papieru
+      const client = new net.Socket();
+      client.connect(printerPort, printerIP, () => {
+        console.log('Połączono z drukarką');
+        client.write(textContent);
+        client.end();
+      });
 
-    // Wykonanie polecenia drukowania
-    let execute = await myPrinter.execute();
-    console.log("Drukowanie zakończone:", execute);
-  } 
-  catch (error) {
-    console.error("Błąd podczas drukowania:", error);
+      client.on('close', () => {
+        console.log('Połączenie z drukarką zamknięte');
+      });
+
+      client.on('error', (err) => {
+        console.error('Błąd połączenia z drukarką:', err);
+      });
+    } catch (error) {
+      console.error('Błąd podczas drukowania:', error);
+    }
   }
-}
-
 // Przykładowy kod HTML do drukowania
 const html = `
     <!DOCTYPE html>

@@ -42,9 +42,9 @@ app.options('*', cors());
 
 const pool = mysql.createPool({
   host: process.env.DB_HOST || 'sql7.freesqldatabase.com',
-  user: process.env.DB_USER || 'sql7748578',
-  password: process.env.DB_PASSWORD || 'taIVSCuIAz',
-  database: process.env.DB_NAME || 'sql7748578',
+  user: process.env.DB_USER || 'sql7758735',
+  password: process.env.DB_PASSWORD || 'LtiXeZFM2P',
+  database: process.env.DB_NAME || 'sql7758735',
   port: parseInt(process.env.DB_PORT || '3306'),
   waitForConnections: true,
   connectionLimit: 5,
