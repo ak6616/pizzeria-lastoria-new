@@ -41,10 +41,10 @@ app.use(session({
 app.options('*', cors());
 
 const pool = mysql.createPool({
-  host: process.env.DB_HOST || 'sql7.freesqldatabase.com',
-  user: process.env.DB_USER || 'sql7758735',
-  password: process.env.DB_PASSWORD || 'LtiXeZFM2P',
-  database: process.env.DB_NAME || 'sql7758735',
+  host: process.env.DB_HOST || '89.168.91.157',
+  user: process.env.DB_USER || 'lastoria',
+  password: process.env.DB_PASSWORD || 'bjdp6tx-27',
+  database: process.env.DB_NAME || 'pizzeria',
   port: parseInt(process.env.DB_PORT || '3306'),
   waitForConnections: true,
   connectionLimit: 5,
