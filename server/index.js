@@ -59,10 +59,10 @@ const DEBUG = true; // łatwe włączanie/wyłączanie logowania
 app.use((req, res, next) => {
   if (DEBUG) {
     console.log(`${new Date().toISOString()} ${req.method} ${req.url}`);
-    console.log('Headers:', req.headers);
-    if (req.body && Object.keys(req.body).length > 0) {
-      console.log('Body:', req.body);
-    }
+    // console.log('Headers:', req.headers);
+    // if (req.body && Object.keys(req.body).length > 0) {
+    //   console.log('Body:', req.body);
+    // }
   }
   next();
 });
