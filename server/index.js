@@ -6,6 +6,7 @@ import mysql from 'mysql2/promise';
 import session from 'express-session';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { printToReceiptPrinter } from './printer.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -633,6 +634,7 @@ app.delete('/api/orders/:id', async (req, res) => {
 app.post('/api/orders/:location', async (req, res) => {
   const connection = await getConnection();
   const { location } = req.params;
+  const suffix = location === 'haczow' ? '_hacz' : '_mp';
   
   try {
     const orderData = req.body;
@@ -650,6 +652,7 @@ app.post('/api/orders/:location', async (req, res) => {
       orderData.totalPrice
     ];
 
+    // Zapisz zamówienie do bazy danych
     const [result] = await connection.execute(
       `INSERT INTO zamowienia${location} (
         imie, 
@@ -666,6 +669,28 @@ app.post('/api/orders/:location', async (req, res) => {
       ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       orderValues
     );
+
+    // Przygotuj dane do wydruku
+    const printData = {
+      imie: orderData.firstName,
+      nazwisko: orderData.lastName,
+      miejscowosc: orderData.city,
+      ulica: orderData.street,
+      numerDomu: orderData.houseNumber,
+      numerMieszkania: orderData.apartmentNumber,
+      numerTelefonu: orderData.phone,
+      zamowienieNaGodzine: orderData.deliveryTime,
+      zamowioneProdukty: JSON.stringify(orderData.items),
+      suma: orderData.totalPrice
+    };
+
+    // Wyślij zamówienie do drukarki
+    try {
+      await printToReceiptPrinter(printData);
+    } catch (printError) {
+      console.error('Błąd drukowania:', printError);
+      // Nie przerywamy wykonania - zamówienie zostało zapisane w bazie
+    }
 
     res.json(result);
   } catch (error) {
