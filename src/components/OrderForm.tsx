@@ -232,17 +232,13 @@ export default function OrderForm({ deliveryAreas, location }: OrderFormProps) {
   }
 
   const handleCityChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const selectedCity = e.target.value;
-    // Szukamy dokładnego dopasowania nazwy miasta i ulicy
-    const selectedArea = deliveryAreas.find(area => 
-      area.nazwa === selectedCity.split('|')[0] && 
-      (!area.ulica || area.ulica === selectedCity.split('|')[1])
-    );
+    const selectedValue = e.target.value;
+    const [selectedCity, selectedStreet] = selectedValue.split('|');
     
     setCustomerData(prev => ({
       ...prev,
-      city: selectedCity.split('|')[0],
-      street: selectedArea?.ulica || ''  // Ustawiamy ulicę tylko jeśli jest przypisana do wybranej miejscowości
+      city: selectedCity,
+      street: selectedStreet || ''  // Ustawiamy ulicę tylko jeśli jest przypisana do wybranej miejscowości
     }));
   };
 
@@ -345,7 +341,7 @@ export default function OrderForm({ deliveryAreas, location }: OrderFormProps) {
                 <select
                   name="city"
                   required
-                  value={customerData.city || ''}
+                  value={`${customerData.city}${customerData.street ? `|${customerData.street}` : ''}`}
                   onChange={handleCityChange}
                   className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-yellow-500 focus:ring-yellow-500"
                 >
