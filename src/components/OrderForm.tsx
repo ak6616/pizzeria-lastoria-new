@@ -189,10 +189,13 @@ export default function OrderForm({ deliveryAreas, location }: OrderFormProps) {
         setOrderLimitReached(true);
       } else {
         resetForm();
+        setCustomerData(initialCustomerData);
+        setRodoAccepted(false);
+        setEditingItemId(null);
       }
     } catch (err) {
       console.error('Error checking order limit:', err);
-      resetForm(); // W razie błędu pozwalamy na reset formularza
+      resetForm();
     }
   };
 
@@ -345,10 +348,10 @@ export default function OrderForm({ deliveryAreas, location }: OrderFormProps) {
                   onChange={handleCityChange}
                   className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-yellow-500 focus:ring-yellow-500"
                 >
-                  <option value="">Wybierz miejscowość</option>
+                  <option key="default" value="">Wybierz miejscowość</option>
                   {deliveryAreas.map((area) => (
                     <option 
-                      key={area.id} 
+                      key={`${area.id}_${area.nazwa}_${area.ulica || ''}`}
                       value={`${area.nazwa}${area.ulica ? `|${area.ulica}` : ''}`}
                     >
                       {area.nazwa}{area.ulica ? ` (ul. ${area.ulica})` : ''}
