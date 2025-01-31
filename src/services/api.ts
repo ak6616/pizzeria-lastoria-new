@@ -4,6 +4,8 @@ const API_BASE_URL = import.meta.env.PROD
 
 // type LocationSuffix = '_mp' | '_hacz';
 
+
+
 const getLocationSuffix = (location: string): string => {
   switch (location) {
     case 'miejsce-piastowe':

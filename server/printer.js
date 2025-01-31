@@ -1,5 +1,5 @@
 import { ThermalPrinter, PrinterTypes, CharacterSet} from 'node-thermal-printer';
-
+const electron = typeof process !== 'undefined' && process.versions && !!process.versions.electron;
 
 function formatDate(date) {
   return date.toLocaleString('pl-PL');
@@ -9,7 +9,9 @@ function formatDate(date) {
 const PRINTER_IP = '77.65.194.148';
 // const PRINTER_IP = '192.168.100.200';
 
-const PRINTER_PORT = 9100;
+// const PRINTER_PORT = 9100;
+const PRINTER_PORT = 515;
+
 
 export async function printToReceiptPrinter(orderData) {
   console.log('=== Rozpoczęcie drukowania zamówienia ===');
@@ -17,13 +19,14 @@ export async function printToReceiptPrinter(orderData) {
   
   try {
     let printer = new ThermalPrinter({
-      type: PrinterTypes.STAR,
+      type: PrinterTypes.EPSON,
       interface: `tcp://${PRINTER_IP}:${PRINTER_PORT}`,
       characterSet: CharacterSet.PC852_LATIN2,
       options: {
         timeout: 5000
       },
-      width: 42,
+      // driver: require(electron ? 'electron-printer' : 'printer'),
+      width: 50,
       removeSpecialCharacters: false,
       lineCharacter: "-",
     });
@@ -39,10 +42,9 @@ export async function printToReceiptPrinter(orderData) {
       throw new Error('Nie można połączyć się z drukarką');
     }
     // Nagłówek
-    // printer.setCharacterSet('PC852_LATIN2');
     printer.alignCenter();
     printer.bold(true);
-    printer.setTextSize(1, 1);
+    // printer.setTextSize(1, 1);
     printer.println('Pizzeria Lastoria');
     printer.bold(false);
     printer.setTextNormal();
@@ -86,11 +88,11 @@ export async function printToReceiptPrinter(orderData) {
     printer.println('Dziękujemy za zamówienie!');
     printer.println('\n\n\n');
     printer.cut();
-    printer.println("\x0C"); // Dodanie znaku końca
 
 
     console.log('Wysyłanie zamówienia do drukarki...');
     await printer.execute();
+    printer.println("\x0C"); // Dodanie znaku końca
     console.log('Drukowanie zamówienia zakończone');
 
     return { success: true };
