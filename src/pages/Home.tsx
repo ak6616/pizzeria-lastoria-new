@@ -1,6 +1,6 @@
 import { motion, useAnimationControls } from 'framer-motion';
 import { useEffect } from 'react';
-import { useGallery } from '../hooks/useGallery';
+import { useGallery } from '../../server/hooks/useGallery';
 
 const locations = [
   {

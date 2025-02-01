@@ -1,5 +1,5 @@
 
-import { useNews } from '../hooks/useNews';
+import { useNews } from '../../server/hooks/useNews';
 import { format } from 'date-fns';
 import { pl } from 'date-fns/locale';
 import { motion } from 'framer-motion';

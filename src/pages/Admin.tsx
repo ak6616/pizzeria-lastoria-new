@@ -1,11 +1,11 @@
 import { useState } from 'react';
-import OrdersManagement from '../components/admin/OrdersManagement';
-import MenuManagement from '../components/admin/MenuManagement';
-import DeliveryManagement from '../components/admin/DeliveryManagement';
-import NewsManagement from '../components/admin/NewsManagement';
-import GalleryManagement from '../components/admin/GalleryManagement';
-import LoginForm from '../components/admin/LoginForm';
-import { useAuth } from '../hooks/useAuth';
+import OrdersManagement from '../../server/components/admin/OrdersManagement';
+import MenuManagement from '../../server/components/admin/MenuManagement';
+import DeliveryManagement from '../../server/components/admin/DeliveryManagement';
+import NewsManagement from '../../server/components/admin/NewsManagement';
+import GalleryManagement from '../../server/components/admin/GalleryManagement';
+import LoginForm from '../../server/components/admin/LoginForm';
+import { useAuth } from '../../server/hooks/useAuth';
 
 export default function AdminPanel() {
   const [selectedLocation, setSelectedLocation] = useState<string>('');

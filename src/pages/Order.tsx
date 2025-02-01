@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
-import OrderForm from '../components/OrderForm';
-import { getDeliveryAreas } from '../services/api';
+import OrderForm from '../../server/components/OrderForm';
+import { getDeliveryAreas } from '../../server/services/api';
 import { MapPin, Home } from 'lucide-react';
 import { format } from 'date-fns';
 import { pl } from 'date-fns/locale';
