@@ -237,6 +237,10 @@ export function useOrderForm(
   };
 
   const resetForm = () => {
+    setSelectedItems({});
+    setCustomizations([]);
+    setIsSubmitting(false);
+    setError(null);
     setSuccess(false);
   };
 

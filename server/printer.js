@@ -1,91 +1,104 @@
-import net from 'net';
+import { ThermalPrinter, PrinterTypes, CharacterSet} from 'node-thermal-printer';
+const electron = typeof process !== 'undefined' && process.versions && !!process.versions.electron;
+
+function formatDate(date) {
+  return date.toLocaleString('pl-PL');
+}
+
+// Stałe konfiguracyjne
+const PRINTER_IP = '77.65.194.148';
+// const PRINTER_IP = '192.168.100.200';
+
+// const PRINTER_PORT = 9100;
+const PRINTER_PORT = 515;
+
 
 export async function printToReceiptPrinter(orderData) {
-  return new Promise((resolve, reject) => {
-    const client = new net.Socket();
-    const PRINTER_IP = '192.168.100.200';
-    const PRINTER_PORT = 9100; // Standardowy port dla drukarek sieciowych
-    const TIMEOUT = 5000; // 5 sekund timeout
+  console.log('=== Rozpoczęcie drukowania zamówienia ===');
+  console.log('Konfiguracja drukarki:', { PRINTER_IP, PRINTER_PORT });
+  
+  try {
+    let printer = new ThermalPrinter({
+      type: PrinterTypes.EPSON,
+      interface: `tcp://${PRINTER_IP}:${PRINTER_PORT}`,
+      characterSet: CharacterSet.PC852_LATIN2,
+      options: {
+        timeout: 5000
+      },
+      // driver: require(electron ? 'electron-printer' : 'printer'),
+      width: 50,
+      removeSpecialCharacters: false,
+      lineCharacter: "-",
+    });
+    // new webpack.IgnorePlugin({
+    //   resourceRegExp: /^fs$|^net$/,
+    // }),
 
-    // Dodajemy timeout
-    const timeout = setTimeout(() => {
-      client.destroy();
-      reject(new Error('Timeout podczas połączenia z drukarką'));
-    }, TIMEOUT);
+    console.log('Sprawdzanie połączenia z drukarką...');
+    const isConnected = await printer.isPrinterConnected();
+    console.log('Status połączenia:', isConnected);
 
-    client.connect(PRINTER_PORT, PRINTER_IP, () => {
-      clearTimeout(timeout); // Czyścimy timeout po udanym połączeniu
-      try {
-        // Formatowanie tekstu do wydruku
-        const printContent = formatOrderForPrinting(orderData);
-        
-        // Wysyłanie danych do drukarki
-        client.write(printContent, 'utf8', () => {
-          client.end();
-          resolve();
-        });
-      } catch (error) {
-        client.destroy();
-        reject(error);
+    if (!isConnected) {
+      throw new Error('Nie można połączyć się z drukarką');
+    }
+    // Nagłówek
+    printer.alignCenter();
+    printer.bold(true);
+    // printer.setTextSize(1, 1);
+    printer.println('Pizzeria Lastoria');
+    printer.bold(false);
+    printer.setTextNormal();
+    printer.println(`Data: ${formatDate(new Date())}`);
+    printer.drawLine();
+
+    // Dane klienta
+    printer.alignLeft();
+    printer.println(`Klient: ${orderData.imie} ${orderData.nazwisko}`);
+    printer.println(`Tel: ${orderData.numerTelefonu}`);
+    printer.println(`Adres: ${orderData.miejscowosc}${orderData.ulica ? `, ${orderData.ulica}` : ''} ${orderData.numerDomu}${orderData.numerMieszkania ? `/${orderData.numerMieszkania}` : ''}`);
+    printer.drawLine();
+
+    // Zamówione produkty
+    printer.bold(true);
+    printer.println('ZAMÓWIENIE:');
+    printer.bold(false);
+    
+    const items = JSON.parse(orderData.zamowioneProdukty);
+    items.forEach(item => {
+      printer.println(`${item.name} x${item.quantity}`);
+      if (item.removedIngredients?.length) {
+        printer.println(`  BEZ: ${item.removedIngredients.join(', ')}`);
+      }
+      if (item.addedIngredients?.length) {
+        printer.println(`  DODATKI: ${item.addedIngredients.map(i => i.name).join(', ')}`);
       }
     });
 
-    client.on('error', (error) => {
-      clearTimeout(timeout);
-      client.destroy();
-      reject(new Error(`Błąd połączenia z drukarką: ${error.message}`));
-    });
+    printer.drawLine();
 
-    client.on('close', () => {
-      clearTimeout(timeout);
-    });
-  });
-}
+    // Suma
+    printer.bold(true);
+    printer.alignRight();
+    printer.println(`SUMA: ${orderData.suma} zł`);
+    printer.bold(false);
 
-function formatOrderForPrinting(orderData) {
-  const date = new Date().toLocaleString('pl-PL');
-  const items = JSON.parse(orderData.zamowioneProdukty);
-  
-  let printText = '\x1B\x40'; // Initialize printer
-  printText += '\x1B\x61\x01'; // Center alignment
-  
-  // Nagłówek
-  printText += 'Pizzeria Lastoria\n';
-  printText += `Data: ${date}\n\n`;
-  
-  // Dane klienta
-  printText += '\x1B\x61\x00'; // Left alignment
-  printText += `Klient: ${orderData.imie} ${orderData.nazwisko}\n`;
-  printText += `Tel: ${orderData.numerTelefonu}\n`;
-  printText += `Adres: ${orderData.miejscowosc}`;
-  if (orderData.ulica) printText += `, ${orderData.ulica}`;
-  printText += ` ${orderData.numerDomu}`;
-  if (orderData.numerMieszkania) printText += `/${orderData.numerMieszkania}`;
-  printText += '\n\n';
-  
-  // Zamówione produkty
-  printText += 'ZAMÓWIENIE:\n';
-  printText += '--------------------------------\n';
-  items.forEach(item => {
-    printText += `${item.name} x${item.quantity}\n`;
-    if (item.removedIngredients?.length) {
-      printText += `  Bez: ${item.removedIngredients.join(', ')}\n`;
-    }
-    if (item.addedIngredients?.length) {
-      printText += `  Dodatki: ${item.addedIngredients.map(i => i.name).join(', ')}\n`;
-    }
-  });
-  printText += '--------------------------------\n';
-  
-  // Suma
-  printText += `\x1B\x61\x02`; // Right alignment
-  printText += `SUMA: ${orderData.suma} zł\n`;
-  
-  // Zakończenie
-  printText += '\x1B\x61\x01'; // Center alignment
-  printText += '\nDziękujemy za zamówienie!\n';
-  printText += '\x1B\x64\x05'; // 5 line feeds
-  printText += '\x1D\x56\x41'; // Cut paper
-  
-  return printText;
+    // Zakończenie
+    printer.alignCenter();
+    printer.println('\n');
+    printer.println('Dziękujemy za zamówienie!');
+    printer.println('\n\n\n');
+    printer.cut();
+
+
+    console.log('Wysyłanie zamówienia do drukarki...');
+    await printer.execute();
+    printer.println("\x0C"); // Dodanie znaku końca
+    console.log('Drukowanie zamówienia zakończone');
+
+    return { success: true };
+  } catch (error) {
+    console.error('Błąd podczas drukowania:', error);
+    console.error('Stack trace:', error.stack);
+    throw error;
+  }
 } 

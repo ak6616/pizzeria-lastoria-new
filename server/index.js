@@ -638,6 +638,11 @@ app.post('/api/orders/:location', async (req, res) => {
   
   try {
     const orderData = req.body;
+    console.log('=== Nowe zamówienie otrzymane ===');
+    console.log('Lokalizacja:', location);
+    console.log('Dane zamówienia:', JSON.stringify(orderData, null, 2));
+
+    // Zapisz zamówienie do bazy danych
     const orderValues = [
       orderData.firstName,
       orderData.lastName,
@@ -652,53 +657,49 @@ app.post('/api/orders/:location', async (req, res) => {
       orderData.totalPrice
     ];
 
-    // Zapisz zamówienie do bazy danych
+    // Najpierw zapisz do bazy
     const [result] = await connection.execute(
-      `INSERT INTO zamowienia${location} (
-        imie, 
-        nazwisko, 
-        miejscowosc, 
-        ulica, 
-        numerDomu, 
-        numerMieszkania, 
-        numerTelefonu, 
-        zamowienieNaGodzine, 
-        dataGodzinaZamowienia,
-        zamowioneProdukty, 
-        suma
+      `INSERT INTO zamowienia${suffix} (
+        imie, nazwisko, miejscowosc, ulica, numerDomu, numerMieszkania, 
+        numerTelefonu, zamowienieNaGodzine, dataGodzinaZamowienia,
+        zamowioneProdukty, suma
       ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       orderValues
     );
 
-    // Przygotuj dane do wydruku
-    const printData = {
-      imie: orderData.firstName,
-      nazwisko: orderData.lastName,
-      miejscowosc: orderData.city,
-      ulica: orderData.street,
-      numerDomu: orderData.houseNumber,
-      numerMieszkania: orderData.apartmentNumber,
-      numerTelefonu: orderData.phone,
-      zamowienieNaGodzine: orderData.deliveryTime,
-      zamowioneProdukty: JSON.stringify(orderData.items),
-      suma: orderData.totalPrice
-    };
+    // Jeśli zapis do bazy się powiódł, drukuj zamówienie
+    if (result.insertId) {
+      console.log('Zamówienie zapisane w bazie, ID:', result.insertId);
+      
+      // Przygotuj dane do wydruku
+      const printData = {
+        imie: orderData.firstName,
+        nazwisko: orderData.lastName,
+        miejscowosc: orderData.city,
+        ulica: orderData.street,
+        numerDomu: orderData.houseNumber,
+        numerMieszkania: orderData.apartmentNumber,
+        numerTelefonu: orderData.phone,
+        zamowienieNaGodzine: orderData.deliveryTime,
+        zamowioneProdukty: JSON.stringify(orderData.items),
+        suma: orderData.totalPrice
+      };
 
-    // Wyślij zamówienie do drukarki
-    try {
-      await printToReceiptPrinter(printData);
-    } catch (printError) {
-      console.error('Błąd drukowania:', printError);
-      // Nie przerywamy wykonania - zamówienie zostało zapisane w bazie
+      try {
+        console.log('Rozpoczynam proces drukowania...');
+        console.log('Dane do wydruku:', JSON.stringify(printData, null, 2));
+        const printResult = await printToReceiptPrinter(printData);
+        console.log('Wynik drukowania:', printResult);
+      } catch (printError) {
+        console.error('Błąd podczas drukowania:', printError);
+        console.error('Stack trace:', printError.stack);
+      }
     }
 
-    res.json(result);
+    res.json({ success: true, orderId: result.insertId });
   } catch (error) {
-    console.error('Error submitting order:', error);
-    res.status(500).json({ 
-      error: 'Internal server error',
-      details: error.message 
-    });
+    console.error('Błąd przetwarzania zamówienia:', error);
+    res.status(500).json({ error: 'Internal server error', details: error.message });
   } finally {
     await connection.release();
   }
