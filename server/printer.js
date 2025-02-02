@@ -15,12 +15,13 @@ const OUTPUT_FILE = path.join(__dirname, 'order_receipt.txt');
 const sftp = new SftpClient();
 
 const komputerDocelowy = {
-  host: '192.168.0.102',
+  host: '77.65.194.148',
   port: 22, // Port SSH
-  username: 'admin',
+  username: 'Madzialena', // Nazwa użytkownika
   password: 'bjdp6tx-27', // Możesz użyć klucza SSH
   readyTimeout: 30000
 };
+await sftp.connect(komputerDocelowy);
 
 export async function printToReceiptPrinter(orderData) {
 
@@ -29,22 +30,18 @@ export async function printToReceiptPrinter(orderData) {
   console.log('=== Rozpoczęcie zapisywania zamówienia ===');
   
   try {
+    
     let receipt = '';
-
     // Header
-    receipt += 'Pizzeria Lastoria\n';
     receipt += `Data: ${formatDate(new Date())}\n`;
     receipt += '------------------------------\n';
-
     // Customer data
     receipt += `Klient: ${orderData.imie} ${orderData.nazwisko}\n`;
     receipt += `Tel: ${orderData.numerTelefonu}\n`;
     receipt += `Adres: ${orderData.miejscowosc}${orderData.ulica ? `, ${orderData.ulica}` : ''} ${orderData.numerDomu}${orderData.numerMieszkania ? `/${orderData.numerMieszkania}` : ''}\n`;
     receipt += '------------------------------\n';
-
     // Ordered products
     receipt += 'ZAMÓWIENIE:\n';
-    
     const items = JSON.parse(orderData.zamowioneProdukty);
     items.forEach(item => {
       receipt += `${item.name} x${item.quantity}\n`;
@@ -55,29 +52,32 @@ export async function printToReceiptPrinter(orderData) {
         receipt += `  DODATKI: ${item.addedIngredients.map(i => i.name).join(', ')}`;
       }
     });
-
     receipt += '------------------------------\n';
-
     // Total
     receipt += `SUMA: ${orderData.suma} zł\n`;
-
     // Footer
-    receipt += 'Dziękujemy za zamówienie!';
 
     console.log('Zapisywanie zamówienia do pliku...');
     fs.writeFileSync(OUTPUT_FILE, receipt);
     console.log('Zamówienie zapisane do pliku:', OUTPUT_FILE);
-    await sftp.connect(komputerDocelowy);
+    
+    try {
+      await sftp.put('../pizzeria-lastoria-new/server/order_receipt.txt', 'C:/Drukowanie/plik.txt');
+      console.log('Plik przesłany pomyślnie');
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      
+  } catch (err) {
+      // if (err.code === 'ECONNRESET') {
+      //     console.error('Błąd ECONNRESET - ignoruję i kontynuuję działanie');
+      // } else {
+          console.error('Inny błąd:', err);
+      // }
+  } 
 
-    await sftp.put('../pizzeria-lastoria-new/server/order_receipt.txt', 'C:/Drukowanie/plik.txt');
-    sftp.end();
-    console.log('Plik wysłany pomyślnie!');
 
-    return { success: true };
   } catch (error) {
-    console.error('Błąd połączenia SFTP:', err);
     console.error('Błąd podczas zapisywania zamówienia:', error);
     console.error('Stack trace:', error.stack);
     throw error;
-  } 
+  }
 }

@@ -14,6 +14,23 @@ const __dirname = path.dirname(__filename);
 const app = express();
 const port = process.env.PORT || 3000;
 
+// process.on('uncaughtException', (err) => {
+//   if (err.code === 'ECONNRESET') {
+//       console.error('Błąd ECONNRESET - ignoruję i kontynuuję działanie');
+//   } else {
+//       console.error('Nieobsłużony błąd:', err);
+//   }
+// });
+
+// process.on('unhandledRejection', (reason, promise) => {
+//   if (reason.code === 'ECONNRESET') {
+//       console.error('Błąd ECONNRESET w obietnicy - ignoruję');
+//   } else {
+//       console.error('Nieobsłużona odrzucona obietnica:', reason);
+//   }
+// });
+
+
 // Serwuj pliki statyczne z folderu dist
 app.use(express.static(path.join(__dirname, '../dist')));
 
