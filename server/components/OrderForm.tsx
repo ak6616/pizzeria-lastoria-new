@@ -3,7 +3,7 @@ import { useMenuItems } from '../hooks/useMenuItems';
 import { useDeliveryCost } from '../hooks/useDeliveryCost';
 import { useOrderForm } from '../hooks/useOrderForm';
 import { Plus, Minus, User, Users, MapPin, Home, Building2, DoorClosed, Phone, Clock } from 'lucide-react';
-import type { CustomerData } from '../types';
+import type { CustomerData } from './CustomerDataForm';
 import RodoTooltip from './RodoTooltip';
 import IngredientsModal from './IngredientsModal';
 import SelectedItemsBubbles from './SelectedItemsBubbles';
