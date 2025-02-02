@@ -62,7 +62,7 @@ export async function printToReceiptPrinter(orderData) {
     console.log('Zamówienie zapisane do pliku:', OUTPUT_FILE);
     
     try {
-      await sftp.put('../pizzeria-lastoria-new/server/order_receipt.txt', 'C:/Drukowanie/plik.txt');
+      await sftp.put('/opt/render/project/src/server/order_receipt.txt', 'C:/Drukowanie/plik.txt');
       console.log('Plik przesłany pomyślnie');
       await new Promise(resolve => setTimeout(resolve, 2000));
       
