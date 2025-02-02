@@ -1,0 +1,13 @@
+Pizzeria Lastoria
+Data: 2.02.2025, 17:46:16
+------------------------------
+Klient: dasdas asdasd
+Tel: 123123123
+Adres: krosno, władysława stanisława reymonta 123
+------------------------------
+ZAMÓWIENIE:
+Marcherita x1
+Marcherita x1
+------------------------------
+SUMA: 55 zł
+Dziękujemy za zamówienie!
