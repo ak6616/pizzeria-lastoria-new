@@ -7,6 +7,7 @@ import session from 'express-session';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { printToReceiptPrinter } from './printer.js';
+import { initializePayment } from './services/tpay.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -821,6 +822,58 @@ app.get('/api/orders/:location/count', async (req, res) => {
     res.status(500).json({ error: 'Internal server error' });
   } finally {
     await connection.release();
+  }
+});
+
+// Endpoint dla sukcesu płatności
+app.get('/payment/success', async (req, res) => {
+  const { tr_id, tr_amount, tr_crc } = req.query;
+
+  try {
+    const tpay = new TPay({
+      merchantId: 'YOUR_MERCHANT_ID',
+      merchantSecret: 'YOUR_MERCHANT_SECRET',
+      sandbox: false
+    });
+
+    // Weryfikacja statusu transakcji
+    const verification = await tpay.verifyTransaction(tr_id);
+
+    if (verification.result) {
+      // Aktualizacja statusu zamówienia w bazie danych
+      const connection = await getConnection();
+      try {
+        await connection.execute(
+          'UPDATE zamowienia SET status_platnosci = ? WHERE id = ?',
+          ['paid', tr_crc]
+        );
+      } finally {
+        await connection.release();
+      }
+
+      // Przekierowanie do strony potwierdzenia
+      res.redirect('/order-confirmation');
+    } else {
+      res.redirect('/payment/error');
+    }
+  } catch (error) {
+    console.error('Błąd weryfikacji płatności:', error);
+    res.redirect('/payment/error');
+  }
+});
+
+// Endpoint dla błędu płatności
+app.get('/payment/error', (req, res) => {
+  res.redirect('/payment-failed');
+});
+
+app.post('/api/payment/init', async (req, res) => {
+  try {
+    const transaction = await initializePayment(req.body);
+    res.json(transaction);
+  } catch (error) {
+    console.error('Błąd inicjalizacji płatności:', error);
+    res.status(500).json({ error: 'Błąd inicjalizacji płatności' });
   }
 });
 
