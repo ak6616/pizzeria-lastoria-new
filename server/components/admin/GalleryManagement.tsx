@@ -1,4 +1,6 @@
 import { useState } from 'react';
+import React from 'react';
+
 import { Trash2, Plus } from 'lucide-react';
 import { useGallery } from '../../hooks/useGallery';
 import AddGalleryItemModal from './AddGalleryItemModal';

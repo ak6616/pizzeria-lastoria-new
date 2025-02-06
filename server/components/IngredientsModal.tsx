@@ -1,4 +1,6 @@
 import { X } from 'lucide-react';
+import React from 'react';
+
 
 interface IngredientsModalProps {
   item: {
