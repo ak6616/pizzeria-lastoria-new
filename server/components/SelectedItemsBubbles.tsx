@@ -1,6 +1,4 @@
 import SelectedItemBubble from './SelectedItemBubble';
-import React from 'react';
-
 
 interface SelectedItemsBubblesProps {
   items: Array<{

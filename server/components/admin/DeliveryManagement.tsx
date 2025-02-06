@@ -1,5 +1,3 @@
-
-import React from 'react';
 import { useState } from 'react';
 import { Edit2, Trash2, Plus } from 'lucide-react';
 import { useDeliveryRules } from '../../hooks/useDeliveryRules';
@@ -37,7 +35,7 @@ export default function DeliveryManagement({ location }: DeliveryManagementProps
         await deleteDeliveryRule(category, id);
         await refetch();
       } catch (err) {
-        console.error('Error deleting delivery rule:', err);
+        console.error('Error deleting menu item:', err);
         alert('Wystąpił błąd podczas usuwania pozycji');
       }
     }

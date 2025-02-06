@@ -1,8 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { ChevronDown, Menu, X } from 'lucide-react';
-import React from 'react';
-
 
 const locations = [
   { name: 'Haczów', href: '/menu/haczow' },
