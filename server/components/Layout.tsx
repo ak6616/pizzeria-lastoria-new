@@ -1,5 +1,7 @@
 import { Outlet } from 'react-router-dom';
 import Navbar from './Navbar';
+import React from 'react';
+
 import { Pizza, Beef, Coffee } from 'lucide-react';
 
 const BackgroundIcons = () => {

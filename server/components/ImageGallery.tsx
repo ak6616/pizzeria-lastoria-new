@@ -1,4 +1,6 @@
 import { useState } from 'react';
+import React from 'react';
+
 import { X, ChevronLeft, ChevronRight } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useGallery } from '../hooks/useGallery';
