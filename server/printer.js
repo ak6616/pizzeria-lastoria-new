@@ -1,6 +1,6 @@
 import path from 'path';
 import { fileURLToPath } from 'url';
-import SftpClient from 'ssh2-sftp-client';
+
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -12,16 +12,9 @@ function formatDate(date) {
 
 // Stałe konfiguracyjne
 const OUTPUT_FILE = path.join(__dirname, 'order_receipt.txt');
-const sftp = new SftpClient();
 
-const komputerDocelowy = {
-  host: '77.65.194.148',
-  port: 22, // Port SSH
-  username: 'Madzialena', // Nazwa użytkownika
-  password: 'bjdp6tx-27', // Możesz użyć klucza SSH
-  readyTimeout: 30000
-};
-await sftp.connect(komputerDocelowy);
+
+
 
 export async function printToReceiptPrinter(orderData) {
 
@@ -60,19 +53,6 @@ export async function printToReceiptPrinter(orderData) {
     console.log('Zapisywanie zamówienia do pliku...');
     fs.writeFileSync(OUTPUT_FILE, receipt);
     console.log('Zamówienie zapisane do pliku:', OUTPUT_FILE);
-    
-    try {
-      await sftp.put('/opt/render/project/src/server/order_receipt.txt', 'C:/Drukowanie/plik.txt');
-      console.log('Plik przesłany pomyślnie');
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
-  } catch (err) {
-      // if (err.code === 'ECONNRESET') {
-      //     console.error('Błąd ECONNRESET - ignoruję i kontynuuję działanie');
-      // } else {
-          console.error('Inny błąd:', err);
-      // }
-  } 
 
 
   } catch (error) {

@@ -14,6 +14,20 @@ interface OrderFormProps {
   location: string;
 }
 
+interface PaymentOrderData {
+  firstName: string;
+  lastName: string;
+  city: string;
+  street?: string;
+  houseNumber: string;
+  apartmentNumber?: string;
+  phone: string;
+  deliveryTime?: string;
+  items: Record<string, number>;
+  totalPrice: number;
+  email?: string;
+}
+
 // Dodaj funkcję sprawdzającą dostępność dostawy na konkretną godzinę
 const isDeliveryTimeAvailable = (time: string, location: string): { available: boolean; message?: string } => {
   if (!time) return { available: true };
@@ -124,7 +138,38 @@ export default function OrderForm({ deliveryAreas, location }: OrderFormProps) {
     checkOrderLimit();
   }, [location]);
 
-  const handleFormSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handlePayment = async (orderData: PaymentOrderData) => {
+    try {
+      const paymentData = {
+        amount: orderData.totalPrice,
+        description: `Zamówienie - Pizzeria Lastoria ${location}`,
+        crc: `${Date.now()}`,
+        email: orderData.email || 'klient@example.com',
+        name: `${orderData.firstName} ${orderData.lastName}`,
+        address: `${orderData.city} ${orderData.street || ''} ${orderData.houseNumber}`,
+        phone: orderData.phone
+      };
+
+      const response = await fetch('/api/payment/init', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(paymentData)
+      });
+
+      const transaction = await response.json();
+
+      if (transaction.url) {
+        window.location.href = transaction.url;
+      } else {
+        throw new Error('Nie udało się utworzyć transakcji');
+      }
+    } catch (error) {
+      console.error('Błąd podczas inicjowania płatności:', error);
+      throw error;
+    }
+  };
+
+  const handleFormSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     
     const formData = new FormData(e.currentTarget);
@@ -140,7 +185,41 @@ export default function OrderForm({ deliveryAreas, location }: OrderFormProps) {
       setError('Proszę zaakceptować klauzulę RODO');
       return;
     }
-    handleSubmit(customerData, deliveryCost);
+
+    const orderData: PaymentOrderData = {
+      firstName: customerData.firstName,
+      lastName: customerData.lastName,
+      city: customerData.city,
+      street: customerData.street,
+      houseNumber: customerData.houseNumber,
+      apartmentNumber: customerData.apartmentNumber,
+      phone: customerData.phone,
+      deliveryTime,
+      items: selectedItems,
+      totalPrice: Number(calculateTotal(deliveryCost))
+    };
+
+    // Najpierw inicjujemy płatność
+    await handlePayment(orderData);
+
+    // Jeśli płatność się powiedzie, wysyłamy zamówienie
+    const response = await fetch(`/api/orders/${location}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(orderData)
+    });
+
+    if (!response.ok) {
+      throw new Error('Błąd podczas składania zamówienia');
+    }
+
+    // Czyszczenie formularza i koszyka
+    resetForm();
+    setCustomerData(initialCustomerData);
+    setRodoAccepted(false);
+    setEditingItemId(null);
   };
 
   const handleEditIngredients = (_uniqueId: string, instanceId: string) => {
