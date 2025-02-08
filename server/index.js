@@ -1,5 +1,6 @@
 process.noDeprecation = true;
-
+import dotenv from 'dotenv';
+dotenv.config();
 import express from 'express';
 import cors from 'cors';
 import mysql from 'mysql2/promise';
@@ -14,22 +15,6 @@ const __dirname = path.dirname(__filename);
 
 const app = express();
 const port = process.env.PORT || 3000;
-
-// process.on('uncaughtException', (err) => {
-//   if (err.code === 'ECONNRESET') {
-//       console.error('Błąd ECONNRESET - ignoruję i kontynuuję działanie');
-//   } else {
-//       console.error('Nieobsłużony błąd:', err);
-//   }
-// });
-
-// process.on('unhandledRejection', (reason, promise) => {
-//   if (reason.code === 'ECONNRESET') {
-//       console.error('Błąd ECONNRESET w obietnicy - ignoruję');
-//   } else {
-//       console.error('Nieobsłużona odrzucona obietnica:', reason);
-//   }
-// });
 
 
 // Serwuj pliki statyczne z folderu dist
@@ -60,11 +45,11 @@ app.use(session({
 app.options('*', cors());
 
 const pool = mysql.createPool({
-  host: process.env.DB_HOST || '89.168.91.157',
-  user: process.env.DB_USER || 'lastoria',
-  password: process.env.DB_PASSWORD || 'bjdp6tx-27',
-  database: process.env.DB_NAME || 'pizzeria',
-  port: parseInt(process.env.DB_PORT || '3306'),
+  host: process.env.DB_HOST,
+  user: process.env.DB_USER,
+  password: process.env.DB_PASSWORD,
+  database: process.env.DB_NAME,
+  port: parseInt(process.env.DB_PORT),
   waitForConnections: true,
   connectionLimit: 5,
   queueLimit: 0,
@@ -78,10 +63,10 @@ const DEBUG = true; // łatwe włączanie/wyłączanie logowania
 app.use((req, res, next) => {
   if (DEBUG) {
     console.log(`${new Date().toISOString()} ${req.method} ${req.url}`);
-    // console.log('Headers:', req.headers);
-    // if (req.body && Object.keys(req.body).length > 0) {
-    //   console.log('Body:', req.body);
-    // }
+    console.log('Headers:', req.headers);
+    if (req.body && Object.keys(req.body).length > 0) {
+      console.log('Body:', req.body);
+    }
   }
   next();
 });
