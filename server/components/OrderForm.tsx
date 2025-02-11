@@ -146,7 +146,7 @@ export default function OrderForm({ deliveryAreas, location, orderType }: OrderF
         amount: orderData.totalPrice,
         description: `Zamówienie - Pizzeria Lastoria ${location}`,
         crc: `${Date.now()}`,
-        email: orderData.email || 'klient@example.com',
+        email: orderData.email,
         name: `${orderData.firstName} ${orderData.lastName}`,
         address: `${orderData.city} ${orderData.street || ''} ${orderData.houseNumber}`,
         phone: orderData.phone

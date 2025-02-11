@@ -170,6 +170,7 @@ export async function submitOrder(data: {
   houseNumber: string;
   apartmentNumber?: string;
   phone: string;
+  email: string;
   deliveryTime?: string;
   items: OrderItem[];
   totalPrice: number;
