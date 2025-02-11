@@ -1,6 +1,6 @@
 const API_BASE_URL = import.meta.env.PROD 
-  ? 'https://77.65.194.148:3000/api'
-  : 'http://localhost:3000/api';
+  ? 'http://77.65.194.148:3000/api'
+  : 'http://192.168.100.150:3000/api';
 
 // type LocationSuffix = '_mp' | '_hacz';
 

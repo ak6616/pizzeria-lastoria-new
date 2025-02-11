@@ -14,20 +14,18 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const app = express();
-const port = process.env.PORT || 3000;
+const port = process.env.PORT ;
 
 
 // Serwuj pliki statyczne z folderu dist
 app.use(express.static(path.join(__dirname, '../dist')));
 
 app.use(cors({
-  origin: process.env.NODE_ENV === 'production' 
-    ? ['https://77.65.194.148:5173']
-    : ['http://localhost:5173'],
-  credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization']
+  origin: 'http://77.65.194.148:5173', // Tw�j frontendowy adres
+  methods: 'GET,POST,PUT,DELETE',
+  allowedHeaders: 'Content-Type,Authorization'
 }));
+
 app.use(express.json());
 
 // Dodaj obsługę sesji
