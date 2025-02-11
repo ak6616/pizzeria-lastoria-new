@@ -524,96 +524,96 @@ app.get('/api/delivery-cost:location', async (req, res) => {
   }
 });
 
-// app.post('/api/orders', async (req, res) => {
-//   const connection = await getConnection();
-//   const orderData = req.body;
+app.post('/api/orders', async (req, res) => {
+  const connection = await getConnection();
+  const orderData = req.body;
 
-//   try {
-//     // Upewnij się, że items jest tablicą przed konwersją na JSON
-//     const items = Array.isArray(orderData.items) ? orderData.items : [];
+  try {
+    // Upewnij się, że items jest tablicą przed konwersją na JSON
+    const items = Array.isArray(orderData.items) ? orderData.items : [];
     
-//     // Sanityzacja i walidacja każdego elementu
-//     const sanitizedItems = items.map(item => ({
-//       name: String(item.name || ''),
-//       quantity: Number(item.quantity) || 0,
-//       removedIngredients: Array.isArray(item.removedIngredients) ? item.removedIngredients : [],
-//       addedIngredients: Array.isArray(item.addedIngredients) ? item.addedIngredients : []
-//     }));
+    // Sanityzacja i walidacja każdego elementu
+    const sanitizedItems = items.map(item => ({
+      name: String(item.name || ''),
+      quantity: Number(item.quantity) || 0,
+      removedIngredients: Array.isArray(item.removedIngredients) ? item.removedIngredients : [],
+      addedIngredients: Array.isArray(item.addedIngredients) ? item.addedIngredients : []
+    }));
 
-//     // Konwersja do JSON z dodatkowym sprawdzeniem
-//     const itemsJson = JSON.stringify(sanitizedItems)
-//       .replace(/[\u0000-\u001F\u007F-\u009F]/g, '')
-//       .replace(/\\/g, '\\\\')
-//       .replace(/\n/g, '\\n')
-//       .replace(/\r/g, '\\r')
-//       .replace(/\t/g, '\\t');
+    // Konwersja do JSON z dodatkowym sprawdzeniem
+    const itemsJson = JSON.stringify(sanitizedItems)
+      .replace(/[\u0000-\u001F\u007F-\u009F]/g, '')
+      .replace(/\\/g, '\\\\')
+      .replace(/\n/g, '\\n')
+      .replace(/\r/g, '\\r')
+      .replace(/\t/g, '\\t');
 
-//     // Przygotuj dane z wartościami domyślnymi dla null/undefined
-//     const orderValues = [
-//       orderData.firstName || '',
-//       orderData.lastName || '',
-//       orderData.city || '',
-//       orderData.street || '',
-//       orderData.houseNumber || '',
-//       orderData.apartmentNumber || null, // null jest dozwolony w SQL
-//       orderData.phone || '',
-//       orderData.deliveryTime || null,    // null jest dozwolony w SQL
-//       orderData.orderDateTime || new Date().toISOString(),
-//       itemsJson,
-//       Number(orderData.totalPrice) || 0
-//     ];
+    // Przygotuj dane z wartościami domyślnymi dla null/undefined
+    const orderValues = [
+      orderData.firstName || '',
+      orderData.lastName || '',
+      orderData.city || '',
+      orderData.street || '',
+      orderData.houseNumber || '',
+      orderData.apartmentNumber || null, // null jest dozwolony w SQL
+      orderData.phone || '',
+      orderData.deliveryTime || null,    // null jest dozwolony w SQL
+      orderData.orderDateTime || new Date().toISOString(),
+      itemsJson,
+      Number(orderData.totalPrice) || 0
+    ];
 
-//     // Sprawdź czy nie ma undefined w wartościach
-//     if (orderValues.includes(undefined)) {
-//       console.error('Wykryto undefined w danych zamówienia:', orderValues);
-//       throw new Error('Invalid order data - contains undefined values');
-//     }
+    // Sprawdź czy nie ma undefined w wartościach
+    if (orderValues.includes(undefined)) {
+      console.error('Wykryto undefined w danych zamówienia:', orderValues);
+      throw new Error('Invalid order data - contains undefined values');
+    }
 
-//     const [result] = await connection.execute(
-//       `INSERT INTO zamowienia (
-//         imie, 
-//         nazwisko, 
-//         miejscowosc, 
-//         ulica, 
-//         numerDomu, 
-//         numerMieszkania, 
-//         numerTelefonu, 
-//         zamowienieNaGodzine, 
-//         dataGodzinaZamowienia,
-//         zamowioneProdukty, 
-//         suma
-//       ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-//       orderValues
-//     );
+    const [result] = await connection.execute(
+      `INSERT INTO zamowienia (
+        imie, 
+        nazwisko, 
+        miejscowosc, 
+        ulica, 
+        numerDomu, 
+        numerMieszkania, 
+        numerTelefonu, 
+        zamowienieNaGodzine, 
+        dataGodzinaZamowienia,
+        zamowioneProdukty, 
+        suma
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      orderValues
+    );
 
-//     res.json(result);
-//   } catch (error) {
-//     console.error('Error submitting order:', error);
-//     console.error('Order data:', JSON.stringify(orderData, null, 2));
-//     res.status(500).json({ 
-//       error: 'Internal server error',
-//       details: error.message 
-//     });
-//   } finally {
-//     await connection.release();
-//   }
-// });
+    res.json(result);
+  } catch (error) {
+    console.error('Error submitting order:', error);
+    console.error('Order data:', JSON.stringify(orderData, null, 2));
+    res.status(500).json({ 
+      error: 'Internal server error',
+      details: error.message 
+    });
+  } finally {
+    await connection.release();
+  }
+});
 
-// app.get('/api/orders', async (req, res) => {
-//   const connection = await getConnection();
+app.get('/api/orders', async (req, res) => {
+  const connection = await getConnection();
 
-//   try {
-//     const [rows] = await connection.execute(
-//       'SELECT *, DATE_FORMAT(dataGodzinaZamowienia, "%Y-%m-%dT%H:%i:%s.000Z") as dataGodzinaZamowienia FROM zamowienia ORDER BY dataGodzinaZamowienia ASC'
-//     );
-//     res.json(rows);
-//   } catch (error) {
-//     console.error('Error fetching orders:', error);
-//     res.status(500).json({ error: 'Internal server error' });
-//   } finally {
-//     await connection.release();
-//   }
-// });
+  try {
+    const [rows] = await connection.execute(
+      'SELECT *, DATE_FORMAT(dataGodzinaZamowienia, "%Y-%m-%dT%H:%i:%s.000Z") as dataGodzinaZamowienia FROM zamowienia ORDER BY dataGodzinaZamowienia ASC'
+    );
+    res.json(rows);
+  } catch (error) {
+    console.error('Error fetching orders:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  } finally {
+    await connection.release();
+  }
+});
 
 app.delete('/api/orders/:id', async (req, res) => {
   const { id } = req.params;
