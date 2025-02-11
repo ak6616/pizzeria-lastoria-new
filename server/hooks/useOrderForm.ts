@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { submitOrder } from '../services/api';
 import type { CustomerData } from '../components/CustomerDataForm';
 import type { MenuItem } from '../hooks/useMenuItems';
+// import type { OrderData } from '../index';
 
 interface ProductCustomization {
   uniqueId: string;
@@ -25,6 +26,7 @@ export interface OrderItem {
     price: number;
   }>;
 }
+
 
 export function useOrderForm(
   menuItems: Record<string, MenuItem[]>, 
@@ -218,7 +220,7 @@ export function useOrderForm(
         totalPrice: parseFloat(totalPrice),
         deliveryCost: deliveryCost || 0,
         location,
-        type: 
+        type: "delivery",
       }, location);
 
       setSuccess(true);
