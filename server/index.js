@@ -828,15 +828,15 @@ app.get('/payment/success', async (req, res) => {
 
     if (verification.result) {
       // Aktualizacja statusu zamówienia w bazie danych
-      const connection = await getConnection();
-      try {
-        await connection.execute(
-          'UPDATE zamowienia SET status_platnosci = ? WHERE id = ?',
-          ['paid', tr_crc]
-        );
-      } finally {
-        await connection.release();
-      }
+      // const connection = await getConnection();
+      // try {
+      //   await connection.execute(
+      //     'UPDATE zamowienia SET status_platnosci = ? WHERE id = ?',
+      //     ['paid', tr_crc]
+      //   );
+      // } finally {
+      //   await connection.release();
+      // }
 
       // Przekierowanie do strony potwierdzenia
       res.redirect('/order-confirmation');
