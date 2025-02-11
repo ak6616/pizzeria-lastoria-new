@@ -12,6 +12,7 @@ import { getActiveOrdersCount } from '../services/api';
 interface OrderFormProps {
   deliveryAreas: Array<{ id: number; nazwa: string; ulica: string }>;
   location: string;
+  orderType: 'delivery' | 'pickup';
 }
 
 interface PaymentOrderData {
@@ -26,6 +27,7 @@ interface PaymentOrderData {
   items: Record<string, number>;
   totalPrice: number;
   email?: string;
+  type: 'delivery' | 'pickup';
 }
 
 // Dodaj funkcję sprawdzającą dostępność dostawy na konkretną godzinę
@@ -69,7 +71,7 @@ const isDeliveryTimeAvailable = (time: string, location: string): { available: b
   return { available: true };
 };
 
-export default function OrderForm({ deliveryAreas, location }: OrderFormProps) {
+export default function OrderForm({ deliveryAreas, location, orderType }: OrderFormProps) {
   const initialCustomerData: CustomerData = {
     firstName: '',
     lastName: '',
@@ -186,7 +188,7 @@ export default function OrderForm({ deliveryAreas, location }: OrderFormProps) {
       return;
     }
 
-    const orderData: PaymentOrderData = {
+    const orderData = {
       firstName: customerData.firstName,
       lastName: customerData.lastName,
       city: customerData.city,
@@ -194,9 +196,13 @@ export default function OrderForm({ deliveryAreas, location }: OrderFormProps) {
       houseNumber: customerData.houseNumber,
       apartmentNumber: customerData.apartmentNumber,
       phone: customerData.phone,
-      deliveryTime,
+      deliveryTime: formData.get('deliveryTime') as string,
       items: selectedItems,
-      totalPrice: Number(calculateTotal(deliveryCost))
+      totalPrice: Number(calculateTotal(deliveryCost)),
+      orderDateTime: new Date().toISOString(),
+      deliveryCost,
+      location,
+      type: orderType
     };
 
     // Najpierw inicjujemy płatność
@@ -417,73 +423,6 @@ export default function OrderForm({ deliveryAreas, location }: OrderFormProps) {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 flex items-center gap-2">
-                  <MapPin className="w-4 h-4 text-yellow-600" />
-                  Miejscowość *
-                </label>
-                <select
-                  name="city"
-                  required
-                  value={`${customerData.city}${customerData.street ? `|${customerData.street}` : ''}`}
-                  onChange={handleCityChange}
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-yellow-500 focus:ring-yellow-500"
-                >
-                  <option key="default" value="">Wybierz miejscowość</option>
-                  {deliveryAreas.map((area) => (
-                    <option 
-                      key={`${area.id}_${area.nazwa}_${area.ulica || ''}`}
-                      value={`${area.nazwa}${area.ulica ? `|${area.ulica}` : ''}`}
-                    >
-                      {area.nazwa}{area.ulica ? ` (ul. ${area.ulica})` : ''}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 flex items-center gap-2">
-                  <Home className="w-4 h-4 text-yellow-600" />
-                  Ulica
-                </label>
-                <input
-                  type="text"
-                  name="street"
-                  value={customerData.street}
-                  onChange={handleStreetChange}
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-yellow-500 focus:ring-yellow-500"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 flex items-center gap-2">
-                  <Building2 className="w-4 h-4 text-yellow-600" />
-                  Numer domu *
-                </label>
-                <input
-                  type="text"
-                  name="houseNumber"
-                  value={customerData.houseNumber}
-                  onChange={handleInputChange}
-                  required
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-yellow-500 focus:ring-yellow-500"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 flex items-center gap-2">
-                  <DoorClosed className="w-4 h-4 text-yellow-600" />
-                  Numer mieszkania
-                </label>
-                <input
-                  type="text"
-                  name="apartmentNumber"
-                  value={customerData.apartmentNumber}
-                  onChange={handleInputChange}
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-yellow-500 focus:ring-yellow-500"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 flex items-center gap-2">
                   <Phone className="w-4 h-4 text-yellow-600" />
                   Numer telefonu *
                 </label>
@@ -496,6 +435,77 @@ export default function OrderForm({ deliveryAreas, location }: OrderFormProps) {
                   className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-yellow-500 focus:ring-yellow-500"
                 />
               </div>
+
+              {orderType === 'delivery' && (
+                <>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 flex items-center gap-2">
+                      <MapPin className="w-4 h-4 text-yellow-600" />
+                      Miejscowość *
+                    </label>
+                    <select
+                      name="city"
+                      required
+                      value={`${customerData.city}${customerData.street ? `|${customerData.street}` : ''}`}
+                      onChange={handleCityChange}
+                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-yellow-500 focus:ring-yellow-500"
+                    >
+                      <option key="default" value="">Wybierz miejscowość</option>
+                      {deliveryAreas.map((area) => (
+                        <option 
+                          key={`${area.id}_${area.nazwa}_${area.ulica || ''}`}
+                          value={`${area.nazwa}${area.ulica ? `|${area.ulica}` : ''}`}
+                        >
+                          {area.nazwa}{area.ulica ? ` (ul. ${area.ulica})` : ''}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 flex items-center gap-2">
+                      <Home className="w-4 h-4 text-yellow-600" />
+                      Ulica
+                    </label>
+                    <input
+                      type="text"
+                      name="street"
+                      value={customerData.street}
+                      onChange={handleStreetChange}
+                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-yellow-500 focus:ring-yellow-500"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 flex items-center gap-2">
+                      <Building2 className="w-4 h-4 text-yellow-600" />
+                      Numer domu *
+                    </label>
+                    <input
+                      type="text"
+                      name="houseNumber"
+                      value={customerData.houseNumber}
+                      onChange={handleInputChange}
+                      required
+                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-yellow-500 focus:ring-yellow-500"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 flex items-center gap-2">
+                      <DoorClosed className="w-4 h-4 text-yellow-600" />
+                      Numer mieszkania
+                    </label>
+                    <input
+                      type="text"
+                      name="apartmentNumber"
+                      value={customerData.apartmentNumber}
+                      onChange={handleInputChange}
+                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-yellow-500 focus:ring-yellow-500"
+                    />
+                  </div>
+                </>
+              )}
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 flex items-center gap-2">

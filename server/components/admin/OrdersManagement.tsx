@@ -5,6 +5,21 @@ import { format, isValid, parseISO } from 'date-fns';
 import { pl } from 'date-fns/locale';
 import React from 'react';
 
+export interface Order {
+  id: number;
+  imie: string;
+  nazwisko: string;
+  miejscowosc: string;
+  ulica: string;
+  numerDomu: string;
+  numerMieszkania: string;
+  numerTelefonu: string;
+  zamowienieNaGodzine: string;
+  dataGodzinaZamowienia: string;
+  zamowioneProdukty: string;
+  suma: number;
+  type: 'delivery' | 'pickup';
+}
 
 interface OrderItem {
   name: string;
@@ -21,8 +36,17 @@ interface OrdersManagementProps {
   location: string;
 }
 
+const formatOrderType = (type: 'delivery' | 'pickup') => {
+  return type === 'delivery' ? 'Dostawa' : 'Odbiór osobisty';
+};
+
 export default function OrdersManagement({ location }: OrdersManagementProps) {
-  const { orders, loading, error, refetch } = useOrders(location);
+  const { orders, loading, error, refetch } = useOrders(location) as { 
+    orders: Order[],
+    loading: boolean,
+    error: string | null,
+    refetch: () => Promise<void>
+  };
 
   const handleDelete = async (id: number) => {
     if (window.confirm('Czy na pewno chcesz usunąć to zamówienie?')) {
@@ -157,6 +181,9 @@ export default function OrdersManagement({ location }: OrdersManagementProps) {
                     <time className="text-sm text-gray-500 block">
                       {formatDate(order.dataGodzinaZamowienia)}
                     </time>
+                    <span className="inline-block mt-1 px-2 py-1 bg-yellow-100 text-yellow-800 text-sm rounded">
+                      {formatOrderType(order.type)}
+                    </span>
                   </div>
                   <div className="text-right">
                     <div className="font-medium">Suma: {order.suma} zł</div>

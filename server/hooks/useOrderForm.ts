@@ -218,6 +218,7 @@ export function useOrderForm(
         totalPrice: parseFloat(totalPrice),
         deliveryCost: deliveryCost || 0,
         location,
+        type: 
       }, location);
 
       setSuccess(true);

@@ -1,5 +1,5 @@
 const API_BASE_URL = import.meta.env.PROD 
-  ? 'https://pizzeria-lastoria.onrender.com/api'
+  ? 'https://77.65.194.148:3000/api'
   : 'http://localhost:3000/api';
 
 // type LocationSuffix = '_mp' | '_hacz';
@@ -41,7 +41,7 @@ export async function addGalleryImage(data: { link: string }) {
     headers: {
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify(data), // Dane są poprawnie serializowane do JSON
+    body: JSON.stringify(data), // Dane sÄ… poprawnie serializowane do JSON
   });
 
   if (!response.ok) {
@@ -60,7 +60,7 @@ export async function deleteGalleryImage(id: number) {
   }
   return response.json();
 }
-//////////aktualności
+//////////aktualnoĹ›ci
 
 export async function getNews() {
   const response = await fetch(`${API_BASE_URL}/news`);
@@ -146,7 +146,7 @@ export async function calculateDeliveryCost(
   }
   return response.json();
 }
-///////////////////zamówienia
+///////////////////zamĂłwienia
 interface OrderItem {
   uniqueId: string;
   id: number;
@@ -176,6 +176,7 @@ export async function submitOrder(data: {
   orderDateTime: string;
   deliveryCost: number;
   location: string;
+  type: 'delivery' | 'pickup';
 }, location: string) {
   const suffix = getLocationSuffix(location);
   const response = await fetch(`${API_BASE_URL}/orders/${suffix}`, {

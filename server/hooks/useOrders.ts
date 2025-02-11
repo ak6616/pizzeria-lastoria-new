@@ -1,20 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
 import { getOrders } from '../services/api';
+import { Order}  from '../components/admin/OrdersManagement.tsx';
 
-export interface Orders {
-  id: number;
-  imie: string;
-  nazwisko: string;
-  miejscowosc: string;
-  ulica?: string;
-  numerDomu: string;
-  numerMieszkania?: string;
-  numerTelefonu: string;
-  dataGodzinaZamowienia: string;
-  zamowienieNaGodzine?: string;
-  zamowioneProdukty: string;
-  suma: number;
-}
+interface Orders extends Order {}
 
 export function useOrders(location: string) {
   const [orders, setOrders] = useState<Orders[]>([]);

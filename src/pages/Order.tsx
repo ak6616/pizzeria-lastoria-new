@@ -49,11 +49,14 @@ const isDeliveryAvailable = (location: string): { available: boolean; message?: 
   return { available: true };
 };
 
+type OrderType = 'delivery' | 'pickup' | null;
+
 export default function Order() {
   const [selectedLocation, setSelectedLocation] = useState<string>('');
   const [deliveryAreas, setDeliveryAreas] = useState<DeliveryArea[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [orderType, setOrderType] = useState<OrderType>(null);
 
   useEffect(() => {
     async function fetchDeliveryAreas() {
@@ -213,10 +216,39 @@ export default function Order() {
           </div>
         </div>
 
-        <OrderForm 
-          deliveryAreas={deliveryAreas} 
-          location={selectedLocation}
-        />
+        <div className="bg-white/90 rounded-lg p-6 mb-8">
+          <h2 className="text-xl font-semibold mb-4">Wybierz typ zamówienia:</h2>
+          <div className="flex gap-4">
+            <button
+              onClick={() => setOrderType('delivery')}
+              className={`flex-1 py-3 px-6 rounded-lg transition ${
+                orderType === 'delivery'
+                  ? 'bg-yellow-500 text-white'
+                  : 'bg-gray-200 hover:bg-gray-300'
+              }`}
+            >
+              Dostawa
+            </button>
+            <button
+              onClick={() => setOrderType('pickup')}
+              className={`flex-1 py-3 px-6 rounded-lg transition ${
+                orderType === 'pickup'
+                  ? 'bg-yellow-500 text-white'
+                  : 'bg-gray-200 hover:bg-gray-300'
+              }`}
+            >
+              Odbiór osobisty
+            </button>
+          </div>
+        </div>
+
+        {orderType && (
+          <OrderForm 
+            deliveryAreas={deliveryAreas} 
+            location={selectedLocation}
+            orderType={orderType}
+          />
+        )}
       </div>
     );
   }
