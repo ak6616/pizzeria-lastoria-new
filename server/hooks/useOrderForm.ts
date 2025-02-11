@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { submitOrder } from '../services/api';
-import type { CustomerData } from '../components/CustomerDataForm';
 import type { MenuItem } from '../hooks/useMenuItems';
 // import type { OrderData } from '../index';
 
@@ -27,6 +26,17 @@ export interface OrderItem {
   }>;
 }
 
+interface CustomerData {
+  firstName: string;
+  lastName: string;
+  city: string;
+  street: string;
+  houseNumber: string;
+  apartmentNumber?: string;
+  phone: string;
+  email: string;
+  deliveryTime?: string;
+}
 
 export function useOrderForm(
   menuItems: Record<string, MenuItem[]>, 
