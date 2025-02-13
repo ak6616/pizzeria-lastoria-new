@@ -11,7 +11,7 @@ export default defineConfig({
     cors: true,       // W��cza CORS
     proxy: {          // Proxy dla backendu (je�li masz API na innym porcie)
       '/api': {
-        target: process.env.VITE_API_URL,
+        target: 'http://77.65.194.148:3000',
         changeOrigin: true,
         secure: false
       }

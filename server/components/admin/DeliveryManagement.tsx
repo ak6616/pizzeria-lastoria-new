@@ -1,6 +1,5 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import React from 'react';
-
 import { Edit2, Trash2, Plus } from 'lucide-react';
 import { useDeliveryRules } from '../../hooks/useDeliveryRules';
 import AddDeliveryRuleModal from './AddDeliveryRuleModal';
@@ -14,8 +13,6 @@ const CATEGORY_NAMES: Record<string, string> = {
 };
 
 const CATEGORY_ORDER = ['dostawaweekday', 'dostawaweekend'];
-
-
 
 export default function DeliveryManagement({ location }: DeliveryManagementProps) {
   const { rules, loading, error, refetch } = useDeliveryRules(location);
@@ -33,10 +30,10 @@ export default function DeliveryManagement({ location }: DeliveryManagementProps
   const handleDelete = async (category: string, id: number) => {
     if (window.confirm('Czy na pewno chcesz usunąć tę pozycję?')) {
       try {
-        await deleteDeliveryRule(category, id);
+        await deleteDeliveryRule(location, category, id);
         await refetch();
       } catch (err) {
-        console.error('Error deleting menu item:', err);
+        console.error('Error deleting delivery rule:', err);
         alert('Wystąpił błąd podczas usuwania pozycji');
       }
     }

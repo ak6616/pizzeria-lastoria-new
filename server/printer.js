@@ -1,7 +1,6 @@
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { exec } from 'child_process';
-// import fs from 'fs';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -11,10 +10,6 @@ function formatDate(date) {
   return date.toLocaleString('pl-PL');
 }
 
-// Stałe konfiguracyjne
-const OUTPUT_FILE = path.join(__dirname, 'order.txt');
-
-
 export async function printToReceiptPrinter(orderData) {
   console.log('=== Rozpoczęcie drukowania zamówienia ===');
   console.log('Dane zamówienia:', orderData);
@@ -22,6 +17,7 @@ export async function printToReceiptPrinter(orderData) {
   try {
     let receipt = '';
     // Header
+    receipt += "\x1B\x21\x07"; // Ustawienie czcionki na wartość 7
     receipt += `Data: ${formatDate(new Date())}\n`;
     receipt += '--------------------------------\n';
     
@@ -54,13 +50,11 @@ export async function printToReceiptPrinter(orderData) {
     // Total
     receipt += `SUMA: ${orderData.suma} zł`;
 
-    // Zapisz do pliku i wydrukuj
-    // fs.writeFileSync(OUTPUT_FILE, receipt);
     console.log('Zawartość paragonu:', receipt);
 
-    // Wyślij do drukarki
+    // Wyślij do drukarki bezpośrednio
     return new Promise((resolve, reject) => {
-      const lpProcess = exec(`lp -d ${PRINTER_NAME} ${OUTPUT_FILE}`, (error, stdout, stderr) => {
+      const lpProcess = exec(`echo "${receipt}" | lp -d ${PRINTER_NAME}`, (error, stdout, stderr) => {
         if (error) {
           console.error('Błąd drukowania:', error);
           reject(error);

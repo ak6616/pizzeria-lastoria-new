@@ -237,3 +237,7 @@ id: number;
 nazwa: string;
 ulica: string;
 }
+
+export interface TimerProps {
+    refetch: () => void; // Funkcja do ponownego pobrania danych
+  }

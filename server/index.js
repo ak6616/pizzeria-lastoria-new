@@ -18,13 +18,12 @@ const port = process.env.PORT ;
 
 
 // Serwuj pliki statyczne z folderu dist
-app.use(express.static(path.join(__dirname, '../dist')));
+app.use(express.static(path.join(__dirname, '../server')));
 
 app.use(cors({
   origin: 
   'http://77.65.194.148:5173', // Tw�j frontendowy adres
   methods: 'GET,POST,PUT,DELETE',
-  allowedHeaders: 'Content-Type,Authorization'
   allowedHeaders: 'Content-Type,Authorization',
   credentials: true   
 }));
@@ -281,6 +280,10 @@ app.put('/api/delivery/:category/:id', async (req, res) => {
 
 app.delete('/api/delivery/:category/:id', async (req, res) => {
   const { category, id } = req.params;
+  const validCategories = [
+    'dostawaweekday_mp', 'dostawaweekend_mp',
+    'dostawaweekday_hacz', 'dostawaweekend_hacz'
+  ];
 
   if (!validCategories.includes(category)) {
     return res.status(400).json({ error: 'Invalid category' });

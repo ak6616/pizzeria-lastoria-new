@@ -1,15 +1,18 @@
 import { Trash2 } from 'lucide-react';
+import { useState, useEffect } from 'react';
 import { useOrders } from '../../hooks/useOrders';
 import { deleteOrder } from '../../services/api';
 import { format, isValid, parseISO } from 'date-fns';
 import { pl } from 'date-fns/locale';
 import React from 'react';
-import { OrdersManagementProps, Order, OrderItem } from '../../types';
+import { OrdersManagementProps, Order, OrderItem, TimerProps } from '../../types';
+
 
 
 const formatOrderType = (type: 'delivery' | 'pickup') => {
   return type === 'delivery' ? 'Dostawa' : 'Odbiór osobisty';
 };
+
 
 export default function OrdersManagement({ location }: OrdersManagementProps) {
   const { orders, loading, error, refetch } = useOrders(location) as { 
@@ -18,6 +21,22 @@ export default function OrdersManagement({ location }: OrdersManagementProps) {
     error: string | null,
     refetch: () => Promise<void>
   };
+  const [time, setTime] = useState<number>(30);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setTime((prevTime) => {
+        if (prevTime > 0) {
+          return prevTime - 1; // Zmniejsza czas o 1 sekund�
+        } else {
+          refetch(); // Wywo�aj funkcj� refetch, gdy czas osi�gnie 0
+          return 30; // Resetuj licznik do 30 sekund
+        }
+      });
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [refetch]);
 
   const handleDelete = async (id: number) => {
     if (window.confirm('Czy na pewno chcesz usunąć to zamówienie?')) {

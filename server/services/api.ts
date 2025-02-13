@@ -344,13 +344,14 @@ export async function updateDeliveryRule(data: {
   return response.json();
 }
 
-export async function deleteDeliveryRule(category: string, id: number) {
-  const validCategories = ['weekday', 'weekend'];
+export async function deleteDeliveryRule(location: string, category: string, id: number) {
+  const suffix = getLocationSuffix(location);
+  const validCategories = [`dostawaweekday`, `dostawaweekend`];
   if (!validCategories.includes(category)) {
-    throw new Error('Invalid category');
+    throw new Error(`Invalid category`);
   }
 
-  const response = await fetch(`${API_BASE_URL}/delivery/${category}/${id}`, {
+  const response = await fetch(`${API_BASE_URL}/delivery/${category}${suffix}/${id}`, {
     method: 'DELETE',
   });
 
