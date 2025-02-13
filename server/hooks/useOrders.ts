@@ -1,7 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
 import { getOrders } from '../services/api';
-import { Order}  from '../components/admin/OrdersManagement.tsx';
-import { Orders } from '../types/index.ts';
+import { Order}  from '../types';
+
+interface Orders extends Order {}
 
 
 export function useOrders(location: string) {

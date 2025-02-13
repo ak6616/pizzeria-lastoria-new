@@ -49,9 +49,12 @@ export default function OrdersManagement({ location }: OrdersManagementProps) {
 
       // Walidacja i mapowanie każdego elementu
       return items.map(item => ({
+        uniqueId: String(item.uniqueId || ''),
+        id: Number(item.id || 0),
+        category: String(item.category || ''),
         name: String(item.name),
         quantity: Number(item.quantity),
-        price: Number(item.price ),
+        price: Number(item.price),
         removedIngredients: Array.isArray(item.removedIngredients) ? item.removedIngredients : [],
         addedIngredients: Array.isArray(item.addedIngredients) ? item.addedIngredients : []
       }));
@@ -153,7 +156,7 @@ export default function OrdersManagement({ location }: OrdersManagementProps) {
                       {formatDate(order.dataGodzinaZamowienia)}
                     </time>
                     <span className="inline-block mt-1 px-2 py-1 bg-yellow-100 text-yellow-800 text-sm rounded">
-                      {formatOrderType(order.type)}
+                      {formatOrderType(order.typ)}
                     </span>
                   </div>
                   <div className="text-right">

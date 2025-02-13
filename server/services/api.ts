@@ -1,13 +1,5 @@
 import { OrderItem, LoginCredentials } from "../types";
-import dotenv from 'dotenv';
 const API_BASE_URL = import.meta.env.VITE_API_URL;
-  // ? 'http://77.65.194.148:3000/api'
-  // : 'http://192.168.100.150:3000/api';
-  // 'http://localhost:3000';
-
-// type LocationSuffix = '_mp' | '_hacz';
-
-
 
 const getLocationSuffix = (location: string): string => {
   switch (location) {
@@ -63,7 +55,7 @@ export async function deleteGalleryImage(id: number) {
   }
   return response.json();
 }
-//////////aktualnoĹ›ci
+//////////aktualności
 
 export async function getNews() {
   const response = await fetch(`${API_BASE_URL}/news`);
@@ -149,12 +141,13 @@ export async function calculateDeliveryCost(
   }
   return response.json();
 }
-///////////////////zamĂłwienia
+///////////////////zamówienia
 
 
 export async function submitOrder(data: {
   firstName: string;
   lastName: string;
+  type: 'delivery' | 'pickup';
   city: string;
   street: string;
   houseNumber: string;
@@ -167,7 +160,6 @@ export async function submitOrder(data: {
   orderDateTime: string;
   deliveryCost: number;
   location: string;
-  type: 'delivery' | 'pickup';
 }, location: string) {
   const suffix = getLocationSuffix(location);
   const response = await fetch(`${API_BASE_URL}/orders/${suffix}`, {

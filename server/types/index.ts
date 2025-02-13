@@ -85,6 +85,7 @@ export interface OrderFormProps {
 export interface PaymentOrderData {
 firstName: string;
 lastName: string;
+type: 'delivery' | 'pickup';
 city: string;
 street?: string;
 houseNumber: string;
@@ -94,7 +95,6 @@ deliveryTime?: string;
 items: Record<string, number>;
 totalPrice: number;
 email?: string;
-type: 'delivery' | 'pickup';
 }
 export interface RodoTooltipProps {
     children: React.ReactNode;
@@ -198,6 +198,7 @@ export interface Order {
     id: number;
     imie: string;
     nazwisko: string;
+    typ: 'delivery' | 'pickup';
     miejscowosc: string;
     ulica: string;
     numerDomu: string;
@@ -207,7 +208,6 @@ export interface Order {
     dataGodzinaZamowienia: string;
     zamowioneProdukty: string;
     suma: number;
-    type: 'delivery' | 'pickup';
 }
   
 export interface OrdersManagementProps {

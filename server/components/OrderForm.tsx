@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useMenuItems } from '../hooks/useMenuItems';
 import { useDeliveryCost } from '../hooks/useDeliveryCost';
 import { useOrderForm } from '../hooks/useOrderForm';
-import { Plus, Minus, User, Users, MapPin, Home, Building2, DoorClosed, Phone, Clock, MessageCircleCode } from 'lucide-react';
+import { Plus, Minus, User, Users, MapPin, Home, Building2, DoorClosed, Phone, Clock, MessageCircleMore } from 'lucide-react';
 import RodoTooltip from './RodoTooltip';
 import IngredientsModal from './IngredientsModal';
 import SelectedItemsBubbles from './SelectedItemsBubbles';
@@ -173,22 +173,50 @@ export default function OrderForm({ deliveryAreas, location, orderType }: OrderF
     const orderData = {
       firstName: customerData.firstName,
       lastName: customerData.lastName,
+      type: orderType,
       city: customerData.city,
       street: customerData.street,
       houseNumber: customerData.houseNumber,
       apartmentNumber: customerData.apartmentNumber,
       phone: customerData.phone,
       deliveryTime: formData.get('deliveryTime') as string,
-      items: selectedItems,
+      items: Object.entries(selectedItems).flatMap(([uniqueId, quantity]) => {
+        const item = Object.values(menuItems)
+          .flat()
+          .find(menuItem => menuItem.uniqueId === uniqueId);
+        
+        // Tworzymy osobny obiekt dla każdej sztuki produktu
+        return Array(quantity).fill(null).map((_, index) => {
+          const instanceId = `${uniqueId}_${index}`;
+          const customization = customizations.find(c => c.instanceId === instanceId);
+          
+          return {
+            uniqueId,
+            id: item?.id || 0,
+            category: item?.category || '',
+            name: item?.nazwa || '',
+            quantity: 1, // każda sztuka ma ilość 1
+            price: item?.cena || 0,
+            removedIngredients: customization?.removedIngredients || [],
+            addedIngredients: (customization?.addedIngredients || []).map(id => {
+              const ingredient = additionalIngredients.find(i => i.id === id);
+              return {
+                id,
+                name: ingredient?.nazwa || '',
+                price: ingredient?.cena || 0
+              };
+            })
+          };
+        });
+      }),
       totalPrice: Number(calculateTotal(deliveryCost)),
       orderDateTime: new Date().toISOString(),
       deliveryCost,
       location,
-      type: orderType
     };
 
     // Najpierw inicjujemy płatność
-    await handlePayment(orderData);
+    // await handlePayment(orderData);
 
     // Jeśli płatność się powiedzie, wysyłamy zamówienie
     const response = await fetch(`/api/orders/${location}`, {
@@ -411,6 +439,8 @@ export default function OrderForm({ deliveryAreas, location, orderType }: OrderF
                 <input
                   type="tel"
                   name="phone"
+                  inputMode="tel" 
+                  pattern="[0-9]+"
                   value={customerData.phone}
                   onChange={handleInputChange}
                   required
@@ -419,12 +449,13 @@ export default function OrderForm({ deliveryAreas, location, orderType }: OrderF
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 flex items-center gap-2">
-                  <MessageCircleCode className="w-4 h-4 text-yellow-600" />
+                  <MessageCircleMore className="w-4 h-4 text-yellow-600" />
                   Email *
                 </label>
                 <input
                   type="email"
                   name="email"
+                  inputMode="email" 
                   value={customerData.email}
                   onChange={handleInputChange}
                   required
@@ -480,6 +511,8 @@ export default function OrderForm({ deliveryAreas, location, orderType }: OrderF
                     <input
                       type="text"
                       name="houseNumber"
+                      inputMode="numeric" 
+                      pattern="[0-9]+"
                       value={customerData.houseNumber}
                       onChange={handleInputChange}
                       required

@@ -1,70 +1,66 @@
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { exec } from 'child_process';
-import iconv from 'iconv-lite';
+// import fs from 'fs';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-
 const PRINTER_NAME = 'xprinter';
-const ENCODING = 'CP852_LATIN2'; // Kodowanie dla polskich znaków
 
 function formatDate(date) {
   return date.toLocaleString('pl-PL');
 }
 
 // Stałe konfiguracyjne
-const OUTPUT_FILE = path.join(__dirname, 'order_receipt.txt');
+const OUTPUT_FILE = path.join(__dirname, 'order.txt');
+
 
 export async function printToReceiptPrinter(orderData) {
   console.log('=== Rozpoczęcie drukowania zamówienia ===');
+  console.log('Dane zamówienia:', orderData);
   
   try {
     let receipt = '';
     // Header
-    receipt += '\x1B\x40'; // Initialize printer
-    receipt += '\x1B\x61\x01'; // Center alignment
-    receipt += 'PIZZERIA LASTORIA\n\n';
     receipt += `Data: ${formatDate(new Date())}\n`;
     receipt += '--------------------------------\n';
     
     // Customer data
-    receipt += '\x1B\x61\x00'; // Left alignment
     receipt += `Klient: ${orderData.imie} ${orderData.nazwisko}\n`;
     receipt += `Tel: ${orderData.numerTelefonu}\n`;
-    if (orderData.type === 'delivery') {
+    if (orderData.typ === 'delivery') {
       receipt += `Adres: ${orderData.miejscowosc}${orderData.ulica ? `, ${orderData.ulica}` : ''} ${orderData.numerDomu}${orderData.numerMieszkania ? `/${orderData.numerMieszkania}` : ''}\n`;
     }
-    receipt += `Typ: ${orderData.type === 'delivery' ? 'Dostawa' : 'Odbiór osobisty'}\n`;
+    receipt += `Typ: ${orderData.typ === 'delivery' ? 'Dostawa' : 'Odbiór osobisty'}\n`;
     receipt += '--------------------------------\n';
     
     // Ordered products
     receipt += 'ZAMÓWIENIE:\n';
-    const items = JSON.parse(orderData.zamowioneProdukty);
+    let items = Array.isArray(orderData.zamowioneProdukty) 
+      ? orderData.zamowioneProdukty 
+      : [];
+
     items.forEach(item => {
       receipt += `${item.name} x${item.quantity}\n`;
       if (item.removedIngredients?.length) {
-        receipt += `  BEZ: ${item.removedIngredients.join(', ')}`;
+        receipt += `  BEZ: ${item.removedIngredients.join(', ')}\n`;
       }
       if (item.addedIngredients?.length) {
-        receipt += `  DODATKI: ${item.addedIngredients.map(i => i.name).join(', ')}`;
+        receipt += `  DODATKI: ${item.addedIngredients.map(i => i.name).join(', ')}\n`;
       }
     });
     
     receipt += '--------------------------------\n';
     // Total
-    receipt += '\x1B\x61\x02'; // Right alignment
     receipt += `SUMA: ${orderData.suma} zł`;
-    
-    // Cut paper
-    // receipt += '\x1D\x56\x41\n';
 
-    // Konwertuj tekst na odpowiednie kodowanie
-    const buffer = iconv.encode(receipt, ENCODING);
+    // Zapisz do pliku i wydrukuj
+    // fs.writeFileSync(OUTPUT_FILE, receipt);
+    console.log('Zawartość paragonu:', receipt);
 
-    // Wyślij do drukarki używając lp
+    // Wyślij do drukarki
     return new Promise((resolve, reject) => {
-      const lpProcess = exec(`lp -d ${PRINTER_NAME}`, (error, stdout, stderr) => {
+      const lpProcess = exec(`lp -d ${PRINTER_NAME} ${OUTPUT_FILE}`, (error, stdout, stderr) => {
         if (error) {
           console.error('Błąd drukowania:', error);
           reject(error);
@@ -73,9 +69,6 @@ export async function printToReceiptPrinter(orderData) {
         console.log('Wydruk zakończony pomyślnie');
         resolve({ success: true });
       });
-
-      lpProcess.stdin.write(buffer);
-      lpProcess.stdin.end();
     });
 
   } catch (error) {
