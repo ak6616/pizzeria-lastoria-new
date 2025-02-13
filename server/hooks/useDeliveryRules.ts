@@ -1,22 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { getDeliveryRules } from '../services/api';
+import { DeliveryRuleResponse } from '../types';
 
-export interface DeliveryRule {
-  uniqueId: string;
-  id: number;
-  nazwa: string;
-  ulica?: string;
-  ilosc: number;
-  koszt: number;
-}
-
-interface DeliveryRuleResponse {
-  id: number;
-  nazwa: string;
-  ulica?: string;
-  ilosc: number;
-  koszt: number;
-}
 
 export function useDeliveryRules(location: string) {
   const [rules, setRules] = useState<any[]>([]);

@@ -2,11 +2,8 @@ import React, { useState } from 'react';
 import { X } from 'lucide-react';
 import { addGalleryImage } from '../../services/api';
 import { useGallery } from '../../hooks/useGallery';
+import { AddGalleryItemModalProps } from '../../types';
 
-interface AddGalleryItemModalProps {
-  onClose: () => void;
-  onSuccess: () => void;
-}
 
 export default function AddGalleryItemModal({
   onClose,

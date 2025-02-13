@@ -1,27 +1,8 @@
 import { X } from 'lucide-react';
 import React from 'react';
+import { IngredientsModalProps } from '../types';
 
 
-interface IngredientsModalProps {
-  item: {
-    uniqueId: string;
-    nazwa: string;
-    skladniki?: string;
-    category?: string;
-  };
-  customization: {
-    removedIngredients: string[];
-    addedIngredients: (string | number)[];
-  };
-  onClose: () => void;
-  onToggleIngredient: (uniqueId: string, ingredient: string) => void;
-  onToggleAdditionalIngredient: (uniqueId: string, ingredientId: number) => void;
-  additionalIngredients: Array<{
-    id: number;
-    nazwa: string;
-    cena: number;
-  }>;
-}
 
 export default function IngredientsModal({
   item,

@@ -1,12 +1,8 @@
 import React, { useState } from 'react';
 import { X } from 'lucide-react';
 import { addMenuItem } from '../../services/api';
+import { AddMenuItemModalProps } from '../../types';
 
-interface AddMenuItemModalProps {
-  onClose: () => void;
-  onSuccess: () => void;
-  location: string;
-}
 
 export default function AddMenuItemModal({ onClose, onSuccess, location }: AddMenuItemModalProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);

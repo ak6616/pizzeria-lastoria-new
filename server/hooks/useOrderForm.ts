@@ -1,42 +1,9 @@
 import { useState } from 'react';
 import { submitOrder } from '../services/api';
-import type { MenuItem } from '../hooks/useMenuItems';
+import { ProductCustomization, MenuItem, CustomerData, OrderItem} from '../types';
 // import type { OrderData } from '../index';
 
-interface ProductCustomization {
-  uniqueId: string;
-  instanceId: string;
-  removedIngredients: string[];
-  addedIngredients: (string | number)[];
-  notes?: string;
-}
 
-export interface OrderItem {
-  uniqueId: string;
-  id: number;
-  category: string;
-  name: string;
-  quantity: number;
-  price: number;
-  removedIngredients: string[];
-  addedIngredients: Array<{
-    id: string | number;
-    name: string;
-    price: number;
-  }>;
-}
-
-interface CustomerData {
-  firstName: string;
-  lastName: string;
-  city: string;
-  street: string;
-  houseNumber: string;
-  apartmentNumber?: string;
-  phone: string;
-  email: string;
-  deliveryTime?: string;
-}
 
 export function useOrderForm(
   menuItems: Record<string, MenuItem[]>, 

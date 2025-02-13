@@ -21,7 +21,8 @@ const port = process.env.PORT ;
 app.use(express.static(path.join(__dirname, '../dist')));
 
 app.use(cors({
-  origin: 'http://77.65.194.148:5173', // Tw�j frontendowy adres
+  origin: 
+  'http://77.65.194.148:5173', // Tw�j frontendowy adres
   methods: 'GET,POST,PUT,DELETE',
   allowedHeaders: 'Content-Type,Authorization'
 }));
@@ -816,8 +817,8 @@ app.get('/payment/success', async (req, res) => {
 
   try {
     const tpay = new TPay({
-      merchantId: process.env.TPAY_API_KEY,
-      merchantSecret: process.env.TPAY_SECRET_KEY,
+      merchantId: process.env.TPAY_SECRET_ID,
+      merchantSecret: process.env.TPAY_API_KEY,
       sandbox: false
     });
 

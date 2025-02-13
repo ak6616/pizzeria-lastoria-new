@@ -6,6 +6,7 @@ import { useDeliveryRules } from '../../hooks/useDeliveryRules';
 import AddDeliveryRuleModal from './AddDeliveryRuleModal';
 import EditDeliveryRuleModal from './EditDeliveryRuleModal';
 import { deleteDeliveryRule } from '../../services/api';
+import { DeliveryManagementProps } from '../../types';
 
 const CATEGORY_NAMES: Record<string, string> = {
   dostawaweekend: 'Weekend',
@@ -14,9 +15,7 @@ const CATEGORY_NAMES: Record<string, string> = {
 
 const CATEGORY_ORDER = ['dostawaweekday', 'dostawaweekend'];
 
-interface DeliveryManagementProps {
-  location: string;
-}
+
 
 export default function DeliveryManagement({ location }: DeliveryManagementProps) {
   const { rules, loading, error, refetch } = useDeliveryRules(location);

@@ -1,6 +1,8 @@
+import { OrderItem, LoginCredentials } from "../types";
 const API_BASE_URL = import.meta.env.PROD 
   ? 'http://77.65.194.148:3000/api'
   : 'http://192.168.100.150:3000/api';
+  // 'http://localhost:3000';
 
 // type LocationSuffix = '_mp' | '_hacz';
 
@@ -147,20 +149,7 @@ export async function calculateDeliveryCost(
   return response.json();
 }
 ///////////////////zamĂłwienia
-interface OrderItem {
-  uniqueId: string;
-  id: number;
-  category: string;
-  name: string;
-  quantity: number;
-  price: number;
-  removedIngredients: string[];
-  addedIngredients: Array<{
-    id: string | number;
-    name: string;
-    price: number;
-  }>;
-}
+
 
 export async function submitOrder(data: {
   firstName: string;
@@ -378,10 +367,6 @@ export async function deleteDeliveryRule(category: string, id: number) {
   return response.json();
 }
 
-interface LoginCredentials {
-  username: string;
-  password: string;
-}
 
 export async function login(credentials: LoginCredentials) {
   const response = await fetch(`${API_BASE_URL}/login`, {

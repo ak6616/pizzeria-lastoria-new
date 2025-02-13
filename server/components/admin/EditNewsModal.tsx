@@ -1,13 +1,8 @@
 import React, { useState } from 'react';
 import { X } from 'lucide-react';
 import { updateNews } from '../../services/api';
-import { NewsArticle } from '../../hooks/useNews';
+import { EditNewsModalProps, NewsArticle } from '../../types';
 
-interface EditNewsModalProps {
-  article: NewsArticle;
-  onClose: () => void;
-  onSuccess: () => void;
-}
 
 export default function EditNewsModal({ article, onClose, onSuccess }: EditNewsModalProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);

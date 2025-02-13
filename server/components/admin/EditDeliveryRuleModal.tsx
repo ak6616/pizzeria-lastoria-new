@@ -1,13 +1,8 @@
 import React, { useState } from 'react';
 import { X } from 'lucide-react';
 import { updateDeliveryRule } from '../../services/api';
+import { EditDeliveryRuleModalProps } from '../../types';
 
-interface EditDeliveryRuleModalProps {
-  rule: any;
-  onClose: () => void;
-  onSuccess: () => void;
-  location: string;
-}
 
 export default function EditDeliveryRuleModal({
   rule,

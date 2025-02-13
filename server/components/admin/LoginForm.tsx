@@ -1,8 +1,6 @@
 import React, { useState } from 'react';
+import { LoginFormProps } from '../../types';
 
-interface LoginFormProps {
-  onLogin: (username: string, password: string) => Promise<boolean>;
-}
 
 export default function LoginForm({ onLogin }: LoginFormProps) {
   const [error, setError] = useState('');

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import React from 'react';
-
+import { MenuManagementProps } from '../../types';
 import { Edit2, Trash2, Plus } from 'lucide-react';
 import { useMenuItems } from '../../hooks/useMenuItems';
 import AddMenuItemModal from './AddMenuItemModal';
@@ -16,9 +16,7 @@ const CATEGORY_NAMES: Record<string, string> = {
 
 const CATEGORY_ORDER = ['pizza', 'fastfood', 'dodatki', 'napoje'];
 
-interface MenuManagementProps {
-  location: string;
-}
+
 
 export default function MenuManagement({ location }: MenuManagementProps) {
   const { items, loading, error, refetch } = useMenuItems(location);

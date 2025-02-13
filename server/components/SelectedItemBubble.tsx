@@ -1,18 +1,8 @@
 import { Edit2, X } from 'lucide-react';
 import React from 'react';
+import { SelectedItemBubbleProps } from '../types';
 
 
-interface SelectedItemBubbleProps {
-  item: {
-    uniqueId: string;
-    nazwa: string;
-    skladniki?: string;
-    category?: string;
-    instanceId: string;
-  };
-  onEditIngredients: (uniqueId: string, instanceId: string) => void;
-  onClose: (uniqueId: string, instanceId: string) => void;
-}
 
 export default function SelectedItemBubble({ item, onEditIngredients, onClose }: SelectedItemBubbleProps) {
   const canEdit = item.skladniki || item.category?.includes('pizza') || item.category?.includes('fastfood');

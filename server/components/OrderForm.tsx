@@ -2,33 +2,14 @@ import React, { useState, useEffect } from 'react';
 import { useMenuItems } from '../hooks/useMenuItems';
 import { useDeliveryCost } from '../hooks/useDeliveryCost';
 import { useOrderForm } from '../hooks/useOrderForm';
-import { Plus, Minus, User, Users, MapPin, Home, Building2, DoorClosed, Phone, Clock } from 'lucide-react';
-import type { CustomerData } from './CustomerDataForm';
+import { Plus, Minus, User, Users, MapPin, Home, Building2, DoorClosed, Phone, Clock, MessageCircleCode } from 'lucide-react';
 import RodoTooltip from './RodoTooltip';
 import IngredientsModal from './IngredientsModal';
 import SelectedItemsBubbles from './SelectedItemsBubbles';
 import { getActiveOrdersCount } from '../services/api';
+import { OrderFormProps, CustomerData, PaymentOrderData } from '../types';
 
-interface OrderFormProps {
-  deliveryAreas: Array<{ id: number; nazwa: string; ulica: string }>;
-  location: string;
-  orderType: 'delivery' | 'pickup';
-}
 
-interface PaymentOrderData {
-  firstName: string;
-  lastName: string;
-  city: string;
-  street?: string;
-  houseNumber: string;
-  apartmentNumber?: string;
-  phone: string;
-  deliveryTime?: string;
-  items: Record<string, number>;
-  totalPrice: number;
-  email?: string;
-  type: 'delivery' | 'pickup';
-}
 
 // Dodaj funkcję sprawdzającą dostępność dostawy na konkretną godzinę
 const isDeliveryTimeAvailable = (time: string, location: string): { available: boolean; message?: string } => {
@@ -80,6 +61,7 @@ export default function OrderForm({ deliveryAreas, location, orderType }: OrderF
     houseNumber: '',
     apartmentNumber: '',
     phone: '',
+    email: '',
     deliveryTime: ''
   };
 
@@ -435,6 +417,20 @@ export default function OrderForm({ deliveryAreas, location, orderType }: OrderF
                   className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-yellow-500 focus:ring-yellow-500"
                 />
               </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 flex items-center gap-2">
+                  <MessageCircleCode className="w-4 h-4 text-yellow-600" />
+                  Email *
+                </label>
+                <input
+                  type="email"
+                  name="email"
+                  value={customerData.email}
+                  onChange={handleInputChange}
+                  required
+                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-yellow-500 focus:ring-yellow-500"
+                />
+              </div>
 
               {orderType === 'delivery' && (
                 <>
@@ -518,8 +514,8 @@ export default function OrderForm({ deliveryAreas, location, orderType }: OrderF
                   value={customerData.deliveryTime}
                   onChange={handleInputChange}
                   min={`${location === 'miejsce-piastowe' ? '11' : '12'}:00`}
-                  max="21:45"
-                  step="900" // 15 minut
+                  max="21:30"
+                  step="1800" // 15 minut
                   className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-yellow-500 focus:ring-yellow-500"
                 />
                 <p className="mt-1 text-sm text-gray-500">

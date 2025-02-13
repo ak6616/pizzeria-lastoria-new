@@ -1,17 +1,7 @@
 import React from 'react';
+import { MenuSectionProps, MenuItem } from '../types';
 
 
-interface MenuItem {
-  id: number;
-  nazwa: string;
-  cena: number;
-  skladniki?: string;
-}
-
-interface MenuSectionProps {
-  title: string;
-  items: MenuItem[];
-}
 
 export default function MenuSection({ title, items }: MenuSectionProps) {
   return (

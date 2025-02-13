@@ -1,12 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
 import { getNews } from '../services/api';
+import { NewsArticle } from '../types';
 
-export interface NewsArticle {
-  id: number;
-  tytul: string;
-  data: string;
-  tekst: string;
-}
+
 
 export function useNews() {
   const [articles, setArticles] = useState<NewsArticle[]>([]);

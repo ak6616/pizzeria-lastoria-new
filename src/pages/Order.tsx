@@ -4,12 +4,8 @@ import { getDeliveryAreas } from '../../server/services/api';
 import { MapPin, Home } from 'lucide-react';
 import { format } from 'date-fns';
 import { pl } from 'date-fns/locale';
+import { DeliveryArea } from '../../server/types';
 
-interface DeliveryArea {
-  id: number;
-  nazwa: string;
-  ulica: string;
-}
 
 const isDeliveryAvailable = (location: string): { available: boolean; message?: string } => {
   const now = new Date();

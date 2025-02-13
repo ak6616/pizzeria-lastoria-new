@@ -4,37 +4,8 @@ import { deleteOrder } from '../../services/api';
 import { format, isValid, parseISO } from 'date-fns';
 import { pl } from 'date-fns/locale';
 import React from 'react';
+import { OrdersManagementProps, Order, OrderItem } from '../../types';
 
-export interface Order {
-  id: number;
-  imie: string;
-  nazwisko: string;
-  miejscowosc: string;
-  ulica: string;
-  numerDomu: string;
-  numerMieszkania: string;
-  numerTelefonu: string;
-  zamowienieNaGodzine: string;
-  dataGodzinaZamowienia: string;
-  zamowioneProdukty: string;
-  suma: number;
-  type: 'delivery' | 'pickup';
-}
-
-interface OrderItem {
-  name: string;
-  quantity: number;
-  price: number;
-  removedIngredients?: string[];
-  addedIngredients?: Array<{
-    name: string;
-    price: number;
-  }>;
-}
-
-interface OrdersManagementProps {
-  location: string;
-}
 
 const formatOrderType = (type: 'delivery' | 'pickup') => {
   return type === 'delivery' ? 'Dostawa' : 'Odbiór osobisty';

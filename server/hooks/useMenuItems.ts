@@ -1,21 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
 import { getMenuItems, getAdditionalIngredients } from '../services/api';
+import { MenuItem, AdditionalIngredient } from '../types';
 
-export interface MenuItem {
-  id: number;
-  category: string;
-  nazwa: string;
-  cena: number;
-  skladniki?: string;
-  uniqueId: string;
-  location: string;
-}
 
-export interface AdditionalIngredient {
-  id: number;
-  nazwa: string;
-  cena: number;
-}
 
 type LocationSuffix = '_mp' | '_hacz';
 

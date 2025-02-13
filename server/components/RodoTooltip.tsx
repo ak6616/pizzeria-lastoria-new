@@ -1,8 +1,6 @@
 import React from 'react';
+import { RodoTooltipProps } from '../types';
 
-interface RodoTooltipProps {
-  children: React.ReactNode;
-}
 
 export default function RodoTooltip({ children }: RodoTooltipProps) {
   return (

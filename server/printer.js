@@ -5,7 +5,6 @@ import iconv from 'iconv-lite';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-import fs from 'fs';
 
 const PRINTER_NAME = 'xprinter';
 const ENCODING = 'CP852_LATIN2'; // Kodowanie dla polskich znaków

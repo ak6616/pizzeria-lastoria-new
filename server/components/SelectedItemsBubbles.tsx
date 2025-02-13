@@ -1,18 +1,8 @@
 import SelectedItemBubble from './SelectedItemBubble';
 import React from 'react';
+import { SelectedItemsBubblesProps } from '../types';
 
 
-interface SelectedItemsBubblesProps {
-  items: Array<{
-    uniqueId: string;
-    nazwa: string;
-    skladniki?: string;
-    category?: string;
-    instanceId: string;
-  }>;
-  onEditIngredients: (uniqueId: string, instanceId: string) => void;
-  onRemoveItem: (uniqueId: string, instanceId: string) => void;
-}
 
 export default function SelectedItemsBubbles({
   items,

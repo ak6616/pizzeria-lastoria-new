@@ -11,7 +11,8 @@ export default defineConfig({
     cors: true,       // W��cza CORS
     proxy: {          // Proxy dla backendu (je�li masz API na innym porcie)
       '/api': {
-        target: 'http://77.65.194.148:3000',
+        target: 
+        'http://77.65.194.148:3000',
         changeOrigin: true,
         secure: false
       }

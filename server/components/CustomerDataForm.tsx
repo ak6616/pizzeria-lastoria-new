@@ -1,25 +1,6 @@
 import React from 'react';
+import { CustomerDataFormProps, CustomerData } from '../types';
 
-export interface CustomerData {
-  firstName: string;
-  lastName: string;
-  city: string;
-  street: string;
-  houseNumber: string;
-  apartmentNumber: string;
-  phone: string;
-  deliveryTime: string;
-}
-
-interface CustomerDataFormProps {
-  deliveryAreas: Array<{ id: number; nazwa: string; ulica: string }>;
-  onSubmit: (data: CustomerData) => void;
-  isSubmitting: boolean;
-  selectedItems: Record<string, number>;
-  deliveryCost: number | null;
-  deliveryError: string | null;
-  totalPrice: number;
-}
 
 export default function CustomerDataForm({
   deliveryAreas,
@@ -42,6 +23,7 @@ export default function CustomerDataForm({
       apartmentNumber: formData.get('apartmentNumber') as string,
       phone: formData.get('phone') as string,
       deliveryTime: formData.get('deliveryTime') as string,
+      email: formData.get('email') as string,
     };
     onSubmit(customerData);
   };
@@ -157,6 +139,18 @@ export default function CustomerDataForm({
           <input
             type="time"
             name="deliveryTime"
+            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-yellow-500 focus:ring-yellow-500"
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700">
+            Email *
+          </label>
+          <input
+            required
+            type="email"
+            name="email"
             className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-yellow-500 focus:ring-yellow-500"
           />
         </div>

@@ -1,10 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { getGalleryImages } from '../services/api';
+import { GalleryImage } from '../types';
 
-export interface GalleryImage {
-  id: number;
-  link: string;
-}
 
 export function useGallery() {
   const [images, setImages] = useState<GalleryImage[]>([]);
