@@ -1,7 +1,8 @@
 import { OrderItem, LoginCredentials } from "../types";
-const API_BASE_URL = import.meta.env.PROD 
-  ? 'http://77.65.194.148:3000/api'
-  : 'http://192.168.100.150:3000/api';
+import dotenv from 'dotenv';
+const API_BASE_URL = import.meta.env.VITE_API_URL;
+  // ? 'http://77.65.194.148:3000/api'
+  // : 'http://192.168.100.150:3000/api';
   // 'http://localhost:3000';
 
 // type LocationSuffix = '_mp' | '_hacz';

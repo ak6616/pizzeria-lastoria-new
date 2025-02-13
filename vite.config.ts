@@ -12,7 +12,9 @@ export default defineConfig({
     proxy: {          // Proxy dla backendu (je�li masz API na innym porcie)
       '/api': {
         target: 
-        'http://77.65.194.148:3000',
+        // 'http://192.168.100.150:3000',
+        // 'http://localhost:3000',
+        process.env.VITE_API_URL,
         changeOrigin: true,
         secure: false
       }
