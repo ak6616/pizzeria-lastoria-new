@@ -446,7 +446,7 @@ app.get('/api/delivery-areas:location', async (req, res) => {
   const connection = await getConnection();
 
   try {
-    const [rows] = await connection.execute(`SELECT DISTINCT id, nazwa, ulica FROM dostawaweekday${location}`);
+    const [rows] = await connection.execute(`SELECT id, nazwa, ulica FROM dostawaweekday${location}`);
     res.json(rows);
   } catch (error) {
     console.error('Error fetching delivery areas:', error);

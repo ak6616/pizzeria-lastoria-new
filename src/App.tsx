@@ -6,7 +6,7 @@ import Menu from './pages/Menu';
 import Gallery from './pages/Gallery';
 import News from './pages/News';
 import Order from './pages/Order';
-import Admin from './pages/Admin';
+import Admin from '../server/components/Admin';
 
 function App() {
   return (

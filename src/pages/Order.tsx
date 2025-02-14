@@ -54,6 +54,27 @@ export default function Order() {
   const [error, setError] = useState<string | null>(null);
   const [orderType, setOrderType] = useState<OrderType>(null);
 
+  const filteredAreas = new Map<string, Set<string | null>>();
+  const [openCity, setOpenCity] = useState<string | null>(null);
+
+const handleToggle = (city: string) => {
+  setOpenCity(openCity === city ? null : city);
+};
+
+deliveryAreas.forEach((area) => {
+  if (!filteredAreas.has(area.nazwa)) {
+    filteredAreas.set(area.nazwa, new Set());
+  }
+
+  if (area.ulica === null) {
+    // Je�li istnieje wersja bez ulicy, usuwamy ulice i zapisujemy "ca�y obszar"
+    filteredAreas.set(area.nazwa, new Set(["Cały Obszar"]));
+  } else if (!filteredAreas.get(area.nazwa)?.has("Cały Obszar")) {
+    // Je�li nie znaleziono jeszcze "ca�ego obszaru", dodajemy ulic�
+    filteredAreas.get(area.nazwa)?.add(area.ulica);
+  }
+});
+
   useEffect(() => {
     async function fetchDeliveryAreas() {
       if (!selectedLocation) return;
@@ -193,22 +214,31 @@ export default function Order() {
         <div className="bg-white/90 rounded-lg p-6 mb-8">
           <h2 className="text-xl font-semibold mb-4">Dowozimy do:</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {deliveryAreas.map((area) => (
-              <div key={area.id} className="flex flex-col">
-                <div className="flex items-center gap-2">
-                  <MapPin className="w-4 h-4 text-yellow-600" />
-                  <span className="font-medium">{area.nazwa}</span>
-                </div>
-                {area.ulica && (
-                  <div className="flex items-center gap-2 ml-4 mt-1">
-                    <Home className="w-4 h-4 text-gray-500" />
-                    <span className="text-sm text-gray-600">
-                      ul. {area.ulica}
-                    </span>
-                  </div>
-                )}
+            {Array.from(filteredAreas.entries()).map(([nazwa, ulice]) => (
+              <div key={nazwa} className="flex flex-col">
+              <div
+                className="flex items-center gap-2 cursor-pointer"
+                onClick={() => handleToggle(nazwa)}
+                onMouseEnter={() => handleToggle(nazwa)}
+              >
+                <MapPin className="w-4 h-4 text-yellow-600" />
+                <span className="font-medium">{nazwa}</span>
               </div>
-            ))}
+          
+              {openCity === nazwa && (
+                <div className="ml-4 mt-1 border-l-2 border-gray-300 pl-2">
+                  {Array.from(ulice).map((ulica, index) => (
+                    <div key={index} className="flex items-center gap-2">
+                      <Home className="w-4 h-4 text-gray-500" />
+                      <span className="text-sm text-gray-600">
+                        {ulica === "Cały Obszar" ? ulica : `ul. ${ulica}`}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          ))}
           </div>
         </div>
 
