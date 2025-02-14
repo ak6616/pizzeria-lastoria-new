@@ -9,20 +9,21 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import { printToReceiptPrinter } from './printer.js';
 import { initializePayment } from './services/tpay.js';
+// import WebSocket from 'ws';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const app = express();
 const port = process.env.PORT ;
-
+// const socket = new WebSocket('wss:pizza-lastoria.pl');
 
 // Serwuj pliki statyczne z folderu dist
 app.use(express.static(path.join(__dirname, '../server')));
 
 app.use(cors({
   origin: 
-  'http://77.65.194.148:5173', // Tw�j frontendowy adres
+  'https://pizza-lastoria.pl', // Tw�j frontendowy adres
   methods: 'GET,POST,PUT,DELETE',
   allowedHeaders: 'Content-Type,Authorization',
   credentials: true   
@@ -731,7 +732,7 @@ app.get('/payment/success', async (req, res) => {
 
   try {
     const tpay = new TPay({
-      merchantId: process.env.TPAY_SECRET_ID,
+      merchantId: process.env.TPAY_CLIENT_ID,
       merchantSecret: process.env.TPAY_API_KEY,
       sandbox: false
     });

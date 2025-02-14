@@ -83,18 +83,28 @@ export interface OrderFormProps {
 }
   
 export interface PaymentOrderData {
-firstName: string;
-lastName: string;
-type: 'delivery' | 'pickup';
-city: string;
-street?: string;
-houseNumber: string;
-apartmentNumber?: string;
-phone: string;
-deliveryTime?: string;
-items: Record<string, number>;
-totalPrice: number;
-email?: string;
+    firstName: string;
+    lastName: string;
+    type: 'delivery' | 'pickup';
+    city: string;
+    street?: string;
+    houseNumber: string;
+    apartmentNumber?: string;
+    phone: string;
+    items: {
+      uniqueId: string;
+      id: number;
+      category: string;
+      name: string;
+      quantity: number;
+      price: number;
+      removedIngredients: string[];
+      addedIngredients: { id: string | number; name: string; price: number }[];
+    }[];
+    totalPrice: number;
+    email?: string;
+    orderDateTime: string;
+    location: string;
 }
 export interface RodoTooltipProps {
     children: React.ReactNode;

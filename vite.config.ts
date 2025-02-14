@@ -8,13 +8,20 @@ export default defineConfig({
     port: 5173,       // Mo�esz zmieni� na inny port
     strictPort: true, // Zapewnia, �e Vite u�yje dok�adnie tego portu
     // https: false,     // Mo�esz w��czy� HTTPS (wymaga certyfikatu)
-    cors: true,       // W��cza CORS
+    cors: true, 
+    
+    allowedHosts: ['pizza-lastoria.pl', 'www.pizza-lastoria.pl'],      // W��cza CORS
     proxy: {          // Proxy dla backendu (je�li masz API na innym porcie)
       '/api': {
-        target: 'http://77.65.194.148:3000',
+        target: 'https://www.pizza-lastoria.pl:3000',
         changeOrigin: true,
-        secure: false
+        secure: true
       }
-    }
+    },
+    // hmr: {
+    //   protocol: 'wss',
+    //   host: 'pizza-lastoria.pl',
+    //   // port: 443
+    // }
   }
 });
