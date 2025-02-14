@@ -9,6 +9,8 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import { printToReceiptPrinter } from './printer.js';
 import { initializePayment } from './services/tpay.js';
+import fs from 'fs';
+import https from 'https';
 // import WebSocket from 'ws';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -23,7 +25,7 @@ app.use(express.static(path.join(__dirname, '../server')));
 
 app.use(cors({
   origin: 
-  'https://pizza-lastoria.pl', // Tw�j frontendowy adres
+  'https://www.pizza-lastoria.pl', // Tw�j frontendowy adres
   methods: 'GET,POST,PUT,DELETE',
   allowedHeaders: 'Content-Type,Authorization',
   credentials: true   
@@ -786,7 +788,12 @@ app.get('*', (req, res) => {
   }
 });
 
-const server = app.listen(port, () => {
+const sslOptions = {
+  key: fs.readFileSync('/etc/letsencrypt/live/pizza-lastoria.pl/privkey.pem'),
+  cert: fs.readFileSync('/etc/letsencrypt/live/pizza-lastoria.pl/fullchain.pem'),
+};
+
+const server = https.createServer(sslOptions, app).listen(port, () => {
   console.log(`Server running on port ${port}`);
 }).on('error', (err) => {
   if (err.code === 'EADDRINUSE') {
