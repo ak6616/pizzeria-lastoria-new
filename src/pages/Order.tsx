@@ -10,12 +10,13 @@ import { DeliveryArea } from '../../server/types';
 const isDeliveryAvailable = (location: string): { available: boolean; message?: string } => {
   const now = new Date();
   const currentHour = now.getHours();
+  const currentMinute = now.getMinutes();
   const isWeekend = now.getDay() === 0 || now.getDay() === 6;
   const isHoliday = false; // TODO: Dodać sprawdzanie świąt
 
   // Wspólne godziny dla weekendów i świąt
   if (isWeekend || isHoliday) {
-    if (currentHour < 16 || currentHour >= 22) {
+    if (currentHour < 1 || currentHour >= 21 && currentMinute >= 30) {
       return {
         available: false,
         message: `Dostawa w weekendy i święta dostępna w godzinach 16:00 - 22:00. 
@@ -27,7 +28,7 @@ const isDeliveryAvailable = (location: string): { available: boolean; message?: 
 
   // Godziny w dni powszednie
   if (location === 'miejsce-piastowe') {
-    if (currentHour < 11 || currentHour >= 22) {
+    if (currentHour < 11 || currentHour >= 21 && currentMinute >= 30) {
       return {
         available: false,
         message: 'Dostawa w dni powszednie dostępna w godzinach 11:00 - 22:00'

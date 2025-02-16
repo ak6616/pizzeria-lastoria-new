@@ -14,7 +14,7 @@ export default defineConfig({
       cert: fs.readFileSync('/etc/letsencrypt/live/pizza-lastoria.pl/fullchain.pem')
     },
     
-    allowedHosts: ['77.65.194.148', 'pizza-lastoria.pl', 'www.pizza-lastoria.pl'],      // W��cza CORS
+    allowedHosts: ['pizza-lastoria.pl', 'www.pizza-lastoria.pl'],      // W��cza CORS
     proxy: {          // Proxy dla backendu (je�li masz API na innym porcie)
       '/api': {
         target: 'https://www.pizza-lastoria.pl:3000',
@@ -22,10 +22,5 @@ export default defineConfig({
         secure: true
       }
     },
-    // hmr: {
-    //   protocol: 'wss',
-    //   host: 'pizza-lastoria.pl',
-    //   // port: 443
-    // }
   }
 });

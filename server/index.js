@@ -25,7 +25,7 @@ app.use(express.static(path.join(__dirname, '../server')));
 
 app.use(cors({
   origin: 
-  'https://www.pizza-lastoria.pl', // Tw�j frontendowy adres
+  ['https://www.pizza-lastoria.pl', 'https://pizza-lastoria.pl'], // Tw�j frontendowy adres
   methods: 'GET,POST,PUT,DELETE',
   allowedHeaders: 'Content-Type,Authorization',
   credentials: true   
@@ -64,6 +64,10 @@ const DEBUG = true; // łatwe włączanie/wyłączanie logowania
 
 // Middleware do logowania wszystkich zapytań
 app.use((req, res, next) => {
+  // if (!req.secure) {
+  //   return res.redirect(301, `https://${req.headers.host}${req.url}`);
+  // }
+
   if (DEBUG) {
     console.log(`${new Date().toISOString()} ${req.method} ${req.url}`);
     console.log('Headers:', req.headers);

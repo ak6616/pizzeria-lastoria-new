@@ -17,7 +17,10 @@ export async function initializePayment(paymentData) {
       return_url: process.env.TPAY_RETURN_URL,
       return_error_url: process.env.TPAY_ERROR_URL
     })
+    
   });
 
   return response.json();
 } 
+
+    

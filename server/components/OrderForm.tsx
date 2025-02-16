@@ -113,7 +113,7 @@ export default function OrderForm({ deliveryAreas, location, orderType }: OrderF
     async function checkOrderLimit() {
       try {
         const { count } = await getActiveOrdersCount(location);
-        setOrderLimitReached(count >= 10);
+        setOrderLimitReached(count >= 5);
       } catch (err) {
         console.error('Error checking order limit:', err);
       }
@@ -141,6 +141,7 @@ export default function OrderForm({ deliveryAreas, location, orderType }: OrderF
       });
 
       const transaction = await response.json();
+      console.log(transaction);
 
       if (transaction.url) {
         window.location.href = transaction.url;
@@ -216,7 +217,7 @@ export default function OrderForm({ deliveryAreas, location, orderType }: OrderF
     };
 
     // Najpierw inicjujemy płatność
-    // await handlePayment(orderData);
+    await handlePayment(orderData);
 
     // Jeśli płatność się powiedzie, wysyłamy zamówienie
     const response = await fetch(`/api/orders/${location}`, {
@@ -441,6 +442,7 @@ export default function OrderForm({ deliveryAreas, location, orderType }: OrderF
                   name="phone"
                   inputMode="tel" 
                   pattern="[0-9]+"
+                  maxLength={12}
                   value={customerData.phone}
                   onChange={handleInputChange}
                   required
