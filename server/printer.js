@@ -24,16 +24,18 @@ export async function printToReceiptPrinter(orderData) {
     let receipt = '';
     // Header
     
-    receipt += `Data: ${formatDate(new Date())}\n`;
+    receipt += `${formatDate(new Date())}\n`;
     
     // Customer data
-    receipt += `Klient: ${orderData.imie} ${orderData.nazwisko}\n`;
-    receipt += `Tel: ${orderData.numerTelefonu}\n`;
+    receipt += `${orderData.imie} ${orderData.nazwisko}\n`;
+    receipt += `${orderData.numerTelefonu}\n`;
     if (orderData.typ === 'delivery') {
-      receipt += `Adres: ${orderData.miejscowosc}${orderData.ulica ? `, ${orderData.ulica}` : ''} ${orderData.numerDomu}${orderData.numerMieszkania ? `/${orderData.numerMieszkania}` : ''}\n`;
+      receipt += `${orderData.miejscowosc}${orderData.ulica ? `, ${orderData.ulica}` : ''} ${orderData.numerDomu}${orderData.numerMieszkania ? `/${orderData.numerMieszkania}` : ''}\n`;
     }
     receipt += `Typ: ${orderData.typ === 'delivery' ? 'Dostawa' : 'Odbiór osobisty'}\n`;
-    
+    if (orderData.zamowienieNaGodzine) {
+      receipt += `Na godzinę: ${orderData.zamowienieNaGodzine}\n`;
+    }
     // Ordered products
     receipt += 'ZAMÓWIENIE:\n';
     let items = Array.isArray(orderData.zamowioneProdukty) 
@@ -49,8 +51,6 @@ export async function printToReceiptPrinter(orderData) {
         receipt += `  DODATKI: ${item.addedIngredients.map(i => i.name).join(', ')}\n`;
       }
     });
-    
-    receipt += '--------------------------------\n';
     // Total
     receipt += `SUMA: ${orderData.suma} zł`;
     // Zapisz do pliku i wydrukuj
@@ -62,7 +62,7 @@ export async function printToReceiptPrinter(orderData) {
     return new Promise((resolve, reject) => {
       // const lpProcess = exec(`lp -d ${PRINTER_NAME} ${OUTPUT_FILE}`, (error, stdout, stderr) => {
 
-      const lpProcess = exec(`echo "${receipt}" | lp -d xprinter -o media=Custom.50x42mm -o page-left=0 -o page-right=0 -o page-top=0 -o page-bottom=0 -o font-size=5 -o print-quality=5 -o orientation-requested=6`, (error, stdout, stderr) => {
+      const lpProcess = exec(`echo "${receipt}" | lp -d xprinter -o media=Custom.50x42mm -o fit-to-page -o font-size=5 -o print-quality=5 -o orientation-requested=6`, (error, stdout, stderr) => {
         if (error) {
           console.error('Błąd drukowania:', error);
           reject(error);

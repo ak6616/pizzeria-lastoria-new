@@ -181,7 +181,7 @@ export default function OrdersManagement({ location }: OrdersManagementProps) {
                   <div className="text-right">
                     <div className="font-medium">Suma: {order.suma} zł</div>
                     {order.zamowienieNaGodzine && (
-                      <div className="text-sm text-gray-600">
+                      <div className="text-mid font-bold text-red-600">
                         Na godzinę: {order.zamowienieNaGodzine}
                       </div>
                     )}

@@ -7,6 +7,8 @@ import Gallery from './pages/Gallery';
 import News from './pages/News';
 import Order from './pages/Order';
 import Admin from '../server/components/Admin';
+import PaymentSuccess from './pages/PaymentSuccess';
+import PaymentFailed from './pages/PaymentFailed';
 
 function App() {
   return (
@@ -19,6 +21,9 @@ function App() {
           <Route path="news" element={<News />} />
           <Route path="order" element={<Order />} />
           <Route path="admin" element={<Admin />} />
+          <Route path="paymentSuccess" element={<PaymentSuccess />} />
+          <Route path="paymentFailed" element={<PaymentFailed />} />
+
         </Route>
       </Routes>
     </BrowserRouter>

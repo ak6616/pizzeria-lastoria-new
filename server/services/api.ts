@@ -1,4 +1,4 @@
-import { OrderItem, LoginCredentials } from "../types";
+import { OrderItem, LoginCredentials, PaymentOrderData } from "../types";
 const API_BASE_URL = import.meta.env.VITE_API_URL;
 
 const getLocationSuffix = (location: string): string => {
@@ -401,3 +401,4 @@ export async function getActiveOrdersCount(location: string) {
   }
   return response.json();
 }
+

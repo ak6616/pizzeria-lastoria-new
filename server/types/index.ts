@@ -85,10 +85,10 @@ export interface OrderFormProps {
 export interface PaymentOrderData {
     firstName: string;
     lastName: string;
-    type: 'delivery' | 'pickup';
     city: string;
     street?: string;
     houseNumber: string;
+    description?: string,
     apartmentNumber?: string;
     phone: string;
     items: {
@@ -102,7 +102,7 @@ export interface PaymentOrderData {
       addedIngredients: { id: string | number; name: string; price: number }[];
     }[];
     totalPrice: number;
-    email?: string;
+    email: string;
     orderDateTime: string;
     location: string;
 }

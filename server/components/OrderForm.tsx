@@ -125,13 +125,20 @@ export default function OrderForm({ deliveryAreas, location, orderType }: OrderF
   const handlePayment = async (orderData: PaymentOrderData) => {
     try {
       const paymentData = {
+        name: `${orderData.firstName} ${orderData.lastName}`,
         amount: orderData.totalPrice,
         description: `Zamówienie - Pizzeria Lastoria ${location}`,
         crc: `${Date.now()}`,
-        email: orderData.email,
-        name: `${orderData.firstName} ${orderData.lastName}`,
-        address: `${orderData.city} ${orderData.street || ''} ${orderData.houseNumber}`,
-        phone: orderData.phone
+        // payer: {
+          email: `${orderData.email}`,
+          
+          city: `${orderData.city}`, 
+          address: `${orderData.street || ''} ${orderData.houseNumber}${orderData.apartmentNumber ? '/' + orderData.apartmentNumber : ''}`,
+          phone: orderData.phone,
+          country: 'Poland',
+        // },
+        return_url: import.meta.env.VITE_TPAY_RETURN_URL,
+        return_error_url: import.meta.env.VITE_TPAY_ERROR_URL
       };
 
       const response = await fetch('/api/payment/init', {
@@ -141,10 +148,10 @@ export default function OrderForm({ deliveryAreas, location, orderType }: OrderF
       });
 
       const transaction = await response.json();
-      console.log(transaction);
+      
 
-      if (transaction.url) {
-        window.location.href = transaction.url;
+      if (transaction.transactionPaymentUrl) {
+        window.location.href = transaction.transactionPaymentUrl;
       } else {
         throw new Error('Nie udało się utworzyć transakcji');
       }
@@ -172,9 +179,10 @@ export default function OrderForm({ deliveryAreas, location, orderType }: OrderF
     }
 
     const orderData = {
-      firstName: customerData.firstName,
-      lastName: customerData.lastName,
+      firstName: `${customerData.firstName}`, 
+      lastName: `${customerData.lastName}`,
       type: orderType,
+      email: customerData.email,
       city: customerData.city,
       street: customerData.street,
       houseNumber: customerData.houseNumber,
@@ -331,16 +339,14 @@ export default function OrderForm({ deliveryAreas, location, orderType }: OrderF
   }
 
   const handleCityChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const selectedValue = e.target.value;
-    const [selectedCity, selectedStreet] = selectedValue.split('|');
-    
-    setCustomerData(prev => ({
+    const [city, street = ""] = e.target.value.split("|");
+  
+    setCustomerData((prev) => ({
       ...prev,
-      city: selectedCity,
-      street: selectedStreet || ''  // Ustawiamy ulicę tylko jeśli jest przypisana do wybranej miejscowości
+      city,
+      street: street || prev.street, // Zapisuje ulic� tylko, je�li by�a w opcji
     }));
   };
-
   const handleStreetChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setCustomerData(prev => ({
       ...prev,
@@ -355,6 +361,13 @@ export default function OrderForm({ deliveryAreas, location, orderType }: OrderF
       [name]: value
     }));
   };
+
+  const uniqueAreas = Array.from(
+    new Set(deliveryAreas.map(area => `${area.nazwa}|${area.ulica || ''}`))
+  ).map((uniqueArea) => {
+    const [nazwa, ulica] = uniqueArea.split('|');
+    return { nazwa, ulica };
+  });
 
   return (
     <div className="max-w-6xl mx-auto bg-white/90 p-6 rounded-lg shadow-xl">
@@ -475,14 +488,14 @@ export default function OrderForm({ deliveryAreas, location, orderType }: OrderF
                     <select
                       name="city"
                       required
-                      value={`${customerData.city}${customerData.street ? `|${customerData.street}` : ''}`}
+                      value={`${customerData.city}`}
                       onChange={handleCityChange}
                       className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-yellow-500 focus:ring-yellow-500"
                     >
                       <option key="default" value="">Wybierz miejscowość</option>
-                      {deliveryAreas.map((area) => (
+                      {uniqueAreas.map((area) => (
                         <option 
-                          key={`${area.id}_${area.nazwa}_${area.ulica || ''}`}
+                          key={`${area.nazwa}|${area.ulica}`}
                           value={`${area.nazwa}${area.ulica ? `|${area.ulica}` : ''}`}
                         >
                           {area.nazwa}{area.ulica ? ` (ul. ${area.ulica})` : ''}

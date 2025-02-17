@@ -8,7 +8,7 @@ import session from 'express-session';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { printToReceiptPrinter } from './printer.js';
-import { initializePayment } from './services/tpay.js';
+// import { initializePayment } from './services/api';
 import fs from 'fs';
 import https from 'https';
 // import WebSocket from 'ws';
@@ -16,6 +16,7 @@ import https from 'https';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+let tpayToken = null;
 const app = express();
 const port = process.env.PORT ;
 // const socket = new WebSocket('wss:pizza-lastoria.pl');
@@ -732,14 +733,15 @@ app.get('/api/orders/:location/count', async (req, res) => {
   }
 });
 
+
 // Endpoint dla sukcesu płatności
-app.get('/payment/success', async (req, res) => {
+app.get('/payment-success', async (req, res) => {
   const { tr_id, tr_amount, tr_crc } = req.query;
 
   try {
     const tpay = new TPay({
       merchantId: process.env.TPAY_CLIENT_ID,
-      merchantSecret: process.env.TPAY_API_KEY,
+      merchantSecret: process.env.TPAY_SECRET,
       sandbox: false
     });
 
@@ -774,8 +776,77 @@ app.get('/payment/error', (req, res) => {
   res.redirect('/payment-failed');
 });
 
+async function getTpayToken() {
+  try {
+      const url = "https://api.tpay.com/oauth/auth";
+      const data = new URLSearchParams({
+          client_id: process.env.TPAY_CLIENT_ID,
+          client_secret: process.env.TPAY_SECRET
+      });
+
+      const response = await fetch(url, {
+          method: "POST",
+          headers: { "Content-Type": "application/x-www-form-urlencoded" },
+          body: data
+      });
+
+      if (!response.ok) throw new Error(`HTTP Error! Status: ${response.status}`);
+
+      const result = await response.json();
+      tpayToken = result.access_token; // Zapisujemy nowy token
+      
+  } catch (error) {
+      console.error("Błąd pobierania tokena:", error.message);
+  }
+}
+
+// Pobieramy token na starcie aplikacji
+getTpayToken();
+
+// Automatyczne od�wie�anie co 1h 55min (przed wyga�ni�ciem tokena)
+setInterval(getTpayToken, 115 * 60 * 1000); // 115 minut w milisekundach
+
+// Endpoint zwracaj�cy aktualny token
+// app.get("/token", (req, res) => {
+//   if (tpayToken) {
+//       res.json({ access_token: tpayToken });
+//   } else {
+//       res.status(500).json({ error: "Brak tokena, spr�buj ponownie p�niej." });
+//   }
+// });
+
 app.post('/api/payment/init', async (req, res) => {
   try {
+
+    async function initializePayment(paymentData) {
+      // Tutaj implementacja integracji z API TPay
+      const response = await fetch('https://api.tpay.com/transactions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${tpayToken}`
+        },
+        body: JSON.stringify({
+          amount: paymentData.amount,
+          description: paymentData.description,
+          crc: paymentData.crc,
+          payer: {
+            email: paymentData.email,
+            city: paymentData.city,
+            name: `${paymentData.name}`,
+            address: `${paymentData.city} ${paymentData.street || ''} ${paymentData.houseNumber}${paymentData.apartmentNumber ? '/' + paymentData.apartmentNumber : ''}`,
+            phone: paymentData.phone,
+          },
+          
+          return_url: process.env.TPAY_RETURN_URL,
+          return_error_url: process.env.TPAY_ERROR_URL
+        })
+        
+      });
+      console.log("Odpowiedź na rozpoczęcie transakcji: ".response);
+      return response.json();
+    } 
+
     const transaction = await initializePayment(req.body);
     res.json(transaction);
   } catch (error) {
@@ -815,4 +886,6 @@ process.on('SIGTERM', () => {
     process.exit(0);
   });
 });
+
+////////////////////////////////////////////
 
