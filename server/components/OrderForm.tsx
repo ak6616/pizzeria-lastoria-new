@@ -131,8 +131,7 @@ export default function OrderForm({ deliveryAreas, location, orderType }: OrderF
         crc: `${Date.now()}`,
         // payer: {
           email: `${orderData.email}`,
-          
-          city: `${orderData.city}`, 
+          city: orderData.city == "" ? "Miejsce Piastowe" : orderData.city, 
           address: `${orderData.street || ''} ${orderData.houseNumber}${orderData.apartmentNumber ? '/' + orderData.apartmentNumber : ''}`,
           phone: orderData.phone,
           country: 'Poland',
@@ -148,13 +147,28 @@ export default function OrderForm({ deliveryAreas, location, orderType }: OrderF
       });
 
       const transaction = await response.json();
-      
-
       if (transaction.transactionPaymentUrl) {
         window.location.href = transaction.transactionPaymentUrl;
       } else {
         throw new Error('Nie udało się utworzyć transakcji');
       }
+      // if(transaction.transactionId){
+      //   const response = await fetch('/api/payment/status', {
+      //     method: 'POST',
+      //     headers: { 'Content-Type': 'application/json' },
+      //     body: JSON.stringify({ transactionId: transaction.transactionId }) // Poprawiony body
+      // })};
+      // const transactionStatus = await response.json();
+      
+
+      
+    //   if(transactionStatus == 'correct'){
+    //     return;
+    //   } else {
+    //     throw new Error('Nie opłacono transakcji');
+    // }
+      
+      
     } catch (error) {
       console.error('Błąd podczas inicjowania płatności:', error);
       throw error;
@@ -226,6 +240,8 @@ export default function OrderForm({ deliveryAreas, location, orderType }: OrderF
 
     // Najpierw inicjujemy płatność
     await handlePayment(orderData);
+
+    
 
     // Jeśli płatność się powiedzie, wysyłamy zamówienie
     const response = await fetch(`/api/orders/${location}`, {
@@ -524,6 +540,7 @@ export default function OrderForm({ deliveryAreas, location, orderType }: OrderF
                       Numer domu *
                     </label>
                     <input
+                      maxLength={3}
                       type="text"
                       name="houseNumber"
                       inputMode="numeric" 
@@ -542,6 +559,7 @@ export default function OrderForm({ deliveryAreas, location, orderType }: OrderF
                     </label>
                     <input
                       type="text"
+                      maxLength={3}
                       name="apartmentNumber"
                       value={customerData.apartmentNumber}
                       onChange={handleInputChange}
@@ -657,7 +675,8 @@ export default function OrderForm({ deliveryAreas, location, orderType }: OrderF
                   <span className="text-sm text-gray-600">
                     Akceptuję{' '}
                     <RodoTooltip>
-                      <span className="text-yellow-600 hover:text-yellow-700 cursor-help underline">
+                      <span 
+                      >
                         klauzulę RODO
                       </span>
                     </RodoTooltip>

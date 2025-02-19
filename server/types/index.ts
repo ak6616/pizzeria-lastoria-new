@@ -85,7 +85,7 @@ export interface OrderFormProps {
 export interface PaymentOrderData {
     firstName: string;
     lastName: string;
-    city: string;
+    city?: string;
     street?: string;
     houseNumber: string;
     description?: string,
@@ -107,6 +107,9 @@ export interface PaymentOrderData {
     location: string;
 }
 export interface RodoTooltipProps {
+    children: React.ReactNode;
+}
+export interface RegulationsTooltipProps {
     children: React.ReactNode;
 }
 export interface SelectedItemBubbleProps {

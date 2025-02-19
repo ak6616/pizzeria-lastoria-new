@@ -1,12 +1,36 @@
-import React from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { RodoTooltipProps } from '../types';
 
 
 export default function RodoTooltip({ children }: RodoTooltipProps) {
+  const [isOpen, setIsOpen] = useState(false);
+  const tooltipRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (tooltipRef.current && !tooltipRef.current.contains(event.target as Node)) {
+        setIsOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+  
   return (
-    <div className="group relative inline-block">
-      {children}
-      <div className="invisible group-hover:visible absolute bottom-full left-0 mb-2 w-[600px] p-6 bg-white/95 rounded-lg shadow-lg text-sm text-gray-700 z-50 max-h-[80vh] overflow-y-auto">
+    <div className="group relative inline-block" ref={tooltipRef}
+    
+        >
+      <span 
+        className="text-yellow-600 hover:text-yellow-700 cursor-pointer underline"
+        onClick={() => setIsOpen(!isOpen)}
+      >
+        {children}
+      </span>
+
+      {isOpen && (
+      <div className="absolute bottom-full left-0 mb-2 w-[600px] p-6 bg-white/95 rounded-lg shadow-lg text-sm text-gray-700 z-50 max-h-[20vh] overflow-y-auto"
+      
+      >
         <div className="prose prose-sm max-w-none">
           <h2 className="text-lg font-bold mb-4">
             Deklaracja RODO dotycząca przetwarzania danych osobowych klientów pizzerii Lastoria
@@ -38,6 +62,7 @@ export default function RodoTooltip({ children }: RodoTooltipProps) {
             <li>Imię i nazwisko</li>
             <li>Adres dostawy</li>
             <li>Numer telefonu</li>
+            <li>Adres e-mail</li>
             <li>Informacje o zamówieniu (rodzaj i ilość produktów)</li>
           </ul>
 
@@ -64,6 +89,7 @@ export default function RodoTooltip({ children }: RodoTooltipProps) {
           </p>
         </div>
       </div>
+       )}
     </div>
   );
 } 

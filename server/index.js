@@ -561,7 +561,14 @@ app.post('/api/orders/:location', async (req, res) => {
   const suffix = location === 'haczow' ? '_hacz' : '_mp';
   
   try {
-    const orderData = req.body;
+
+    
+  
+     // Poprawna nazwa zmiennej
+    
+     // Sprawdzenie konkretnego statusu
+
+      const orderData = req.body;
     console.log('=== Nowe zamówienie otrzymane ===');
     console.log('Lokalizacja:', location);
     console.log('Dane zamówienia:', JSON.stringify(orderData, null, 2));
@@ -582,47 +589,51 @@ app.post('/api/orders/:location', async (req, res) => {
       orderData.totalPrice
     ];
 
-    // Najpierw zapisz do bazy
-    const [result] = await connection.execute(
-      `INSERT INTO zamowienia${suffix} (
-        imie, nazwisko, typ, miejscowosc, ulica, numerDomu, numerMieszkania, 
-        numerTelefonu, zamowienieNaGodzine, dataGodzinaZamowienia,
-        zamowioneProdukty, suma
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-      orderValues
-    );
-
-    // Jeśli zapis do bazy się powiódł, drukuj zamówienie
-    if (result.insertId) {
-      console.log('Zamówienie zapisane w bazie, ID:', result.insertId);
-      
-      // Przygotuj dane do wydruku
-      const printData = {
-        imie: orderData.firstName,
-        nazwisko: orderData.lastName,
-        typ: orderData.type,
-        miejscowosc: orderData.city,
-        ulica: orderData.street,
-        numerDomu: orderData.houseNumber,
-        numerMieszkania: orderData.apartmentNumber,
-        numerTelefonu: orderData.phone,
-        zamowienieNaGodzine: orderData.deliveryTime,
-        zamowioneProdukty: orderData.items,
-        suma: orderData.totalPrice
-      };
-
-      try {
-        console.log('Rozpoczynam proces drukowania...');
-        console.log('Dane do wydruku:', JSON.stringify(printData, null, 2));
-        const printResult = await printToReceiptPrinter(printData);
-        console.log('Wynik drukowania:', printResult);
-      } catch (printError) {
-        console.error('Błąd podczas drukowania:', printError);
-        console.error('Stack trace:', printError.stack);
+      const [result] = await connection.execute(
+        `INSERT INTO zamowienia${suffix} (
+          imie, nazwisko, typ, miejscowosc, ulica, numerDomu, numerMieszkania, 
+          numerTelefonu, zamowienieNaGodzine, dataGodzinaZamowienia,
+          zamowioneProdukty, suma
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        orderValues
+      );
+  
+      // Jeśli zapis do bazy się powiódł, drukuj zamówienie
+      if (result.insertId) {
+        console.log('Zamówienie zapisane w bazie, ID:', result.insertId);
+        
+        // Przygotuj dane do wydruku
+        const printData = {
+          imie: orderData.firstName,
+          nazwisko: orderData.lastName,
+          typ: orderData.type,
+          miejscowosc: orderData.city,
+          ulica: orderData.street,
+          numerDomu: orderData.houseNumber,
+          numerMieszkania: orderData.apartmentNumber,
+          numerTelefonu: orderData.phone,
+          zamowienieNaGodzine: orderData.deliveryTime,
+          zamowioneProdukty: orderData.items,
+          suma: orderData.totalPrice
+        };
+  
+        try {
+          console.log('Rozpoczynam proces drukowania...');
+          console.log('Dane do wydruku:', JSON.stringify(printData, null, 2));
+          const printResult = await printToReceiptPrinter(printData);
+          console.log('Wynik drukowania:', printResult);
+        } catch (printError) {
+          console.error('Błąd podczas drukowania:', printError);
+          console.error('Stack trace:', printError.stack);
+        }
       }
-    }
+  
+      res.json({ success: true, orderId: result.insertId });
+    
+  
 
-    res.json({ success: true, orderId: result.insertId });
+    // Najpierw zapisz do bazy
+    
   } catch (error) {
     console.error('Błąd przetwarzania zamówienia:', error);
     res.status(500).json({ error: 'Internal server error', details: error.message });
@@ -843,17 +854,85 @@ app.post('/api/payment/init', async (req, res) => {
         })
         
       });
-      console.log("Odpowiedź na rozpoczęcie transakcji: ".response);
+      
       return response.json();
     } 
 
     const transaction = await initializePayment(req.body);
     res.json(transaction);
+    
   } catch (error) {
     console.error('Błąd inicjalizacji płatności:', error);
     res.status(500).json({ error: 'Błąd inicjalizacji płatności' });
   }
 });
+
+app.post('/api/payment/status', async (req, res) => {
+  try {
+    async function checkTransactionStatus(transactionId) {
+      const maxAttempts = 30; // 30 pr�b
+      const intervalTime = 30000; // 30 sekund
+      let attempts = 0;
+
+      while (attempts < maxAttempts) {
+        attempts++;
+        console.log(`Pr�ba nr ${attempts}...`);
+
+        try {
+          const response = await fetch(`https://api.tpay.com/transactions/${transactionId}`, {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+              "Authorization": `Bearer ${tpayToken}` // Zaktualizuj token
+            }
+          });
+
+          if (!response.ok) {
+            throw new Error(`B��d HTTP! Status: ${response.status}`);
+          }
+
+          const data = await response.json();
+          console.log(`Odpowied� z API (${attempts}):`, data);
+
+          if (data.status === "correct") {
+            console.log("? P�atno�� zako�czona sukcesem!");
+            return  data.status ;  // Zwr�� status w momencie sukcesu
+          } else {
+            console.log(`P�atno�� nie zako�czona sukcesem: ${data.status}`);
+          }
+
+        } catch (error) {
+          console.error("? B��d podczas pobierania statusu transakcji:", error);
+          throw error;
+        }
+
+        // Je�li nie uda�o si�, czekaj 30 sekund przed nast�pn� pr�b�
+        if (attempts < maxAttempts) {
+          console.log(`Czekam ${intervalTime / 1000} sekund przed kolejn� pr�b�...`);
+          await new Promise(resolve => setTimeout(resolve, intervalTime));
+        }
+      }
+
+      // Je�li przekroczono maksymaln� liczb� pr�b
+      console.log("Przekroczono maksymaln� liczb� pr�b!");
+      return { status: "timeout", message: "Czas oczekiwania min��." };
+    }
+
+    const transactionStatus = await checkTransactionStatus(req.body.transactionId);
+    console.log("Ostateczny status transakcji:", transactionStatus);
+    res.json(transactionStatus);
+
+  } catch (error) {
+    console.error('B��d statusu p�atno�ci:', error);
+    res.status(500).json({ error: 'B��d statusu p�atno�ci' });
+  }
+});
+
+
+
+
+
+
 
 // Obsługa wszystkich pozostałych ścieżek - przekieruj do index.html
 app.get('*', (req, res) => {
