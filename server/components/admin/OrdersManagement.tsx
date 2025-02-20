@@ -74,6 +74,7 @@ export default function OrdersManagement({ location }: OrdersManagementProps) {
         name: String(item.name),
         quantity: Number(item.quantity),
         price: Number(item.price),
+        doughType: String(item.doughType),
         removedIngredients: Array.isArray(item.removedIngredients) ? item.removedIngredients : [],
         addedIngredients: Array.isArray(item.addedIngredients) ? item.addedIngredients : []
       }));
@@ -94,6 +95,7 @@ export default function OrdersManagement({ location }: OrdersManagementProps) {
         <div className="flex justify-between items-start">
           <div>
             <div className="font-medium">{item.name}</div>
+            <div className="text-sm text-gray-600">Rodzaj ciasta: {item.doughType }</div>
             <div className="text-sm text-gray-600 mt-1">
               Ilość: {item.quantity} x {item.price.toFixed(2)} zł = {(item.quantity * item.price).toFixed(2)} zł
             </div>

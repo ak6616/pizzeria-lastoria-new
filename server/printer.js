@@ -37,7 +37,10 @@ export async function printToReceiptPrinter(orderData) {
     if (orderData.zamowienieNaGodzine) {
       receipt2 += `Na godzinę: ${orderData.zamowienieNaGodzine}\n`;
     }
-    
+
+     // Total
+     receipt2 += `SUMA: ${orderData.suma} zł`;
+    //////////////////////////////
     let receipt1 = ''
     // Ordered products
     receipt1 += 'ZAMÓWIENIE:\n';
@@ -47,6 +50,7 @@ export async function printToReceiptPrinter(orderData) {
 
     items.forEach(item => {
       receipt1 += `${item.name} x${item.quantity}\n`;
+      receipt1 += `Ciasto: ${item.doughType}\n`
       if (item.removedIngredients?.length) {
         receipt1 += `  BEZ: ${item.removedIngredients.join(', ')}\n`;
       }
@@ -54,8 +58,7 @@ export async function printToReceiptPrinter(orderData) {
         receipt1 += `  DODATKI: ${item.addedIngredients.map(i => i.name).join(', ')}\n`;
       }
     });
-    // Total
-    receipt1 += `SUMA: ${orderData.suma} zł`;
+   
     // Zapisz do pliku i wydrukuj
     // fs.writeFileSync(OUTPUT_FILE, receipt);
 

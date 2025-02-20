@@ -1,8 +1,6 @@
 import { X } from 'lucide-react';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { IngredientsModalProps } from '../types';
-
-
 
 export default function IngredientsModal({
   item,
@@ -10,8 +8,22 @@ export default function IngredientsModal({
   onClose,
   onToggleIngredient,
   onToggleAdditionalIngredient,
-  additionalIngredients
+  additionalIngredients,
+  onChangeDoughType
 }: IngredientsModalProps) {
+  const [doughType, setDoughType] = useState(customization.doughType || "Grube");
+
+  useEffect(() => {
+    if (!customization.doughType) {
+      onChangeDoughType(item.uniqueId, doughType);
+    }
+  }, [customization.doughType, doughType, item.uniqueId, onChangeDoughType]);
+
+  const handleDoughChange = (type: string) => {
+    setDoughType(type);
+    onChangeDoughType(item.uniqueId, type);
+  };
+
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div className="bg-white rounded-lg p-6 max-w-md w-full">
@@ -21,6 +33,36 @@ export default function IngredientsModal({
             <X className="w-5 h-5" />
           </button>
         </div>
+
+        {item.category?.includes("pizza") && (
+          <div className="mb-6">
+            <p className="text-sm font-medium mb-2">Wybierz grubość ciasta:</p>
+            <div className="flex gap-4">
+              <label className="inline-flex items-center">
+                <input
+                  type="radio"
+                  name="doughType"
+                  value="Cienkie"
+                  checked={doughType === "Cienkie"}
+                  onChange={() => handleDoughChange("Cienkie")}
+                  className="text-yellow-500 focus:ring-yellow-500"
+                />
+                <span className="ml-2 text-sm">Cienkie</span>
+              </label>
+              <label className="inline-flex items-center">
+                <input
+                  type="radio"
+                  name="doughType"
+                  value="Grube"
+                  checked={doughType === "Grube"}
+                  onChange={() => handleDoughChange("Grube")}
+                  className="text-yellow-500 focus:ring-yellow-500"
+                />
+                <span className="ml-2 text-sm">Grube</span>
+              </label>
+            </div>
+          </div>
+        )}
 
         {item.skladniki && (
           <div className="mb-6">
@@ -73,4 +115,4 @@ export default function IngredientsModal({
       </div>
     </div>
   );
-} 
+}

@@ -1,6 +1,7 @@
 export interface ProductCustomization {
   uniqueId: string;
   instanceId: string;
+  doughType?: string;
   removedIngredients: string[];
   addedIngredients: (string | number)[];
   notes?: string;
@@ -13,6 +14,7 @@ export interface OrderItem {
   name: string;
   quantity: number;
   price: number;
+  doughType: string | "Grube";
   removedIngredients: string[];
   addedIngredients: Array<{
     id: string | number;
@@ -50,12 +52,14 @@ export interface IngredientsModalProps {
       category?: string;
     };
     customization: {
+        doughType?: string;
       removedIngredients: string[];
       addedIngredients: (string | number)[];
     };
     onClose: () => void;
     onToggleIngredient: (uniqueId: string, ingredient: string) => void;
     onToggleAdditionalIngredient: (uniqueId: string, ingredientId: number) => void;
+    onChangeDoughType: (uniqueId: string, doughType: string) => void;
     additionalIngredients: Array<{
       id: number;
       nazwa: string;
@@ -67,6 +71,7 @@ export interface MenuItem {
     category: string;
     nazwa: string;
     cena: number;
+    doughType?: string;
     skladniki?: string;
     uniqueId: string;
     location: string;
@@ -116,6 +121,7 @@ export interface SelectedItemBubbleProps {
     item: {
       uniqueId: string;
       nazwa: string;
+      doughType?: string;
       skladniki?: string;
       category?: string;
       instanceId: string;

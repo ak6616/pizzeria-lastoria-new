@@ -36,6 +36,7 @@ export function useOrderForm(
       setCustomizations(prev => [...prev, {
         uniqueId,
         instanceId: '',
+        doughType: 'Grube',
         removedIngredients: [],
         addedIngredients: [],
       }]);
@@ -91,6 +92,30 @@ export function useOrderForm(
       return prev.map((c) =>
         c.instanceId === instanceId
           ? { ...c, addedIngredients: updatedIngredients }
+          : c
+      );
+    });
+  };
+
+  const setDoughType = (uniqueId: string, instanceId: string, doughType: string) => {
+    setCustomizations((prev) => {
+      const existing = prev.find((c) => c.instanceId === instanceId);
+      if (!existing) {
+        return [
+          ...prev,
+          {
+            uniqueId,
+            instanceId,
+            doughType,
+            removedIngredients: [],
+            addedIngredients: [],
+          },
+        ];
+      }
+
+      return prev.map((c) =>
+        c.instanceId === instanceId
+          ? { ...c, doughType }
           : c
       );
     });
@@ -181,6 +206,7 @@ export function useOrderForm(
               name: item.nazwa,
               quantity: 1, // każdy produkt ma ilość 1
               price: item.cena,
+              doughType: customization?.doughType || 'Grube',
               removedIngredients: customization?.removedIngredients || [],
               addedIngredients: addedIngredientsDetails
             };
@@ -232,6 +258,7 @@ export function useOrderForm(
     success,
     updateQuantity,
     toggleIngredient,
+    setDoughType,
     toggleAdditionalIngredient,
     calculateTotal,
     handleSubmit,
