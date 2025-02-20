@@ -221,6 +221,7 @@ export interface Order {
     dataGodzinaZamowienia: string;
     zamowioneProdukty: string;
     suma: number;
+    // statusTransakcji: string;
 }
   
 export interface OrdersManagementProps {

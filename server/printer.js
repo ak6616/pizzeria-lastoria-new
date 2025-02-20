@@ -21,48 +21,51 @@ export async function printToReceiptPrinter(orderData) {
   console.log('Dane zamówienia:', orderData);
   
   try {
-    let receipt = '';
+    for(let i = 0; i < 2; i++){
+      let receipt2 = '';
     // Header
     
-    receipt += `${formatDate(new Date())}\n`;
+    receipt2 += `${formatDate(new Date())}\n`;
     
     // Customer data
-    receipt += `${orderData.imie} ${orderData.nazwisko}\n`;
-    receipt += `${orderData.numerTelefonu}\n`;
+    receipt2 += `${orderData.imie} ${orderData.nazwisko}\n`;
+    receipt2 += `${orderData.numerTelefonu}\n`;
     if (orderData.typ === 'delivery') {
-      receipt += `${orderData.miejscowosc}${orderData.ulica ? `, ${orderData.ulica}` : ''} ${orderData.numerDomu}${orderData.numerMieszkania ? `/${orderData.numerMieszkania}` : ''}\n`;
+      receipt2 += `${orderData.miejscowosc}${orderData.ulica ? `, ${orderData.ulica}` : ''} ${orderData.numerDomu}${orderData.numerMieszkania ? `/${orderData.numerMieszkania}` : ''}\n`;
     }
-    receipt += `Typ: ${orderData.typ === 'delivery' ? 'Dostawa' : 'Odbiór osobisty'}\n`;
+    receipt2 += `Typ: ${orderData.typ === 'delivery' ? 'Dostawa' : 'Odbiór osobisty'}\n`;
     if (orderData.zamowienieNaGodzine) {
-      receipt += `Na godzinę: ${orderData.zamowienieNaGodzine}\n`;
+      receipt2 += `Na godzinę: ${orderData.zamowienieNaGodzine}\n`;
     }
+    
+    let receipt1 = ''
     // Ordered products
-    receipt += 'ZAMÓWIENIE:\n';
+    receipt1 += 'ZAMÓWIENIE:\n';
     let items = Array.isArray(orderData.zamowioneProdukty) 
       ? orderData.zamowioneProdukty 
       : [];
 
     items.forEach(item => {
-      receipt += `${item.name} x${item.quantity}\n`;
+      receipt1 += `${item.name} x${item.quantity}\n`;
       if (item.removedIngredients?.length) {
-        receipt += `  BEZ: ${item.removedIngredients.join(', ')}\n`;
+        receipt1 += `  BEZ: ${item.removedIngredients.join(', ')}\n`;
       }
       if (item.addedIngredients?.length) {
-        receipt += `  DODATKI: ${item.addedIngredients.map(i => i.name).join(', ')}\n`;
+        receipt1 += `  DODATKI: ${item.addedIngredients.map(i => i.name).join(', ')}\n`;
       }
     });
     // Total
-    receipt += `SUMA: ${orderData.suma} zł`;
+    receipt1 += `SUMA: ${orderData.suma} zł`;
     // Zapisz do pliku i wydrukuj
     // fs.writeFileSync(OUTPUT_FILE, receipt);
 
-    console.log('Zawartość paragonu:', receipt);
+    console.log('Zawartość paragonu:', receipt1, receipt2);
 
     // Wyślij do drukarki bezpośrednio
     return new Promise((resolve, reject) => {
       // const lpProcess = exec(`lp -d ${PRINTER_NAME} ${OUTPUT_FILE}`, (error, stdout, stderr) => {
 
-      const lpProcess = exec(`echo "${receipt}" | lp -d xprinter -o media=Custom.50x42mm -o fit-to-page -o font-size=5 -o print-quality=5 -o orientation-requested=6 && echo "${receipt}" | lp -d xprinter -o media=Custom.50x42mm -o fit-to-page -o font-size=5 -o print-quality=5 -o orientation-requested=6`, (error, stdout, stderr) => {
+      const lpProcess = exec(`echo "${receipt1}" | lp -d xprinter -o media=Custom.50x42mm -o fit-to-page -o font-size=5 -o print-quality=5 -o orientation-requested=6 && echo "${receipt2}" | lp -d xprinter -o media=Custom.50x42mm -o fit-to-page -o font-size=5 -o print-quality=5 -o orientation-requested=6`, (error, stdout, stderr) => {
         if (error) {
           console.error('Błąd drukowania:', error);
           reject(error);
@@ -73,6 +76,8 @@ export async function printToReceiptPrinter(orderData) {
       });
     });
 
+    }
+    
   } catch (error) {
     console.error('Błąd podczas przygotowywania wydruku:', error);
     throw error;

@@ -185,6 +185,9 @@ export default function OrdersManagement({ location }: OrdersManagementProps) {
                         Na godzinę: {order.zamowienieNaGodzine}
                       </div>
                     )}
+                    {/* <div className="text-mid font-bold text-lightblue-600">
+                        Status transakcji: {order.statusTransakcji}
+                      </div> */}
                   </div>
                 </div>
 
