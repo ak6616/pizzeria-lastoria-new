@@ -869,65 +869,58 @@ app.post('/api/payment/init', async (req, res) => {
 
 app.post('/api/payment/status', async (req, res) => {
   try {
-    async function checkTransactionStatus(transactionId) {
-      const maxAttempts = 30; // 30 pr�b
-      const intervalTime = 30000; // 30 sekund
-      let attempts = 0;
-
-      while (attempts < maxAttempts) {
-        attempts++;
-        console.log(`Pr�ba nr ${attempts}...`);
-
-        try {
-          const response = await fetch(`https://api.tpay.com/transactions/${transactionId}`, {
-            method: "GET",
-            headers: {
-              "Content-Type": "application/json",
-              "Authorization": `Bearer ${tpayToken}` // Zaktualizuj token
-            }
-          });
-
-          if (!response.ok) {
-            throw new Error(`B��d HTTP! Status: ${response.status}`);
-          }
-
-          const data = await response.json();
-          console.log(`Odpowied� z API (${attempts}):`, data);
-
-          if (data.status === "correct") {
-            console.log("? P�atno�� zako�czona sukcesem!");
-            return  data.status ;  // Zwr�� status w momencie sukcesu
-          } else {
-            console.log(`P�atno�� nie zako�czona sukcesem: ${data.status}`);
-          }
-
-        } catch (error) {
-          console.error("? B��d podczas pobierania statusu transakcji:", error);
-          throw error;
-        }
-
-        // Je�li nie uda�o si�, czekaj 30 sekund przed nast�pn� pr�b�
-        if (attempts < maxAttempts) {
-          console.log(`Czekam ${intervalTime / 1000} sekund przed kolejn� pr�b�...`);
-          await new Promise(resolve => setTimeout(resolve, intervalTime));
-        }
-      }
-
-      // Je�li przekroczono maksymaln� liczb� pr�b
-      console.log("Przekroczono maksymaln� liczb� pr�b!");
-      return { status: "timeout", message: "Czas oczekiwania min��." };
+    const { transactionId } = req.body;
+    if (!transactionId) {
+      return res.status(400).json({ error: 'Brak transactionId' });
     }
 
-    const transactionStatus = await checkTransactionStatus(req.body.transactionId);
-    console.log("Ostateczny status transakcji:", transactionStatus);
-    res.json(transactionStatus);
+    const maxAttempts = 30; // 30 prób
+    const intervalTime = 30000; // 30 sekund
+    let attempts = 0;
 
+    while (attempts < maxAttempts) {
+      attempts++;
+      console.log(`Próba nr ${attempts}...`);
+
+      try {
+        const response = await fetch(`https://api.tpay.com/transactions/${transactionId}`, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${tpayToken}` // Zaktualizuj token
+          }
+        });
+
+        if (!response.ok) {
+          throw new Error(`Błąd HTTP! Status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        console.log(`Odpowiedź z API (${attempts}):`, data);
+
+        if (data.status === "correct") {
+          console.log("Płatność zakończona sukcesem!");
+          return res.json({ status: "success", data }); // Odpowiedź do klienta
+        } else {
+          console.log(`Płatność nie zakończona sukcesem: ${data.status}`);
+        }
+      } catch (error) {
+        console.error("Błąd podczas pobierania statusu transakcji:", error);
+      }
+
+      if (attempts < maxAttempts) {
+        console.log(`Czekam ${intervalTime / 1000} sekund przed kolejną próbą...`);
+        await new Promise(resolve => setTimeout(resolve, intervalTime));
+      }
+    }
+
+    console.log("Przekroczono maksymalną liczbę prób!");
+    return res.status(408).json({ status: "timeout", message: "Czas oczekiwania minął." });
   } catch (error) {
-    console.error('B��d statusu p�atno�ci:', error);
-    res.status(500).json({ error: 'B��d statusu p�atno�ci' });
+    console.error('Błąd statusu płatności:', error);
+    res.status(500).json({ error: 'Błąd statusu płatności' });
   }
 });
-
 
 
 

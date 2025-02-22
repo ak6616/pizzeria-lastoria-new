@@ -8,6 +8,7 @@ import IngredientsModal from './IngredientsModal';
 import SelectedItemsBubbles from './SelectedItemsBubbles';
 import { getActiveOrdersCount } from '../services/api';
 import { OrderFormProps, CustomerData, PaymentOrderData } from '../types';
+import { checkTransactionStatus } from '../services/api';
 
 
 
@@ -66,6 +67,7 @@ export default function OrderForm({ deliveryAreas, location, orderType }: OrderF
   };
 
   const [customerData, setCustomerData] = useState<CustomerData>(initialCustomerData);
+  const [notes, setNotes] = useState<string>('');
   const {
     items: menuItems,
     additionalIngredients,
@@ -153,21 +155,14 @@ export default function OrderForm({ deliveryAreas, location, orderType }: OrderF
       } else {
         throw new Error('Nie udało się utworzyć transakcji');
       }
-      // if(transaction.transactionId){
-      //   const response = await fetch('/api/payment/status', {
-      //     method: 'POST',
-      //     headers: { 'Content-Type': 'application/json' },
-      //     body: JSON.stringify({ transactionId: transaction.transactionId }) // Poprawiony body
-      // })};
-      // const transactionStatus = await response.json();
-      
-
-      
-    //   if(transactionStatus == 'correct'){
-    //     return;
-    //   } else {
-    //     throw new Error('Nie opłacono transakcji');
-    // }
+      const transactionStatus = await checkTransactionStatus(transaction.transactionId);
+      if (transactionStatus.status === 'success') {
+        return;
+      } else {      
+        console.error('Płatność nieudana:', transactionStatus);
+        throw new Error('Płatność nieudana');
+      }
+     
       
       
     } catch (error) {
@@ -204,6 +199,7 @@ export default function OrderForm({ deliveryAreas, location, orderType }: OrderF
       apartmentNumber: customerData.apartmentNumber,
       phone: customerData.phone,
       deliveryTime: formData.get('deliveryTime') as string,
+      notes,
       items: Object.entries(selectedItems).flatMap(([uniqueId, quantity]) => {
         const item = Object.values(menuItems)
           .flat()
@@ -230,7 +226,8 @@ export default function OrderForm({ deliveryAreas, location, orderType }: OrderF
                 name: ingredient?.nazwa || '',
                 price: ingredient?.cena || 0
               };
-            })
+            }),
+            notes: customization?.notes || ''
           };
         });
       }),
@@ -241,7 +238,7 @@ export default function OrderForm({ deliveryAreas, location, orderType }: OrderF
     };
 
     // Najpierw inicjujemy płatność
-    await handlePayment(orderData);
+    // await handlePayment(orderData);
 
     
 
@@ -263,6 +260,7 @@ export default function OrderForm({ deliveryAreas, location, orderType }: OrderF
     setCustomerData(initialCustomerData);
     setRodoAccepted(false);
     setEditingItemId(null);
+    setNotes('');
   };
 
   const handleEditIngredients = (_uniqueId: string, instanceId: string) => {
@@ -415,7 +413,8 @@ export default function OrderForm({ deliveryAreas, location, orderType }: OrderF
                 instanceId: editingItemId,
                 doughType: 'Grube',
                 removedIngredients: [],
-                addedIngredients: []
+                addedIngredients: [],
+                notes: ''
               }}
               onClose={handleCloseEdit}
               onToggleIngredient={(uniqueId, ingredient) => 
@@ -652,13 +651,26 @@ export default function OrderForm({ deliveryAreas, location, orderType }: OrderF
               )}
             </div>
 
+            <div className="mt-8">
+              <label className="block text-sm font-medium text-gray-700">
+                Uwagi do zamówienia
+              </label>
+              <textarea
+                name="notes"
+                value={notes}
+                onChange={(e) => setNotes(e.target.value)}
+                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-yellow-500 focus:ring-yellow-500"
+                rows={4}
+              />
+            </div>
+
             <div className="mt-8 border-t pt-6">
               {deliveryError ? (
                 <div className="text-red-500 mb-4">{deliveryError}</div>
               ) : (
                 <div className="flex justify-between items-center mb-4">
                   <span className="font-medium">Koszt dostawy:</span>
-                  <span>{deliveryCost === 0 ? 'Gratis!' : `${deliveryCost} zł`}</span>
+                  <span>{deliveryCost === 0 || deliveryCost === null ? 'Gratis!' : `${deliveryCost} zł`}</span>
                 </div>
               )}
               <div className="flex justify-between items-center mb-6">

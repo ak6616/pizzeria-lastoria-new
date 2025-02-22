@@ -1,5 +1,5 @@
 
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import Layout from '../server/components/Layout';
 import Home from './pages/Home';
 import Menu from './pages/Menu';
@@ -23,7 +23,7 @@ function App() {
           <Route path="admin" element={<Admin />} />
           <Route path="paymentSuccess" element={<PaymentSuccess />} />
           <Route path="paymentFailed" element={<PaymentFailed />} />
-
+          <Route path="*" element={<Navigate to="/" replace />} />
         </Route>
       </Routes>
     </BrowserRouter>

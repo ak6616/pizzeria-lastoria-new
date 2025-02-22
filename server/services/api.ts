@@ -65,6 +65,7 @@ export async function getNews() {
   return response.json();
 }
 
+
 export async function addNews(data: {
   tytul: string;
   tekst: string;
@@ -402,3 +403,22 @@ export async function getActiveOrdersCount(location: string) {
   return response.json();
 }
 
+//////////////////////transakcje
+
+export async function checkTransactionStatus(transactionId: string) {
+  try {
+    const response = await fetch('/api/payment/status', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ transactionId })
+    });
+
+    if (!response.ok) {
+      throw new Error('Nie udało się pobrać statusu płatności');
+    }
+    return await response.json();
+  } catch (error) {
+    console.error('Błąd w checkTransactionStatus:', error);
+    throw error;
+  }
+}

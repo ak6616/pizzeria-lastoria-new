@@ -45,7 +45,7 @@ export default function RodoTooltip({ children }: RodoTooltipProps) {
           <h3 className="font-bold mt-4 mb-2">Administrator Danych Osobowych</h3>
           <p className="mb-4">
             Administratorem Państwa danych osobowych jest Pizzeria Lastoria z siedzibą 
-            w Miejscu Piastowym, wpisana do rejestru przedsiębiorców.
+            w Miejscu Piastowym, wpisana do rejestru przedsiębiorców (NIP: 6842156102, REGON: 370461912).
           </p>
 
           <h3 className="font-bold mt-4 mb-2">Cel i Podstawa Przetwarzania Danych</h3>

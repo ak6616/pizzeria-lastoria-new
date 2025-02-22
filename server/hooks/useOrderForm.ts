@@ -39,6 +39,7 @@ export function useOrderForm(
         doughType: 'Grube',
         removedIngredients: [],
         addedIngredients: [],
+        notes: ''
       }]);
     }
   };
@@ -54,6 +55,7 @@ export function useOrderForm(
             instanceId,
             removedIngredients: [ingredient],
             addedIngredients: [],
+            notes: ''
           },
         ];
       }
@@ -81,6 +83,7 @@ export function useOrderForm(
             instanceId,
             removedIngredients: [],
             addedIngredients: [ingredientId],
+            notes: ''
           },
         ];
       }
@@ -109,6 +112,7 @@ export function useOrderForm(
             doughType,
             removedIngredients: [],
             addedIngredients: [],
+            notes: ''
           },
         ];
       }
@@ -116,6 +120,31 @@ export function useOrderForm(
       return prev.map((c) =>
         c.instanceId === instanceId
           ? { ...c, doughType }
+          : c
+      );
+    });
+  };
+
+  const setNotes = (uniqueId: string, instanceId: string, notes: string) => {
+    setCustomizations((prev) => {
+      const existing = prev.find((c) => c.instanceId === instanceId);
+      if (!existing) {
+        return [
+          ...prev,
+          {
+            uniqueId,
+            instanceId,
+            doughType: 'Grube',
+            removedIngredients: [],
+            addedIngredients: [],
+            notes
+          },
+        ];
+      }
+
+      return prev.map((c) =>
+        c.instanceId === instanceId
+          ? { ...c, notes }
           : c
       );
     });
@@ -208,7 +237,8 @@ export function useOrderForm(
               price: item.cena,
               doughType: customization?.doughType || 'Grube',
               removedIngredients: customization?.removedIngredients || [],
-              addedIngredients: addedIngredientsDetails
+              addedIngredients: addedIngredientsDetails,
+              notes: customization?.notes || ''
             };
           });
         });
@@ -259,6 +289,7 @@ export function useOrderForm(
     updateQuantity,
     toggleIngredient,
     setDoughType,
+    setNotes,
     toggleAdditionalIngredient,
     calculateTotal,
     handleSubmit,
