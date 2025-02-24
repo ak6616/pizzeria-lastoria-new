@@ -25,8 +25,8 @@ const port = process.env.PORT ;
 app.use(express.static(path.join(__dirname, '../server')));
 
 app.use(cors({
-  origin: ['http://localhost:5173', 'http://192.168.0.102:5173'],
-  // ['https://www.pizza-lastoria.pl', 'https://pizza-lastoria.pl'], // Tw�j frontendowy adres
+  origin: 
+  ['https://www.pizza-lastoria.pl', 'https://pizza-lastoria.pl'], // Tw�j frontendowy adres
   methods: 'GET,POST,PUT,DELETE',
   allowedHeaders: 'Content-Type,Authorization',
   credentials: true   
@@ -617,15 +617,15 @@ app.post('/api/orders/:location', async (req, res) => {
           suma: orderData.totalPrice
         };
   
-        // try {
-        //   console.log('Rozpoczynam proces drukowania...');
-        //   console.log('Dane do wydruku:', JSON.stringify(printData, null, 2));
-        //   const printResult = await printToReceiptPrinter(printData);
-        //   console.log('Wynik drukowania:', printResult);
-        // } catch (printError) {
-        //   console.error('Błąd podczas drukowania:', printError);
-        //   console.error('Stack trace:', printError.stack);
-        // }
+        try {
+          console.log('Rozpoczynam proces drukowania...');
+          console.log('Dane do wydruku:', JSON.stringify(printData, null, 2));
+          const printResult = await printToReceiptPrinter(printData);
+          console.log('Wynik drukowania:', printResult);
+        } catch (printError) {
+          console.error('Błąd podczas drukowania:', printError);
+          console.error('Stack trace:', printError.stack);
+        }
       }
   
       res.json({ success: true, orderId: result.insertId });
@@ -812,10 +812,10 @@ async function getTpayToken() {
 }
 
 // Pobieramy token na starcie aplikacji
-// getTpayToken();
+getTpayToken();
 
 // Automatyczne od�wie�anie co 1h 55min (przed wyga�ni�ciem tokena)
-// setInterval(getTpayToken, 115 * 60 * 1000); // 115 minut w milisekundach
+setInterval(getTpayToken, 115 * 60 * 1000); // 115 minut w milisekundach
 
 // Endpoint zwracaj�cy aktualny token
 // app.get("/token", (req, res) => {
@@ -935,12 +935,12 @@ app.get('*', (req, res) => {
   }
 });
 
-// const sslOptions = {
-//   key: fs.readFileSync('/etc/letsencrypt/live/pizza-lastoria.pl/privkey.pem'),
-//   cert: fs.readFileSync('/etc/letsencrypt/live/pizza-lastoria.pl/fullchain.pem'),
-// };
+const sslOptions = {
+  key: fs.readFileSync('/etc/letsencrypt/live/pizza-lastoria.pl/privkey.pem'),
+  cert: fs.readFileSync('/etc/letsencrypt/live/pizza-lastoria.pl/fullchain.pem'),
+};
 
-const server = app.listen(port, () => {
+const server = https.createServer(sslOptions, app).listen(port, () => {
   console.log(`Server running on port ${port}`);
 }).on('error', (err) => {
   if (err.code === 'EADDRINUSE') {
