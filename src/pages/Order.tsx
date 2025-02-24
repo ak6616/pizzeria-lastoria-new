@@ -16,7 +16,7 @@ const isDeliveryAvailable = (location: string): { available: boolean; message?: 
 
   // Wspólne godziny dla weekendów i świąt
   if (isWeekend || isHoliday) {
-    if (currentHour < 16 || currentHour >= 21 && currentMinute >= 30) {
+    if (currentHour < 1 || currentHour >= 21 && currentMinute >= 30) {
       return {
         available: false,
         message: `Dostawa w weekendy i święta dostępna w godzinach 16:00 - 22:00. 

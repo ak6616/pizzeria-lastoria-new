@@ -6,20 +6,20 @@ import fs from 'fs';
 export default defineConfig({
   server: {
     host: true,       // Udost�pnia na sieci (0.0.0.0)
-    port: 443,       // Mo�esz zmieni� na inny port
+    port: 5173,       // Mo�esz zmieni� na inny port
     strictPort: true, // Zapewnia, �e Vite u�yje dok�adnie tego portu     // Mo�esz w��czy� HTTPS (wymaga certyfikatu)
     cors: true, 
-    https: {
-      key: fs.readFileSync('/etc/letsencrypt/live/pizza-lastoria.pl/privkey.pem'),
-      cert: fs.readFileSync('/etc/letsencrypt/live/pizza-lastoria.pl/fullchain.pem')
-    },
+    // https: {
+    //   key: fs.readFileSync('/etc/letsencrypt/live/pizza-lastoria.pl/privkey.pem'),
+    //   cert: fs.readFileSync('/etc/letsencrypt/live/pizza-lastoria.pl/fullchain.pem')
+    // },
     
-    allowedHosts: ['pizza-lastoria.pl', 'www.pizza-lastoria.pl'],      // W��cza CORS
+    // allowedHosts: ['pizza-lastoria.pl', 'www.pizza-lastoria.pl'],      // W��cza CORS
     proxy: {          // Proxy dla backendu (je�li masz API na innym porcie)
       '/api': {
-        target: 'https://www.pizza-lastoria.pl:3000',
+        target: 'http://localhost:3000',
         changeOrigin: true,
-        secure: true
+        secure: false
       }
     },
   }
