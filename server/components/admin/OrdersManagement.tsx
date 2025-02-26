@@ -207,6 +207,10 @@ export default function OrdersManagement({ location }: OrdersManagementProps) {
                     <div className="text-sm text-gray-600">Telefon:</div>
                     <div>{order.numerTelefonu}</div>
                   </div>
+                  <div>
+                    <div className="text-sm text-gray-600">Uwagi:</div>
+                    <div>{order.notes}</div>
+                  </div>
                 </div>
 
                 <div className="bg-gray-50 p-3 rounded-lg">

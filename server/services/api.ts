@@ -405,20 +405,3 @@ export async function getActiveOrdersCount(location: string) {
 
 //////////////////////transakcje
 
-export async function checkTransactionStatus(transactionId: string) {
-  try {
-    const response = await fetch('/api/payment/status', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ transactionId })
-    });
-
-    if (!response.ok) {
-      throw new Error('Nie udało się pobrać statusu płatności');
-    }
-    return await response.json();
-  } catch (error) {
-    console.error('Błąd w checkTransactionStatus:', error);
-    throw error;
-  }
-}

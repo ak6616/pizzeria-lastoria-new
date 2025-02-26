@@ -11,6 +11,7 @@ import { printToReceiptPrinter } from './printer.js';
 // import { initializePayment } from './services/api';
 import fs from 'fs';
 import https from 'https';
+// import checkTransactionStatus from './services/api';
 // import WebSocket from 'ws';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -559,10 +560,31 @@ app.post('/api/orders/:location', async (req, res) => {
   const connection = await getConnection();
   const { location } = req.params;
   const suffix = location === 'haczow' ? '_hacz' : '_mp';
+  // async function checkTransactionStatus(transactionId) {
+  //   try {
+  //     const response = await fetch('/api/payment/status', {
+  //       method: 'POST',
+  //       headers: { 'Content-Type': 'application/json' },
+  //       body: JSON.stringify({ transactionId })
+  //     });
   
+  //     if (!response.ok) {
+  //       throw new Error('Nie udało się pobrać statusu płatności');
+  //     }
+  //     return await response.json();
+  //   } catch (error) {
+  //     console.error('Błąd w checkTransactionStatus:', error);
+  //     throw error;
+  //   }
+  // }  
   try {
 
-    
+    // const transactionStatus = await checkTransactionStatus(transaction.transactionId);
+    // console.log(transactionStatus);  
+    // if (transactionStatus.status == 'success') {
+        
+        
+      
   
      // Poprawna nazwa zmiennej
     
@@ -586,15 +608,16 @@ app.post('/api/orders/:location', async (req, res) => {
       orderData.deliveryTime || null,
       new Date().toISOString(),
       JSON.stringify(orderData.items),  // Konwertuj tablicę na string dla bazy
-      orderData.totalPrice
+      orderData.totalPrice,
+      orderData.notes
     ];
 
       const [result] = await connection.execute(
         `INSERT INTO zamowienia${suffix} (
           imie, nazwisko, typ, miejscowosc, ulica, numerDomu, numerMieszkania, 
           numerTelefonu, zamowienieNaGodzine, dataGodzinaZamowienia,
-          zamowioneProdukty, suma
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+          zamowioneProdukty, suma, uwagi
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
         orderValues
       );
   
@@ -614,7 +637,8 @@ app.post('/api/orders/:location', async (req, res) => {
           numerTelefonu: orderData.phone,
           zamowienieNaGodzine: orderData.deliveryTime,
           zamowioneProdukty: orderData.items,
-          suma: orderData.totalPrice
+          suma: orderData.totalPrice,
+          notes: orderData.notes
         };
   
         try {
@@ -626,7 +650,11 @@ app.post('/api/orders/:location', async (req, res) => {
           console.error('Błąd podczas drukowania:', printError);
           console.error('Stack trace:', printError.stack);
         }
-      }
+      // }
+    } else {      
+      console.error('Płatność nieudana:', transactionStatus);
+      throw new Error('Płatność nieudana');
+    }
   
       res.json({ success: true, orderId: result.insertId });
     

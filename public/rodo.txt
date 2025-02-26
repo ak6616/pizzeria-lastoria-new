@@ -5,7 +5,7 @@ Szanowni Klienci,
 W trosce o bezpieczeństwo Państwa danych osobowych oraz zgodnie z Rozporządzeniem Parlamentu Europejskiego i Rady (UE) 2016/679 z dnia 27 kwietnia 2016 r. (RODO), informujemy, że Państwa dane osobowe są przetwarzane w następujących celach:  
 
 ### **Administrator Danych Osobowych**  
-Administratorem Państwa danych osobowych jest Pizzeria Lastoria z siedzibą w [adres pizzerii], wpisana do rejestru przedsiębiorców pod numerem NIP [NIP pizzerii], kontakt: [adres e-mail, telefon].  
+Administratorem Państwa danych osobowych jest Pizzeria Lastoria Marek Domaradzki z siedzibą w Miejscu Piastowym, ul. Krośnieńska 1, wpisana do rejestru przedsiębiorców pod numerem NIP [NIP pizzerii], kontakt: [adres e-mail, telefon].  
 
 ### **Cel i Podstawa Przetwarzania Danych**  
 Państwa dane osobowe przetwarzane są w celu:  

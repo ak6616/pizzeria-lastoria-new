@@ -8,7 +8,7 @@ import IngredientsModal from './IngredientsModal';
 import SelectedItemsBubbles from './SelectedItemsBubbles';
 import { getActiveOrdersCount } from '../services/api';
 import { OrderFormProps, CustomerData, PaymentOrderData } from '../types';
-import { checkTransactionStatus } from '../services/api';
+// import { checkTransactionStatus } from '../services/api';
 
 
 
@@ -137,10 +137,9 @@ export default function OrderForm({ deliveryAreas, location, orderType }: OrderF
           city: orderData.city == "" ? "Miejsce Piastowe" : orderData.city, 
           address: `${orderData.street || ''} ${orderData.houseNumber}${orderData.apartmentNumber ? '/' + orderData.apartmentNumber : ''}`,
           phone: orderData.phone,
-          country: 'Poland',
+          country: 'Poland'
         // },
-        return_url: import.meta.env.VITE_TPAY_RETURN_URL,
-        return_error_url: import.meta.env.VITE_TPAY_ERROR_URL
+        
       };
 
       const response = await fetch('/api/payment/init', {
@@ -155,13 +154,7 @@ export default function OrderForm({ deliveryAreas, location, orderType }: OrderF
       } else {
         throw new Error('Nie udało się utworzyć transakcji');
       }
-      const transactionStatus = await checkTransactionStatus(transaction.transactionId);
-      if (transactionStatus.status === 'success') {
-        return;
-      } else {      
-        console.error('Płatność nieudana:', transactionStatus);
-        throw new Error('Płatność nieudana');
-      }
+      
      
       
       
@@ -238,7 +231,7 @@ export default function OrderForm({ deliveryAreas, location, orderType }: OrderF
     };
 
     // Najpierw inicjujemy płatność
-    // await handlePayment(orderData);
+    await handlePayment(orderData);
 
     
 

@@ -39,7 +39,10 @@ export async function printToReceiptPrinter(orderData) {
     }
 
      // Total
-     receipt2 += `SUMA: ${orderData.suma} zł`;
+     receipt2 += `SUMA: ${orderData.suma} zł\n`;
+     if (orderData.notes){
+        receipt2+= `Uwagi: ${orderData.notes}\n`
+     }
     //////////////////////////////
     let receipt1 = ''
     // Ordered products
