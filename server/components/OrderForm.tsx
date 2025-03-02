@@ -8,7 +8,6 @@ import IngredientsModal from './IngredientsModal';
 import SelectedItemsBubbles from './SelectedItemsBubbles';
 import { getActiveOrdersCount } from '../services/api';
 import { OrderFormProps, CustomerData, PaymentOrderData } from '../types';
-import { checkTransactionStatus } from '../services/api';
 
 
 
@@ -132,17 +131,16 @@ export default function OrderForm({ deliveryAreas, location, orderType }: OrderF
         amount: orderData.totalPrice,
         description: `Zamówienie - Pizzeria Lastoria ${location}`,
         crc: `${Date.now()}`,
-        // payer: {
-          email: `${orderData.email}`,
-          city: orderData.city == "" ? "Miejsce Piastowe" : orderData.city, 
-          address: `${orderData.street || ''} ${orderData.houseNumber}${orderData.apartmentNumber ? '/' + orderData.apartmentNumber : ''}`,
-          phone: orderData.phone,
-          country: 'Poland',
-        // },
+        email: `${orderData.email}`,
+        city: orderData.city == "" ? "Miejsce Piastowe" : orderData.city, 
+        address: `${orderData.street || ''} ${orderData.houseNumber}${orderData.apartmentNumber ? '/' + orderData.apartmentNumber : ''}`,
+        phone: orderData.phone,
+        country: 'Poland',
         return_url: import.meta.env.VITE_TPAY_RETURN_URL,
         return_error_url: import.meta.env.VITE_TPAY_ERROR_URL
       };
 
+      // Inicjacja płatności
       const response = await fetch('/api/payment/init', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -150,21 +148,52 @@ export default function OrderForm({ deliveryAreas, location, orderType }: OrderF
       });
 
       const transaction = await response.json();
+      
       if (transaction.transactionPaymentUrl) {
+        // Przekieruj do płatności
         window.location.href = transaction.transactionPaymentUrl;
+        
+        // Rozpocznij sprawdzanie statusu płatności
+        const statusCheckInterval = setInterval(async () => {
+          const statusResponse = await fetch('/api/payment/status', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ transactionId: transaction.transactionId })
+          });
+
+          const statusData = await statusResponse.json();
+          
+          if (statusData.status === 'success') {
+            clearInterval(statusCheckInterval);
+            
+            // Jeśli płatność się powiodła, wyślij zamówienie
+            const orderResponse = await fetch(`/api/orders/${location}`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(orderData)
+            });
+
+            if (!orderResponse.ok) {
+              throw new Error('Błąd podczas składania zamówienia');
+            }
+
+            // Czyszczenie formularza i koszyka
+            resetForm();
+            setCustomerData(initialCustomerData);
+            setRodoAccepted(false);
+            setEditingItemId(null);
+            setNotes('');
+            
+            // Przekieruj do strony sukcesu
+            window.location.href = '/payment-success';
+          } else if (statusData.status === 'failed' || statusData.status === 'timeout') {
+            clearInterval(statusCheckInterval);
+            window.location.href = '/payment-failed';
+          }
+        }, 5000); // Sprawdzaj co 5 sekund
       } else {
         throw new Error('Nie udało się utworzyć transakcji');
       }
-      const transactionStatus = await checkTransactionStatus(transaction.transactionId);
-      if (transactionStatus.status === 'success') {
-        return;
-      } else {      
-        console.error('Płatność nieudana:', transactionStatus);
-        throw new Error('Płatność nieudana');
-      }
-     
-      
-      
     } catch (error) {
       console.error('Błąd podczas inicjowania płatności:', error);
       throw error;
@@ -237,30 +266,8 @@ export default function OrderForm({ deliveryAreas, location, orderType }: OrderF
       location,
     };
 
-    // Najpierw inicjujemy płatność
-    // await handlePayment(orderData);
-
-    
-
-    // Jeśli płatność się powiedzie, wysyłamy zamówienie
-    const response = await fetch(`/api/orders/${location}`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(orderData)
-    });
-
-    if (!response.ok) {
-      throw new Error('Błąd podczas składania zamówienia');
-    }
-
-    // Czyszczenie formularza i koszyka
-    resetForm();
-    setCustomerData(initialCustomerData);
-    setRodoAccepted(false);
-    setEditingItemId(null);
-    setNotes('');
+    // Rozpocznij proces płatności
+    await handlePayment(orderData);
   };
 
   const handleEditIngredients = (_uniqueId: string, instanceId: string) => {
@@ -360,7 +367,7 @@ export default function OrderForm({ deliveryAreas, location, orderType }: OrderF
     setCustomerData((prev) => ({
       ...prev,
       city,
-      street: street || prev.street, // Zapisuje ulic� tylko, je�li by�a w opcji
+      street: street || prev.street, // Zapisuje ulicę tylko, jeśli była w opcji
     }));
   };
   const handleStreetChange = (e: React.ChangeEvent<HTMLInputElement>) => {
