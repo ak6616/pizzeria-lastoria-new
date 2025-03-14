@@ -139,8 +139,8 @@ export default function OrderForm({ deliveryAreas, location, orderType }: OrderF
           phone: orderData.phone,
           country: 'Poland',
         // },
-        return_url: import.meta.env.VITE_TPAY_RETURN_URL,
-        return_error_url: import.meta.env.VITE_TPAY_ERROR_URL
+        // return_url: import.meta.env.VITE_TPAY_RETURN_URL,
+        // return_error_url: import.meta.env.VITE_TPAY_ERROR_URL
       };
 
       const response = await fetch('/api/payment/init', {

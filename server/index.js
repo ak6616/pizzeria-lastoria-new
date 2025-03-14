@@ -586,15 +586,16 @@ app.post('/api/orders/:location', async (req, res) => {
       orderData.deliveryTime || null,
       new Date().toISOString(),
       JSON.stringify(orderData.items),  // Konwertuj tablicę na string dla bazy
-      orderData.totalPrice
+      orderData.totalPrice,
+      orderData.notes
     ];
 
       const [result] = await connection.execute(
         `INSERT INTO zamowienia${suffix} (
           imie, nazwisko, typ, miejscowosc, ulica, numerDomu, numerMieszkania, 
           numerTelefonu, zamowienieNaGodzine, dataGodzinaZamowienia,
-          zamowioneProdukty, suma
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+          zamowioneProdukty, suma, uwagi
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
         orderValues
       );
   
