@@ -27,7 +27,7 @@ app.use(express.static(path.join(__dirname, '../server')));
 
 app.use(cors({
   origin: 
-  ['https://www.pizza-lastoria.pl', 'https://pizza-lastoria.pl'], // Twój frontendowy adres
+  ['https://www.pizza-lastoria.pl', 'https://pizza-lastoria.pl'], // Tw�j frontendowy adres
   methods: 'GET,POST,PUT,DELETE',
   allowedHeaders: 'Content-Type,Authorization',
   credentials: true   
@@ -842,15 +842,15 @@ async function getTpayToken() {
 // Pobieramy token na starcie aplikacji
 getTpayToken();
 
-// Automatyczne odnowienie co 1h 55min (przed wygaśnięciem tokena)
+// Automatyczne od�wie�anie co 1h 55min (przed wyga�ni�ciem tokena)
 setInterval(getTpayToken, 115 * 60 * 1000); // 115 minut w milisekundach
 
-// Endpoint zwracający aktualny token
+// Endpoint zwracaj�cy aktualny token
 // app.get("/token", (req, res) => {
 //   if (tpayToken) {
 //       res.json({ access_token: tpayToken });
 //   } else {
-//       res.status(500).json({ error: "Brak tokena, spróbuj ponownie później." });
+//       res.status(500).json({ error: "Brak tokena, spr�buj ponownie p�niej." });
 //   }
 // });
 
@@ -903,19 +903,19 @@ app.post('/api/payment/status', async (req, res) => {
     }
 
     const maxAttempts = 30; // 30 prób
-    const intervalTime = 5000; // 5 sekund między próbami
+    const intervalTime = 30000; // 30 sekund
     let attempts = 0;
 
     while (attempts < maxAttempts) {
       attempts++;
-      console.log(`Sprawdzanie statusu płatności - próba ${attempts}...`);
+      console.log(`Próba nr ${attempts}...`);
 
       try {
         const response = await fetch(`https://api.tpay.com/transactions/${transactionId}`, {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
-            "Authorization": `Bearer ${tpayToken}`
+            "Authorization": `Bearer ${tpayToken}` // Zaktualizuj token
           }
         });
 
@@ -924,28 +924,29 @@ app.post('/api/payment/status', async (req, res) => {
         }
 
         const data = await response.json();
-        console.log(`Status płatności (${attempts}):`, data);
+        console.log(`Odpowiedź z API (${attempts}):`, data);
 
         if (data.status === "correct") {
           console.log("Płatność zakończona sukcesem!");
-          return res.json({ status: "success", data });
+          return res.json({ status: "success", data }); // Odpowiedź do klienta
+        } else {
+          console.log(`Płatność nie zakończona sukcesem: ${data.status}`);
         }
       } catch (error) {
-        console.error("Błąd podczas sprawdzania statusu:", error);
+        console.error("Błąd podczas pobierania statusu transakcji:", error);
       }
 
       if (attempts < maxAttempts) {
+        console.log(`Czekam ${intervalTime / 1000} sekund przed kolejną próbą...`);
         await new Promise(resolve => setTimeout(resolve, intervalTime));
       }
     }
 
-    return res.status(408).json({ 
-      status: "timeout", 
-      message: "Przekroczono czas oczekiwania na płatność." 
-    });
+    console.log("Przekroczono maksymalną liczbę prób!");
+    return res.status(408).json({ status: "timeout", message: "Czas oczekiwania minął." });
   } catch (error) {
-    console.error('Błąd sprawdzania statusu płatności:', error);
-    res.status(500).json({ error: 'Błąd sprawdzania statusu płatności' });
+    console.error('Błąd statusu płatności:', error);
+    res.status(500).json({ error: 'Błąd statusu płatności' });
   }
 });
 

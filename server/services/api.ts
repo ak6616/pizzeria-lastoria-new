@@ -31,7 +31,6 @@ export async function getGalleryImages() {
 }
 
 export async function addGalleryImage(data: { link: string }) {
-  await checkAuth();
   const response = await fetch(`${API_BASE_URL}/gallery`, {
     method: 'POST',
     headers: {
@@ -47,7 +46,6 @@ export async function addGalleryImage(data: { link: string }) {
 }
 
 export async function deleteGalleryImage(id: number) {
-  await checkAuth();
   const response = await fetch(`${API_BASE_URL}/gallery/${id}`, {
     method: 'DELETE',
   });
@@ -73,7 +71,6 @@ export async function addNews(data: {
   tekst: string;
   data: string;
 }) {
-  await checkAuth();
   const response = await fetch(`${API_BASE_URL}/news`, {
     method: 'POST',
     headers: {
@@ -94,7 +91,6 @@ export async function updateNews(data: {
   tekst: string;
   data: string;
 }) {
-  await checkAuth();
   const response = await fetch(`${API_BASE_URL}/news/${data.id}`, {
     method: 'PUT',
     headers: {
@@ -110,7 +106,6 @@ export async function updateNews(data: {
 }
 
 export async function deleteNews(id: number) {
-  await checkAuth();
   const response = await fetch(`${API_BASE_URL}/news/${id}`, {
     method: 'DELETE',
   });
@@ -214,7 +209,6 @@ export async function addMenuItem(data: {
   cena: number;
   skladniki?: string;
 }, location: string) {
-  await checkAuth();
   const response = await fetch(
     `${API_BASE_URL}/menu?location=${location}`,
     {
@@ -223,14 +217,10 @@ export async function addMenuItem(data: {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify(data),
-      credentials: 'include'
     }
   );
 
   if (!response.ok) {
-    if (response.status === 401) {
-      throw new Error('Unauthorized - Zaloguj się aby kontynuować');
-    }
     throw new Error('Failed to add menu item');
   }
   return response.json();
@@ -243,7 +233,6 @@ export async function updateMenuItem(data: {
   cena: number;
   skladniki?: string;
 }, location: string) {
-  await checkAuth();
   const baseCategory = data.category.replace(/_mp$|_hacz$/, '');
   const suffix = getLocationSuffix(location);
   
@@ -255,21 +244,16 @@ export async function updateMenuItem(data: {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify(data),
-      credentials: 'include'
     }
   );
 
   if (!response.ok) {
-    if (response.status === 401) {
-      throw new Error('Unauthorized - Zaloguj się aby kontynuować');
-    }
     throw new Error('Failed to update menu item');
   }
   return response.json();
 }
 
 export async function deleteMenuItem(category: string, id: number, location: string) {
-  await checkAuth();
   const baseCategory = category.replace(/_mp$|_hacz$/, '');
   const suffix = getLocationSuffix(location);
   const fullCategory = `${baseCategory}${suffix}`;
@@ -285,13 +269,9 @@ export async function deleteMenuItem(category: string, id: number, location: str
 
   const response = await fetch(`${API_BASE_URL}/menu/${fullCategory}/${id}`, {
     method: 'DELETE',
-    credentials: 'include'
   });
 
   if (!response.ok) {
-    if (response.status === 401) {
-      throw new Error('Unauthorized - Zaloguj się aby kontynuować');
-    }
     throw new Error('Failed to delete menu item');
   }
   return response.json();
@@ -314,7 +294,6 @@ export async function addDeliveryRule(data: {
   ilosc: number;
   koszt: number;
 }, location: string) {
-  await checkAuth();
   const suffix = getLocationSuffix(location);
   const fullCategory = `${data.category}${suffix}`;
 
@@ -346,7 +325,6 @@ export async function updateDeliveryRule(data: {
   ilosc: number;
   koszt: number;
 }, location: string) {
-  await checkAuth();
   const suffix = getLocationSuffix(location);
   const fullCategory = `${data.category}${suffix}`;
 
@@ -368,7 +346,6 @@ export async function updateDeliveryRule(data: {
 }
 
 export async function deleteDeliveryRule(location: string, category: string, id: number) {
-  await checkAuth();
   const suffix = getLocationSuffix(location);
   const validCategories = [`dostawaweekday`, `dostawaweekend`];
   if (!validCategories.includes(category)) {
@@ -428,31 +405,3 @@ export async function getActiveOrdersCount(location: string) {
 
 //////////////////////transakcje
 
-export async function checkTransactionStatus(transactionId: string) {
-  try {
-    const response = await fetch('/api/payment/status', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ transactionId })
-    });
-
-    if (!response.ok) {
-      throw new Error('Nie udało się pobrać statusu płatności');
-    }
-    return await response.json();
-  } catch (error) {
-    console.error('Błąd w checkTransactionStatus:', error);
-    throw error;
-  }
-}
-
-// Dodaj funkcję sprawdzającą autoryzację
-async function checkAuth() {
-  const response = await fetch(`${API_BASE_URL}/check-auth`, {
-    credentials: 'include' // ważne dla obsługi sesji
-  });
-  
-  if (!response.ok) {
-    throw new Error('Unauthorized');
-  }
-}
