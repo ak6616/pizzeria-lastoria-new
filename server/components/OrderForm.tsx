@@ -126,19 +126,26 @@ export default function OrderForm({ deliveryAreas, location, orderType }: OrderF
 
   const handlePayment = async (orderData: PaymentOrderData) => {
     try {
-      const paymentData = {
-        name: `${orderData.firstName} ${orderData.lastName}`,
-        amount: orderData.totalPrice,
-        description: `Zamówienie - Pizzeria Lastoria ${location}`,
-        crc: `${Date.now()}`,
-        email: `${orderData.email}`,
-        city: orderData.city == "" ? "Miejsce Piastowe" : orderData.city, 
-        address: `${orderData.street || ''} ${orderData.houseNumber}${orderData.apartmentNumber ? '/' + orderData.apartmentNumber : ''}`,
-        phone: orderData.phone,
-        country: 'Poland',
-        return_url: import.meta.env.VITE_TPAY_RETURN_URL,
-        return_error_url: import.meta.env.VITE_TPAY_ERROR_URL
-      };
+      const orderDescription = orderData.items
+      .map(item => {
+        const extras = item.addedIngredients.length 
+          ? ` (+${item.addedIngredients.map(i => i.name).join(', ')})`
+          : '';
+        return `${item.name}${extras}`;
+      })
+      .join(', ');
+
+    const paymentData = {
+      name: `${orderData.firstName} ${orderData.lastName}`,
+      amount: orderData.totalPrice,
+      description: `Zamówienie - Pizzeria Lastoria ${location}: ${orderDescription}`,
+      crc: `${Date.now()}`,
+      email: orderData.email,
+      city: orderData.city || "Miejsce Piastowe",
+      address: `${orderData.street || ''} ${orderData.houseNumber}${orderData.apartmentNumber ? '/' + orderData.apartmentNumber : ''}`,
+      phone: orderData.phone,
+      country: 'Poland'
+    };
 
       // Inicjacja płatności
       const response = await fetch('/api/payment/init', {
