@@ -113,3 +113,26 @@ body: JSON.stringify(orderData)
 if (!response.ok) {
 throw new Error('Błąd podczas składania zamówienia');
 }
+
+    const transactionStatus = await checkTransactionStatus(transaction.transactionId);
+    console.log(transactionStatus);  
+    if (transactionStatus.status == 'success') {
+        
+
+       async function checkTransactionStatus(transactionId) {
+    try {
+      const response = await fetch('/api/payment/status', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ transactionId })
+      });
+  
+      if (!response.ok) {
+        throw new Error('Nie udało się pobrać statusu płatności');
+      }
+      return await response.json();
+    } catch (error) {
+      console.error('Błąd w checkTransactionStatus:', error);
+      throw error;
+    }
+  } 
