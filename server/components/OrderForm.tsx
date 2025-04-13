@@ -8,7 +8,6 @@ import IngredientsModal from './IngredientsModal';
 import SelectedItemsBubbles from './SelectedItemsBubbles';
 import { getActiveOrdersCount } from '../services/api';
 import { OrderFormProps, CustomerData, PaymentOrderData } from '../types';
-// import { checkTransactionStatus } from '../services/api';
 
 
 
@@ -235,18 +234,7 @@ export default function OrderForm({ deliveryAreas, location, orderType }: OrderF
 
     
 
-    // Jeśli płatność się powiedzie, wysyłamy zamówienie
-    const response = await fetch(`/api/orders/${location}`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(orderData)
-    });
 
-    if (!response.ok) {
-      throw new Error('Błąd podczas składania zamówienia');
-    }
 
     // Czyszczenie formularza i koszyka
     resetForm();
