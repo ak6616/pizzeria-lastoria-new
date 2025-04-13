@@ -8,11 +8,8 @@ import session from 'express-session';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { printToReceiptPrinter } from './printer.js';
-// import { initializePayment } from './services/api';
 import fs from 'fs';
 import https from 'https';
-// import checkTransactionStatus from './services/api';
-// import WebSocket from 'ws';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -901,50 +898,50 @@ app.post('/api/payment/status', async (req, res) => {
     if (!transactionId) {
       return res.status(400).json({ error: 'Brak transactionId' });
     }
-
-    const maxAttempts = 30; // 30 prób
-    const intervalTime = 30000; // 30 sekund
-    let attempts = 0;
-
-    while (attempts < maxAttempts) {
-      attempts++;
-      console.log(`Próba nr ${attempts}...`);
-
-      try {
-        const response = await fetch(`https://api.tpay.com/transactions/${transactionId}`, {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${tpayToken}` // Zaktualizuj token
+      for(let i = 0; i < 15; i++) {
+        try {
+          const response = await fetch(`https://api.tpay.com/transactions/${transactionId}`, {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+              "Authorization": `Bearer ${tpayToken}` // Zaktualizuj token
+            }
+          });
+  
+          if (!response.ok) {
+            throw new Error(`Błąd HTTP! Status: ${response.status}`);
           }
-        });
+  
+          const data = await response.json();
+          console.log(`Odpowiedź z API:`, data);
+  
+          if (data.status === "correct") {
+            console.log("Płatność zakończona sukcesem!");
+            
+            // Jeśli płatność się powiedzie, wysyłamy zamówienie
+            const response = await fetch(`/api/orders/${location}`, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify(orderData)
+            });
 
-        if (!response.ok) {
-          throw new Error(`Błąd HTTP! Status: ${response.status}`);
+            if (!response.ok) {
+              throw new Error('Błąd podczas składania zamówienia');
+            }
+            return res.json({ status: "success", data }); // Odpowiedź do klienta
+          } else {
+            console.log(`Płatność nie zakończona sukcesem: ${data.status}`);
+          }
+        } catch (error) {
+          console.error("Błąd podczas pobierania statusu transakcji:", error);
         }
-
-        const data = await response.json();
-        console.log(`Odpowiedź z API (${attempts}):`, data);
-
-        if (data.status === "correct") {
-          console.log("Płatność zakończona sukcesem!");
-          return res.json({ status: "success", data }); // Odpowiedź do klienta
-        } else {
-          console.log(`Płatność nie zakończona sukcesem: ${data.status}`);
-        }
-      } catch (error) {
-        console.error("Błąd podczas pobierania statusu transakcji:", error);
+        await new Promise(resolve => setTimeout(resolve, 64000)); // Czekaj 1 sekundę
+        console.log(`Czekam ${i + 1} minuty...`);
       }
-
-      if (attempts < maxAttempts) {
-        console.log(`Czekam ${intervalTime / 1000} sekund przed kolejną próbą...`);
-        await new Promise(resolve => setTimeout(resolve, intervalTime));
-      }
-    }
-
-    console.log("Przekroczono maksymalną liczbę prób!");
-    return res.status(408).json({ status: "timeout", message: "Czas oczekiwania minął." });
-  } catch (error) {
+      
+    } catch (error) {
     console.error('Błąd statusu płatności:', error);
     res.status(500).json({ error: 'Błąd statusu płatności' });
   }
