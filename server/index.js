@@ -557,35 +557,10 @@ app.post('/api/orders/:location', async (req, res) => {
   const connection = await getConnection();
   const { location } = req.params;
   const suffix = location === 'haczow' ? '_hacz' : '_mp';
-  // async function checkTransactionStatus(transactionId) {
-  //   try {
-  //     const response = await fetch('/api/payment/status', {
-  //       method: 'POST',
-  //       headers: { 'Content-Type': 'application/json' },
-  //       body: JSON.stringify({ transactionId })
-  //     });
-  
-  //     if (!response.ok) {
-  //       throw new Error('Nie udało się pobrać statusu płatności');
-  //     }
-  //     return await response.json();
-  //   } catch (error) {
-  //     console.error('Błąd w checkTransactionStatus:', error);
-  //     throw error;
-  //   }
-  // }  
+ 
   try {
 
-    // const transactionStatus = await checkTransactionStatus(transaction.transactionId);
-    // console.log(transactionStatus);  
-    // if (transactionStatus.status == 'success') {
-        
-        
-      
-  
-     // Poprawna nazwa zmiennej
-    
-     // Sprawdzenie konkretnego statusu
+
 
       const orderData = req.body;
     console.log('=== Nowe zamówienie otrzymane ===');
@@ -770,47 +745,9 @@ app.get('/api/orders/:location/count', async (req, res) => {
 });
 
 
-// Endpoint dla sukcesu płatności
-app.get('/payment-success', async (req, res) => {
-  const { tr_id, tr_amount, tr_crc } = req.query;
 
-  try {
-    const tpay = new TPay({
-      merchantId: process.env.TPAY_CLIENT_ID,
-      merchantSecret: process.env.TPAY_SECRET,
-      sandbox: false
-    });
 
-    // Weryfikacja statusu transakcji
-    const verification = await tpay.verifyTransaction(tr_id);
 
-    if (verification.result) {
-      // Aktualizacja statusu zamówienia w bazie danych
-      // const connection = await getConnection();
-      // try {
-      //   await connection.execute(
-      //     'UPDATE zamowienia SET status_platnosci = ? WHERE id = ?',
-      //     ['paid', tr_crc]
-      //   );
-      // } finally {
-      //   await connection.release();
-      // }
-
-      // Przekierowanie do strony potwierdzenia
-      res.redirect('/order-confirmation');
-    } else {
-      res.redirect('/payment/error');
-    }
-  } catch (error) {
-    console.error('Błąd weryfikacji płatności:', error);
-    res.redirect('/payment/error');
-  }
-});
-
-// Endpoint dla błędu płatności
-app.get('/payment/error', (req, res) => {
-  res.redirect('/payment-failed');
-});
 
 async function getTpayToken() {
   try {

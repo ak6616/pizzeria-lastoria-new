@@ -157,6 +157,7 @@ export default function OrderForm({ deliveryAreas, location, orderType }: OrderF
         const status = response.json();
       }
       if (transaction.transactionPaymentUrl) {
+        
         window.location.href = transaction.transactionPaymentUrl;
       } else {
         throw new Error('Nie udało się utworzyć transakcji');
@@ -236,9 +237,6 @@ export default function OrderForm({ deliveryAreas, location, orderType }: OrderF
 
     // Najpierw inicjujemy płatność
     await handlePayment(orderData);
-
-    
-
 
     // Czyszczenie formularza i koszyka
     resetForm();
