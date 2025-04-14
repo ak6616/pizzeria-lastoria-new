@@ -56,7 +56,7 @@ const pool = mysql.createPool({
   database: process.env.DB_NAME,
   port: parseInt(process.env.DB_PORT),
   waitForConnections: true,
-  connectionLimit: 5,
+  connectionLimit: 1000,
   queueLimit: 0,
   enableKeepAlive: true,
   keepAliveInitialDelay: 0
@@ -611,7 +611,7 @@ app.post('/api/orders/:location', async (req, res) => {
       orderData.totalPrice,
       orderData.notes
     ];
-
+     console.log(orderValues);
       const [result] = await connection.execute(
         `INSERT INTO zamowienia${suffix} (
           imie, nazwisko, typ, miejscowosc, ulica, numerDomu, numerMieszkania, 

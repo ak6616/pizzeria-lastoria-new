@@ -127,10 +127,23 @@ export default function OrderForm({ deliveryAreas, location, orderType }: OrderF
 
   const handlePayment = async (orderData: PaymentOrderData) => {
     try {
+
+      const orderDescription = orderData.items
+      .map(item => {
+        const extras = item.addedIngredients.length 
+          ? ` (+${item.addedIngredients.map(i => i.name).join(', ')})`
+          : '';
+          const withouts = item.removedIngredients.length 
+          ? ` (-${item.removedIngredients.join(', ')})`
+          : '';
+        return `${item.name}${extras}${withouts}`;
+      })
+      .join(', ');
+
       const paymentData = {
         name: `${orderData.firstName} ${orderData.lastName}`,
         amount: orderData.totalPrice,
-        description: `Zamówienie - Pizzeria Lastoria ${location}`,
+        description: `Zamówienie - Pizzeria Lastoria ${location}: ${orderDescription}`,
         crc: `${Date.now()}`,
         // payer: {
           email: `${orderData.email}`,
