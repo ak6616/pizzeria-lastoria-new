@@ -831,7 +831,7 @@ app.post('/api/payment/init', async (req, res) => {
 
 app.post('/api/payment/status', async (req, res) => {
   try {
-    const { transactionId } = req.body;
+    const { transactionId, location, orderData} = req.body;
     if (!transactionId) {
       return res.status(400).json({ error: 'Brak transactionId' });
     }
@@ -856,18 +856,19 @@ app.post('/api/payment/status', async (req, res) => {
             console.log("Płatność zakończona sukcesem!");
             
             // Jeśli płatność się powiedzie, wysyłamy zamówienie
-            const response = await fetch(`/api/orders/${location}`, {
+            const response = await fetch(`https://pizza-lastoria.pl/api/orders/${location}`, {
               method: 'POST',
               headers: {
                 'Content-Type': 'application/json',
               },
               body: JSON.stringify(orderData)
+              
             });
-
+            i = 14;
             if (!response.ok) {
               throw new Error('Błąd podczas składania zamówienia');
             }
-            return res.json({ status: "success", data }); // Odpowiedź do klienta
+            return res.json({ status: "correct", data }); // Odpowiedź do klienta
           } else {
             console.log(`Płatność nie zakończona sukcesem: ${data.status}`);
           }

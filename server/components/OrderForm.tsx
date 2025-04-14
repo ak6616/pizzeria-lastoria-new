@@ -144,33 +144,38 @@ export default function OrderForm({ deliveryAreas, location, orderType }: OrderF
         amount: orderData.totalPrice,
         description: `Zamówienie - Pizzeria Lastoria ${location}: ${orderDescription}`,
         crc: `${Date.now()}`,
-        // payer: {
+        payer: {
           email: `${orderData.email}`,
           city: orderData.city == "" ? "Miejsce Piastowe" : orderData.city, 
           address: `${orderData.street || ''} ${orderData.houseNumber}${orderData.apartmentNumber ? '/' + orderData.apartmentNumber : ''}`,
           phone: orderData.phone,
           country: 'Poland'
-        // },
+        },
         
       };
 
-      const response = await fetch('/api/payment/init', {
+      const initresponse = await fetch('/api/payment/init', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(paymentData)
       });
 
-      const transaction = await response.json();
-      if(transaction.transactionId) {
-        const response = await fetch ('api/payment/status', {
+      const transaction = await initresponse.json();
+      if (transaction.transactionId) {
+        fetch('/api/payment/status', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ transactionId: transaction.transactionId })
-        })
-        const status = response.json();
+          body: JSON.stringify({ transactionId: transaction.transactionId, location, orderData })
+        }).then(res => res.json())
+          .then(status => {
+            console.log('Status płatności:', status);
+          })
+          .catch(error => {
+            console.error('Błąd sprawdzania statusu płatności:', error);
+          });
       }
+      
       if (transaction.transactionPaymentUrl) {
-        
         window.location.href = transaction.transactionPaymentUrl;
       } else {
         throw new Error('Nie udało się utworzyć transakcji');
@@ -356,7 +361,7 @@ export default function OrderForm({ deliveryAreas, location, orderType }: OrderF
     setCustomerData((prev) => ({
       ...prev,
       city,
-      street: street || prev.street, // Zapisuje ulic� tylko, je�li by�a w opcji
+      street: street || prev.street, 
     }));
   };
   const handleStreetChange = (e: React.ChangeEvent<HTMLInputElement>) => {
