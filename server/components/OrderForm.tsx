@@ -8,7 +8,6 @@ import IngredientsModal from './IngredientsModal';
 import SelectedItemsBubbles from './SelectedItemsBubbles';
 import { getActiveOrdersCount } from '../services/api';
 import { OrderFormProps, CustomerData, PaymentOrderData } from '../types';
-// import { checkTransactionStatus } from '../services/api';
 
 
 
@@ -125,7 +124,7 @@ export default function OrderForm({ deliveryAreas, location, orderType }: OrderF
     checkOrderLimit();
   }, [location]);
 
-  const handlePayment = async (orderData: PaymentOrderData) => {
+  const handlePayment = async (orderData) => {
     try {
 
       const orderDescription = orderData.items
@@ -162,14 +161,20 @@ export default function OrderForm({ deliveryAreas, location, orderType }: OrderF
       });
 
       const transaction = await response.json();
+      if(transaction.transactionId) {
+        const response = await fetch ('api/payment/status', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ transactionId: transaction.transactionId })
+        })
+        const status = response.json();
+      }
       if (transaction.transactionPaymentUrl) {
+        
         window.location.href = transaction.transactionPaymentUrl;
       } else {
         throw new Error('Nie udało się utworzyć transakcji');
       }
-      
-     
-      
       
     } catch (error) {
       console.error('Błąd podczas inicjowania płatności:', error);
@@ -245,21 +250,6 @@ export default function OrderForm({ deliveryAreas, location, orderType }: OrderF
 
     // Najpierw inicjujemy płatność
     await handlePayment(orderData);
-
-    
-
-    // Jeśli płatność się powiedzie, wysyłamy zamówienie
-    const response = await fetch(`/api/orders/${location}`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(orderData)
-    });
-
-    if (!response.ok) {
-      throw new Error('Błąd podczas składania zamówienia');
-    }
 
     // Czyszczenie formularza i koszyka
     resetForm();
