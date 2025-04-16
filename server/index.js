@@ -39,9 +39,11 @@ app.use(session({
   saveUninitialized: false,
   cookie: { 
     secure: process.env.NODE_ENV === 'production',
-    sameSite: 'lax'
+    sameSite: 'lax',
+    maxAge: 24 * 60 * 60 * 1000 // 24 godziny w milisekundach
   }
 }));
+
 
 // Upewnij się, że preflight requests są obsługiwane prawidłowo
 app.options('*', cors());
@@ -779,14 +781,6 @@ getTpayToken();
 // Automatyczne od�wie�anie co 1h 55min (przed wyga�ni�ciem tokena)
 setInterval(getTpayToken, 115 * 60 * 1000); // 115 minut w milisekundach
 
-// Endpoint zwracaj�cy aktualny token
-// app.get("/token", (req, res) => {
-//   if (tpayToken) {
-//       res.json({ access_token: tpayToken });
-//   } else {
-//       res.status(500).json({ error: "Brak tokena, spr�buj ponownie p�niej." });
-//   }
-// });
 
 app.post('/api/payment/init', async (req, res) => {
   try {
@@ -806,10 +800,11 @@ app.post('/api/payment/init', async (req, res) => {
           payer: {
             email: paymentData.email,
             city: paymentData.city,
-            name: `${paymentData.name}`,
-            address: `${paymentData.city} ${paymentData.street || ''} ${paymentData.houseNumber}${paymentData.apartmentNumber ? '/' + paymentData.apartmentNumber : ''}`,
+            name: paymentData.name,
+            address: paymentData.address,
             phone: paymentData.phone,
           },
+          country: paymentData.country,
           
           return_url: process.env.TPAY_RETURN_URL,
           return_error_url: process.env.TPAY_ERROR_URL
@@ -869,8 +864,12 @@ app.post('/api/payment/status', async (req, res) => {
               throw new Error('Błąd podczas składania zamówienia');
             }
             return res.json({ status: "correct", data }); // Odpowiedź do klienta
-          } else {
-            console.log(`Płatność nie zakończona sukcesem: ${data.status}`);
+          } else if(data.status === "canceled") {
+            i = 14;
+            console.log(`Płatność została anulowana: ${data.status}`);
+          }
+           else {
+            console.log(`Płatność w trakcie: ${data.status}`);
           }
         } catch (error) {
           console.error("Błąd podczas pobierania statusu transakcji:", error);

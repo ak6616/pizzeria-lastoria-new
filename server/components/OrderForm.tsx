@@ -129,38 +129,30 @@ export default function OrderForm({ deliveryAreas, location, orderType }: OrderF
 
       const orderDescription = orderData.items
       .map(item => {
-        const extras = item.addedIngredients.length 
-          ? ` (+${item.addedIngredients.map(i => i.name).join(', ')})`
-          : '';
-          const withouts = item.removedIngredients.length 
-          ? ` (-${item.removedIngredients.join(', ')})`
-          : '';
-        return `${item.name}${extras}${withouts}`;
+        return `${item.name}`;
       })
       .join(', ');
 
       const paymentData = {
         name: `${orderData.firstName} ${orderData.lastName}`,
         amount: orderData.totalPrice,
-        description: `Zamówienie - Pizzeria Lastoria ${location}: ${orderDescription}`,
+        description: ` ${location}: ${orderDescription}`,
         crc: `${Date.now()}`,
-        payer: {
-          email: `${orderData.email}`,
-          city: orderData.city == "" ? "Miejsce Piastowe" : orderData.city, 
-          address: `${orderData.street || ''} ${orderData.houseNumber}${orderData.apartmentNumber ? '/' + orderData.apartmentNumber : ''}`,
-          phone: orderData.phone,
-          country: 'Poland'
-        },
+        email: `${orderData.email}`,
+        city: orderData.city == "" ? "Miejsce Piastowe" : orderData.city, 
+        address: `${orderData.street == "" ? 'Krośnieńska' : orderData.street} ${orderData.houseNumber == "" ? '1' : orderData.houseNumber}${orderData.apartmentNumber ? '/' + orderData.apartmentNumber : ''}`,
+        phone: orderData.phone,
+        country: 'Poland',
         
       };
 
-      const initresponse = await fetch('/api/payment/init', {
+      const initResponse = await fetch('/api/payment/init', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(paymentData)
       });
 
-      const transaction = await initresponse.json();
+      const transaction = await initResponse.json();
       if (transaction.transactionId) {
         fetch('/api/payment/status', {
           method: 'POST',

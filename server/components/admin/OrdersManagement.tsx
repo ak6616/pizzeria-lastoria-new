@@ -209,7 +209,7 @@ export default function OrdersManagement({ location }: OrdersManagementProps) {
                   </div>
                   <div>
                     <div className="text-sm text-gray-600">Uwagi:</div>
-                    <div>{order.notes}</div>
+                    <div>{order.uwagi}</div>
                   </div>
                 </div>
 
