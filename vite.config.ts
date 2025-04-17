@@ -1,26 +1,49 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import fs from 'fs';
+import { IncomingMessage } from 'http';
 
-// https://vitejs.dev/config/
 export default defineConfig({
+  plugins: [
+    react(),
+    {
+      name: 'middleware-uri-check',
+      configureServer(server) {
+        server.middlewares.use((req, res, next) => {
+          try {
+            if (req.url) {
+              decodeURI((req as IncomingMessage & { url: string }).url); // testujemy URI zanim Vite si� do niego dorwie
+            } else {
+              throw new Error('Request URL is undefined');
+            }
+            next();
+          } catch (e) {
+            console.warn('[URI MALFORMED]', req.url);
+            res.statusCode = 400;
+            res.end('400 Bad Request - URI malformed');
+          }
+        });
+      },
+    },
+  ],
   server: {
-    host: true,       // Udost�pnia na sieci (0.0.0.0)
-    port: 443,       // Mo�esz zmieni� na inny port
-    strictPort: true, // Zapewnia, �e Vite u�yje dok�adnie tego portu     // Mo�esz w��czy� HTTPS (wymaga certyfikatu)
-    cors: true, 
+    host: true,
+    port: 443,
+    strictPort: true,
+    cors: true,
     https: {
       key: fs.readFileSync('/etc/letsencrypt/live/pizza-lastoria.pl/privkey.pem'),
       cert: fs.readFileSync('/etc/letsencrypt/live/pizza-lastoria.pl/fullchain.pem')
     },
-    
-    allowedHosts: ['pizza-lastoria.pl', 'www.pizza-lastoria.pl'],      // W��cza CORS
-    proxy: {          // Proxy dla backendu (je�li masz API na innym porcie)
+    allowedHosts: ['pizza-lastoria.pl', 'www.pizza-lastoria.pl'],
+    proxy: {
       '/api': {
         target: 'https://www.pizza-lastoria.pl:3000',
         changeOrigin: true,
         secure: true
       }
     },
-  }
+  },
+  // ?? Tu dodajemy middleware, kt�ry sprawdza poprawno�� URI
+  
 });
