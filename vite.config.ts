@@ -76,10 +76,16 @@ export default defineConfig({
     port: 443,
     strictPort: true,
     cors: true,
+    host: true,
+    port: 443,
+    strictPort: true,
+    cors: true,
     https: {
       key: fs.readFileSync('/etc/letsencrypt/live/pizza-lastoria.pl/privkey.pem'),
       cert: fs.readFileSync('/etc/letsencrypt/live/pizza-lastoria.pl/fullchain.pem')
     },
+    allowedHosts: ['pizza-lastoria.pl', 'www.pizza-lastoria.pl'],
+    proxy: {
     allowedHosts: ['pizza-lastoria.pl', 'www.pizza-lastoria.pl'],
     proxy: {
       '/api': {
