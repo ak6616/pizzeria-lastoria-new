@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import OrdersManagement from './admin/OrdersManagement';
 import MenuManagement from './admin/MenuManagement';
 import DeliveryManagement from './admin/DeliveryManagement';
@@ -6,13 +6,12 @@ import NewsManagement from './admin/NewsManagement';
 import GalleryManagement from './admin/GalleryManagement';
 import LoginForm from './admin/LoginForm';
 import { useAuth } from '../hooks/useAuth';
+import {registerPush} from '../services/push'
 
 export default function AdminPanel() {
   const [selectedLocation, setSelectedLocation] = useState<string>('');
   const [selectedSection, setSelectedSection] = useState<string>('');
   const { isAuthenticated, login } = useAuth();
-
-  
 
   const locations = [
     { id: 'miejsce-piastowe', name: 'Miejsce Piastowe' },
@@ -51,7 +50,12 @@ export default function AdminPanel() {
     );
   }
 
+  useEffect(() => {
+    registerPush('BLvHHJmIqAgZgnvvlZ54P86et0zAZSrVkuP3c3H8Oh94rGdttzdtDblJXRtm4ZCFhW_wkUJXDAaCakCO3_3wsWc')
+  }, [])
+
   return (
+    
     <div className="max-w-7xl mx-auto p-6">
       <div className="flex justify-between items-center mb-8">
         <h1 className="text-3xl font-bold text-white">

@@ -1,7 +1,7 @@
 import { Trash2 } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { useOrders } from '../../hooks/useOrders';
-import { deleteOrder } from '../../services/api';
+import { deleteOrder, deleteAllOrders } from '../../services/api';
 import { format, isValid, parseISO } from 'date-fns';
 import { pl } from 'date-fns/locale';
 import React from 'react';
@@ -46,6 +46,18 @@ export default function OrdersManagement({ location }: OrdersManagementProps) {
       } catch (err) {
         console.error('Error deleting order:', err);
         alert('Wystąpił błąd podczas usuwania zamówienia');
+      }
+    }
+  };
+
+  const handleDeleteAll = async () => {
+    if (window.confirm('Czy na pewno chcesz usunąć wszystkie zamówienia?')) {
+      try {
+        await deleteAllOrders(location);
+        await refetch();
+      } catch (err) {
+        console.error('Error deleting orders:', err);
+        alert('Wystąpił błąd podczas usuwania zamówień');
       }
     }
   };
@@ -158,6 +170,14 @@ export default function OrdersManagement({ location }: OrdersManagementProps) {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h2 className="text-xl font-semibold">Zamówienia</h2>
+        <button
+          onClick={() => handleDeleteAll()}
+          className="ml-4 p-2 text-red-500 hover:text-red-600 transition"
+        >
+          Usuń wszystkie zamówienia
+          <Trash2 className="w-5 h-5" />
+        </button>
+        
       </div>
 
       <div className="space-y-4">

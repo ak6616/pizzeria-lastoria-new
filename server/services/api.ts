@@ -30,7 +30,23 @@ export async function getGalleryImages() {
   return response.json();
 }
 
-export async function addGalleryImage(data: { link: string }) {
+export async function uploadGalleryImage(file: File) {
+  await checkAuth();
+  const formData = new FormData();
+  formData.append('file', file);
+
+  const response = await fetch(`${API_BASE_URL}/gallery/upload`, {
+    method: 'POST',
+    body: formData,
+  });
+
+  if (!response.ok) {
+    throw new Error('Failed to upload image');
+  }
+  return await response.json();
+}
+
+export async function addGalleryImageLink(data: { link: string }) {
   await checkAuth();
   const response = await fetch(`${API_BASE_URL}/gallery`, {
     method: 'POST',
@@ -190,6 +206,7 @@ export async function getOrders(location: string) {
   return response.json();
 }
 export async function deleteOrder(id: number, location: string) {
+  await checkAuth();
   const response = await fetch(`${API_BASE_URL}/orders/${location}/${id}`, {
     method: 'DELETE',
   });
@@ -260,6 +277,18 @@ export async function updateMenuItem(data: {
 
   if (!response.ok) {
     throw new Error('Failed to update menu item');
+  }
+  return response.json();
+}
+
+export async function deleteAllOrders(location: string) {
+  await checkAuth();
+  const response = await fetch(`${API_BASE_URL}/orders/${location}`, {
+    method: 'DELETE',
+  });
+
+  if (!response.ok) {
+    throw new Error('Failed to delete order');
   }
   return response.json();
 }
@@ -423,7 +452,6 @@ export async function getActiveOrdersCount(location: string) {
   return response.json();
 }
 
-//////////////////////transakcje
 
 ///////////////// autoryzacja
 
@@ -435,4 +463,30 @@ async function checkAuth() {
   if (!response.ok) {
     throw new Error('Unauthorized');
   }
+}
+
+
+//////////Status możliwości zamawiania
+export async function getOrderingStatus() {
+  const response = await fetch(`${API_BASE_URL}/orderingStatus`);
+  if (!response.ok) {
+    throw new Error('Failed to fetch order status');
+  }
+  return response.json();
+}
+
+export async function updateOrderingStatus(data: { status: boolean }) {
+  await checkAuth();
+  const response = await fetch(`${API_BASE_URL}/orderingStatus`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(data),
+  });
+
+  if (!response.ok) {
+    throw new Error('Failed to update order status');
+  }
+  return response.json();
 }

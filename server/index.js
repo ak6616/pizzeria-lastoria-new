@@ -10,14 +10,35 @@ import { fileURLToPath } from 'url';
 import { printToReceiptPrinter } from './printer.js';
 import fs from 'fs';
 import https from 'https';
+import webpush from 'web-push';
+import multer from 'multer';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+let orderingStatus = true;
 let tpayToken = null;
 const app = express();
 const port = process.env.PORT ;
-// const socket = new WebSocket('wss:pizza-lastoria.pl');
+const storage = multer.storage({
+  destination: "/uploads",
+  filename: (req, file, cb) => {
+    const ext = path.extname(file.originalname);
+    const uniqueName = Date.now() + ext;
+    cb(null, uniqueName);
+  },
+});
+
+const upload = multer({storage});
+
+app.use("/uploads", express.static("uploads"));
+
+app.post("/upload", upload.single("link"), async (req, res) => {
+  const fileUrl = `http://localhost:3000/uploads/${req.file.filename}`;
+  
+  res.json({ fileUrl });
+
+})
 
 // Serwuj pliki statyczne z folderu dist
 app.use(express.static(path.join(__dirname, '../server')));
@@ -31,6 +52,7 @@ app.use(cors({
 }));
 
 app.use(express.json());
+
 
 // Dodaj obsługę sesji
 app.use(session({
@@ -90,6 +112,8 @@ async function getConnection() {
     throw error;
   }
 }
+
+
 
 //////////////////////menu
 
@@ -536,24 +560,6 @@ app.get('/api/delivery-cost:location', async (req, res) => {
   }
 });
 
-app.delete('/api/orders/:id', async (req, res) => {
-  const { id } = req.params;
-  const connection = await getConnection();
-
-  try {
-    const [result] = await connection.execute(
-      'DELETE FROM zamowienia WHERE id = ?',
-      [id]
-    );
-    res.json(result);
-  } catch (error) {
-    console.error('Error deleting order:', error);
-    res.status(500).json({ error: 'Internal server error' });
-  } finally {
-    await connection.release();
-  }
-});
-
 // Endpoint dla zamówień z różnych lokalizacji
 app.post('/api/orders/:location', async (req, res) => {
   const connection = await getConnection();
@@ -561,8 +567,6 @@ app.post('/api/orders/:location', async (req, res) => {
   const suffix = location === 'haczow' ? '_hacz' : '_mp';
  
   try {
-
-
 
       const orderData = req.body;
     console.log('=== Nowe zamówienie otrzymane ===');
@@ -631,11 +635,7 @@ app.post('/api/orders/:location', async (req, res) => {
     }
   
       res.json({ success: true, orderId: result.insertId });
-    
-  
-
-    // Najpierw zapisz do bazy
-    
+        
   } catch (error) {
     console.error('Błąd przetwarzania zamówienia:', error);
     res.status(500).json({ error: 'Internal server error', details: error.message });
@@ -643,6 +643,8 @@ app.post('/api/orders/:location', async (req, res) => {
     await connection.release();
   }
 });
+
+////////// Endpoint do pobierania zamówień
 
 app.get('/api/orders/:location', async (req, res) => {
   const connection = await getConnection();
@@ -728,6 +730,8 @@ app.post('/api/logout', (req, res) => {
   });
 });
 
+/////Endpoint do zliczania aktywnych zamówień
+
 app.get('/api/orders/:location/count', async (req, res) => {
   const connection = await getConnection();
   const { location } = req.params;
@@ -749,7 +753,7 @@ app.get('/api/orders/:location/count', async (req, res) => {
 
 
 
-
+///////Funkcja do pobierania tokena TPay
 
 async function getTpayToken() {
   try {
@@ -782,6 +786,8 @@ getTpayToken();
 setInterval(getTpayToken, 115 * 60 * 1000); // 115 minut w milisekundach
 
 
+
+////// Endpoint do inicjalizacji płatności
 app.post('/api/payment/init', async (req, res) => {
   try {
 
@@ -824,6 +830,8 @@ app.post('/api/payment/init', async (req, res) => {
   }
 });
 
+
+////// Endpoint do sprawdzania statusu płatności
 app.post('/api/payment/status', async (req, res) => {
   try {
     const { transactionId, location, orderData} = req.body;
@@ -884,7 +892,29 @@ app.post('/api/payment/status', async (req, res) => {
   }
 });
 
+////// Czyszczenie wszystkich zamówień
+app.delete('/api/orders/:location', async (req, res) => {
+  const connection = await getConnection();
+  const { location } = req.params;
+  const suffix = location === 'haczow' ? '_hacz' : '_mp';
 
+  try {
+    const [result] = await connection.execute(
+      `TRUNCATE TABLE zamowienia${suffix}`,
+    );
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ error: 'Orders not found' });
+    }
+
+    res.json({ message: 'Orders deleted successfully' });
+  } catch (error) {
+    console.error('Error deleting orders:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  } finally {
+    await connection.release();
+  }
+});
 
 
 
@@ -923,3 +953,55 @@ process.on('SIGTERM', () => {
 
 ////////////////////////////////////////////
 
+//////////Endpoint do sprawdzania statusu możliwości zamawiania
+app.get('/api/ordering-status', (req, res) => {
+  res.json({ status: orderingStatus });
+});
+
+////////Endpoint do zmiany statusu zamawiania
+app.post('/api/ordering-status', (req, res) => {
+  const { status } = req.body;
+  if (typeof status === 'boolean') {
+    orderingStatus = status;
+    res.json({ success: true, status: orderingStatus });
+  } else {
+    res.status(400).json({ error: 'Invalid status' });
+  }
+});
+
+
+////////Handler dla powiadomień push
+
+webpush.setVapidDetails(
+  'mailto:mp.lastoria@gmail.com',
+  process.env.VAPID_PUBLIC_KEY,
+  process.env.VAPID_PRIVATE_KEY
+);
+
+let subscriptions = [];
+
+app.post('/api/subscribe', (req, res) => {
+  const subscription = req.body;
+  subscriptions.push(subscription);
+  res.status(201).json({ message: 'Subscribed successfully' });
+});
+
+app.post('/api/notify', async (req, res) => {
+  const payload = JSON.stringify({
+    title: 'Nowe Zamówienie',
+    body: 'Sprawdź szybko nowe zamówienie! 😁',
+  })
+
+  const results = await Promise.allSettled(
+    subscriptions.map((sub) => 
+    webpush.sendNotification(sub, payload).catch(err => {
+      console.error("Błąd podczas wysyłania powiadomienia:", err);
+    }))
+  )
+  res.json({ success: true, results })
+
+});
+
+function notification(){
+
+}

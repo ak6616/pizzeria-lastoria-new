@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { X } from 'lucide-react';
-import { addGalleryImage } from '../../services/api';
-import { useGallery } from '../../hooks/useGallery';
+import { addGalleryImageLink } from '../../services/api';
+import { uploadGalleryImage } from '../../services/api';
 import { AddGalleryItemModalProps } from '../../types';
 
 
@@ -18,11 +18,14 @@ export default function AddGalleryItemModal({
     setError(null);
 
     const formData = new FormData(e.currentTarget);
-    const data = {
-      link: formData.get('link') as string,
-    };
     try {
-      await addGalleryImage(data);
+      const file = formData.get('link') as File;
+      if (!file) {
+        throw new Error('No file selected');
+      }
+      const res = await uploadGalleryImage(file); // teraz przesyłamy plik
+      const { fileUrl } = res;
+      await addGalleryImageLink(fileUrl);
 
       onSuccess();
     } catch (err) {
@@ -53,9 +56,9 @@ export default function AddGalleryItemModal({
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-sm font-medium mb-1">Link *</label>
+            <label className="block text-sm font-medium mb-1">Wgraj zdjęcie *</label>
             <input
-              type="text"
+              type="file"
               name="link"
               required
               className="w-full rounded-md border-gray-300 shadow-sm focus:border-yellow-500 focus:ring-yellow-500"
