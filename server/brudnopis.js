@@ -7,6 +7,8 @@
  * pracuję nad powiadomieniami push
  * powiadomienia powinny działać sprawnie
  * 
+ * 
+ * 
  * --------------------------------
  * jestem w trakcie dodawania możliwości wrzucania zdjęć na stronę
  * skopiowałem wszystkie zdjęcia

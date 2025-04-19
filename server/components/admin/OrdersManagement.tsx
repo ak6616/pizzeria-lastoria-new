@@ -1,7 +1,7 @@
 import { Trash2 } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { useOrders } from '../../hooks/useOrders';
-import { deleteOrder, deleteAllOrders } from '../../services/api';
+import { deleteOrder, deleteAllOrders, updateOrderingStatus, getOrderingStatus } from '../../services/api';
 import { format, isValid, parseISO } from 'date-fns';
 import { pl } from 'date-fns/locale';
 import React from 'react';
@@ -22,18 +22,30 @@ export default function OrdersManagement({ location }: OrdersManagementProps) {
     refetch: () => Promise<void>
   };
   const [time, setTime] = useState<number>(30);
+  const [orderingStatus, setOrderingStatus] = useState<boolean>(true);
 
   useEffect(() => {
     const timer = setInterval(() => {
       setTime((prevTime) => {
         if (prevTime > 0) {
-          return prevTime - 1; // Zmniejsza czas o 1 sekund�
+          return prevTime - 1;
         } else {
-          refetch(); // Wywo�aj funkcj� refetch, gdy czas osi�gnie 0
-          return 30; // Resetuj licznik do 30 sekund
+          refetch();
+          return 30;
         }
       });
     }, 1000);
+
+    const fetchOrderingStatus = async () => {
+      try {
+        const status = await getOrderingStatus();
+        setOrderingStatus(status === 'true');
+      } catch (error) {
+        console.error('Error fetching ordering status:', error);
+      }
+    };
+
+    fetchOrderingStatus();
 
     return () => clearInterval(timer);
   }, [refetch]);
@@ -59,6 +71,16 @@ export default function OrdersManagement({ location }: OrdersManagementProps) {
         console.error('Error deleting orders:', err);
         alert('Wystąpił błąd podczas usuwania zamówień');
       }
+    }
+  };
+
+  const handleToggleOrderingStatus = async () => {
+    try {
+      await updateOrderingStatus(!orderingStatus);
+      setOrderingStatus(!orderingStatus);
+    } catch (error) {
+      console.error('Error updating ordering status:', error);
+      alert('Wystąpił błąd podczas aktualizacji statusu zamówień');
     }
   };
 
@@ -170,14 +192,27 @@ export default function OrdersManagement({ location }: OrdersManagementProps) {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h2 className="text-xl font-semibold">Zamówienia</h2>
-        <button
-          onClick={() => handleDeleteAll()}
-          className="ml-4 p-2 text-red-500 hover:text-red-600 transition"
-        >
-          Usuń wszystkie zamówienia
-          <Trash2 className="w-5 h-5" />
-        </button>
-        
+        <div className="flex items-center space-x-4">
+          <div>
+            Status zamówień:{' '}
+            <span className={orderingStatus ? 'text-green-500' : 'text-red-500'}>
+              {orderingStatus ? 'Włączone' : 'Wyłączone'}
+            </span>
+          </div>
+          <button
+            onClick={handleToggleOrderingStatus}
+            className="bg-yellow-500 hover:bg-yellow-700 text-white font-bold py-2 px-4 rounded"
+          >
+            {orderingStatus ? 'Wyłącz zamówienia' : 'Włącz zamówienia'}
+          </button>
+          <button
+            onClick={() => handleDeleteAll()}
+            className="ml-4 p-2 text-red-500 hover:text-red-600 transition"
+          >
+            Usuń wszystkie zamówienia
+            <Trash2 className="w-5 h-5" />
+          </button>
+        </div>
       </div>
 
       <div className="space-y-4">

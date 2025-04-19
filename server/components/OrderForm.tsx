@@ -429,7 +429,7 @@ export default function OrderForm({ deliveryAreas, location, orderType }: OrderF
           <form onSubmit={handleFormSubmit} className="space-y-8">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <label className="block text-sm font-medium text-gray-700 flex items-center gap-2">
+                <label className="block text-sm font-medium text-gray-700  items-center gap-2">
                   <User className="w-4 h-4 text-yellow-600" />
                   Imię *
                 </label>
@@ -444,7 +444,7 @@ export default function OrderForm({ deliveryAreas, location, orderType }: OrderF
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 flex items-center gap-2">
+                <label className="block text-sm font-medium text-gray-700  items-center gap-2">
                   <Users className="w-4 h-4 text-yellow-600" />
                   Nazwisko *
                 </label>
@@ -459,7 +459,7 @@ export default function OrderForm({ deliveryAreas, location, orderType }: OrderF
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 flex items-center gap-2">
+                <label className="block text-sm font-medium text-gray-700  items-center gap-2">
                   <Phone className="w-4 h-4 text-yellow-600" />
                   Numer telefonu *
                 </label>
@@ -476,7 +476,7 @@ export default function OrderForm({ deliveryAreas, location, orderType }: OrderF
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 flex items-center gap-2">
+                <label className="block text-sm font-medium text-gray-700  items-center gap-2">
                   <MessageCircleMore className="w-4 h-4 text-yellow-600" />
                   Email *
                 </label>
@@ -494,7 +494,7 @@ export default function OrderForm({ deliveryAreas, location, orderType }: OrderF
               {orderType === 'delivery' && (
                 <>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 flex items-center gap-2">
+                    <label className="block text-sm font-medium text-gray-700  items-center gap-2">
                       <MapPin className="w-4 h-4 text-yellow-600" />
                       Miejscowość *
                     </label>
@@ -518,7 +518,7 @@ export default function OrderForm({ deliveryAreas, location, orderType }: OrderF
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 flex items-center gap-2">
+                    <label className="block text-sm font-medium text-gray-700  items-center gap-2">
                       <Home className="w-4 h-4 text-yellow-600" />
                       Ulica
                     </label>
@@ -532,7 +532,7 @@ export default function OrderForm({ deliveryAreas, location, orderType }: OrderF
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 flex items-center gap-2">
+                    <label className="block text-sm font-medium text-gray-700  items-center gap-2">
                       <Building2 className="w-4 h-4 text-yellow-600" />
                       Numer domu *
                     </label>
@@ -550,7 +550,7 @@ export default function OrderForm({ deliveryAreas, location, orderType }: OrderF
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 flex items-center gap-2">
+                    <label className="block text-sm font-medium text-gray-700  items-center gap-2">
                       <DoorClosed className="w-4 h-4 text-yellow-600" />
                       Numer mieszkania
                     </label>
@@ -567,7 +567,7 @@ export default function OrderForm({ deliveryAreas, location, orderType }: OrderF
               )}
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 flex items-center gap-2">
+                <label className="block text-sm font-medium text-gray-700  items-center gap-2">
                   <Clock className="w-4 h-4 text-yellow-600" />
                   Dostawa na konkretną godzinę
                 </label>

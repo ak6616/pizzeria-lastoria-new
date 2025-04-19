@@ -475,14 +475,14 @@ export async function getOrderingStatus() {
   return response.json();
 }
 
-export async function updateOrderingStatus(data: { status: boolean }) {
+export async function updateOrderingStatus( status: boolean ) {
   await checkAuth();
   const response = await fetch(`${API_BASE_URL}/orderingStatus`, {
     method: 'PUT',
     headers: {
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify(data),
+    body: JSON.stringify(status),
   });
 
   if (!response.ok) {

@@ -16,7 +16,6 @@ import multer from 'multer';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-let orderingStatus = true;
 let tpayToken = null;
 const app = express();
 const port = process.env.PORT ;
@@ -951,7 +950,8 @@ process.on('SIGTERM', () => {
   });
 });
 
-////////////////////////////////////////////
+///////////////////////Status zamawiania
+let orderingStatus = true;
 
 //////////Endpoint do sprawdzania statusu możliwości zamawiania
 app.get('/api/ordering-status', (req, res) => {
