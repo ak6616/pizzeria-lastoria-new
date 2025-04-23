@@ -50,6 +50,7 @@ const storage = multer.diskStorage({
 
 const upload = multer({storage});
 
+
 app.use("/zdjecia", express.static(path.join(__dirname, "../public/zdjecia")));
 
 app.use(cookieParser());
@@ -454,6 +455,27 @@ app.delete('/api/gallery/:id', async (req, res) => {
   const connection = await getConnection();
 
   try {
+
+    // Usuwanie grafiki z serwera
+
+    const [filePath] = await connection.execute('SELECT link FROM galeria WHERE id = ?', [id]);
+
+    if(!filePath){
+      return res.status(404).json({ error: "Nie znaleziono ścieżki do pliku." });
+    }
+    const absolutePath = path.join(__dirname, '../public/zdjecia', path.basename(filePath));
+
+    fs.unlink(absolutePath, (err) => {
+      if(err){
+        console.error("Błąd podczas usuwania pliku:", err);
+        return res.status(500).json({ error: "Nie udało się usunąć pliku."});
+      }
+
+      return res.json({ message: "Plik usunięty pomyślnie." });
+    });
+
+    // Usuwanie rekordu z bazy danych
+
     const [result] = await connection.execute(
       'DELETE FROM galeria WHERE id = ?',
       [id]
@@ -486,7 +508,6 @@ app.post("/api/gallery/upload", upload.single("photo"), async (req, res) => {
     return res.status(400).json({ error: "Brak przesłanego pliku." });
   }
   const fileUrl = `https://pizza-lastoria.pl/zdjecia/${req.file.filename}`;
-  console.log(req.file);
   res.json({ fileUrl });
 
 })
