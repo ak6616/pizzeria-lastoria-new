@@ -80,6 +80,7 @@ export default function OrdersManagement({ location }: OrdersManagementProps) {
     try {
       await updateOrderingStatus(!orderingStatus);
       setOrderingStatus(!orderingStatus);
+      await refetch();
     } catch (error) {
       console.error('Error updating ordering status:', error);
       alert('Wystąpił błąd podczas aktualizacji statusu zamówień');

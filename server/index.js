@@ -64,7 +64,7 @@ app.use(cors({
   origin: ['https://www.pizza-lastoria.pl', 'https://pizza-lastoria.pl'], // Your frontend address
   methods: 'GET,POST,PUT,DELETE',
   allowedHeaders: 'Content-Type, Authorization',
-  credentials: true
+  credentials: true // Zezwól na przesyłanie ciasteczek
 }));
 
 app.use(express.json());
@@ -73,12 +73,14 @@ app.use(express.json());
 // Dodaj obsługę sesji
 app.use(session({
   secret: 'twoj-tajny-klucz',
-  resave: false,
+  resave: true,
   saveUninitialized: false,
   store: sessionStore,
   cookie: { 
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: 'lax',
+    secure: process.env.NODE_ENV === 'production', // Używaj secure tylko w produkcji
+    sameSite: 'lax', // Ustawiono lax dla obsługi cross-origin
+    path: '/', // Dodaj ścieżkę cookiedla całej aplikacji
+    domain: process.env.NODE_ENV === 'production' ? 'pizza-lastoria.pl' : undefined, // Ustaw domenę cookie
     maxAge: 24 * 60 * 60 * 1000 // 24 godziny w milisekundach
   }
 }));
@@ -755,6 +757,7 @@ app.post('/api/login', async (req, res) => {
     }
 
     req.session.isAuthenticated = true;
+    req.session.save();
     res.json({ success: true });
   } catch (error) {
     console.error('Error during login:', error);
@@ -1026,15 +1029,18 @@ app.put('/api/ordering-status', express.json(), async (req, res) => {
 
 webpush.setVapidDetails(
   'mailto:mp.lastoria@gmail.com',
-  process.env.VAPID_PUBLIC_KEY,
-  process.env.VAPID_PRIVATE_KEY
+  process.env.VAPID_PUBLIC_KEY, // Klucz publiczny
+  process.env.VAPID_PRIVATE_KEY // Klucz prywatny
 );
 
 let subscriptions = [];
 
 app.post('/api/subscribe', (req, res) => {
   const subscription = req.body;
-  subscriptions.push(subscription);
+  if (!subscription || !subscription.endpoint) {
+    return res.status(400).json({ error: 'Invalid subscription object' });
+  }
+  subscriptions.push(subscription); // Upewnij się, że subskrypcja jest poprawnie zapisywana
   res.status(201).json({ message: 'Subscribed successfully' });
 });
 

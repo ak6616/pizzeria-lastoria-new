@@ -26,14 +26,14 @@ const isDeliveryAvailable = async (location: string): Promise<{ available: boole
     return { available: true };
   }
   
-  // const orderingStatus = await getOrderingStatus();
-  // console.log(orderingStatus);
-  // if (orderingStatus.status === false) {
-  //   return { 
-  //     available: false, 
-  //     message: 'Przepraszamy, ale możliwość zamawiania online została zablokowana z przyczyn technicznych.'
-  //   };
-  // }
+  const orderingStatus = await getOrderingStatus();
+  console.log(orderingStatus);
+  if (orderingStatus.status === false) {
+    return { 
+      available: false, 
+      message: 'Przepraszamy, ale możliwość zamawiania online została zablokowana z przyczyn technicznych.'
+    };
+  }
 
   // Godziny w dni powszednie
   if (location === 'miejsce-piastowe') {

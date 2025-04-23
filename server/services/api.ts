@@ -431,10 +431,7 @@ export async function login(credentials: LoginCredentials) {
     headers: {
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify({
-      username: credentials.username,
-      password: credentials.password
-    }),
+    body: JSON.stringify(credentials),
     credentials: 'include',
   });
   
@@ -470,7 +467,7 @@ export async function getActiveOrdersCount(location: string) {
 
 async function checkAuth() {
   const response = await fetch(`${API_BASE_URL}/check-auth`, {
-    credentials: 'include' // ważne dla obsługi sesji
+    credentials: 'include'
   });
   
   if (!response.ok) {
