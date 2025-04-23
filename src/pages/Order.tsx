@@ -27,7 +27,7 @@ const isDeliveryAvailable = async (location: string): Promise<{ available: boole
   }
 
   const orderingStatus = await getOrderingStatus();
-  if (!orderingStatus) {
+  if (orderingStatus == "false") {
     return { 
       available: false, 
       message: 'Przepraszamy, ale możliwość zamawiania online została zablokowana z przyczyn technicznych.'
