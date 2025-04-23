@@ -465,7 +465,7 @@ app.delete('/api/gallery/:id', async (req, res) => {
     if(!filePath){
       return res.status(404).json({ error: "Nie znaleziono ścieżki do pliku." });
     }
-    const absolutePath = path.join(__dirname, '../public/zdjecia', path.basename(filePath));
+    const absolutePath = path.join(__dirname, '../public/zdjecia', path.basename(filePath.stringify));
 
     fs.unlink(absolutePath, (err) => {
       if(err){
