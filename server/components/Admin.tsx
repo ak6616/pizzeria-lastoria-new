@@ -12,6 +12,9 @@ export default function AdminPanel() {
   const [selectedLocation, setSelectedLocation] = useState<string>('');
   const [selectedSection, setSelectedSection] = useState<string>('');
   const { isAuthenticated, login } = useAuth();
+  useEffect(() => {
+    registerPush('BLvHHJmIqAgZgnvvlZ54P86et0zAZSrVkuP3c3H8Oh94rGdttzdtDblJXRtm4ZCFhW_wkUJXDAaCakCO3_3wsWc')
+  }, [])
 
   const locations = [
     { id: 'miejsce-piastowe', name: 'Miejsce Piastowe' },
@@ -50,9 +53,7 @@ export default function AdminPanel() {
     );
   }
 
-  useEffect(() => {
-    registerPush('BLvHHJmIqAgZgnvvlZ54P86et0zAZSrVkuP3c3H8Oh94rGdttzdtDblJXRtm4ZCFhW_wkUJXDAaCakCO3_3wsWc')
-  }, [])
+  
 
   return (
     

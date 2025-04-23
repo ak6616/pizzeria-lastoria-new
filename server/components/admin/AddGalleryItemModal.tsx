@@ -19,13 +19,13 @@ export default function AddGalleryItemModal({
 
     const formData = new FormData(e.currentTarget);
     try {
-      const file = formData.get('link') as File;
+      const file = formData.get('photo') as File;
       if (!file) {
         throw new Error('No file selected');
       }
       const res = await uploadGalleryImage(file); // teraz przesyłamy plik
       const { fileUrl } = res;
-      await addGalleryImageLink(fileUrl);
+      await addGalleryImageLink({link: fileUrl});
 
       onSuccess();
     } catch (err) {
@@ -59,7 +59,7 @@ export default function AddGalleryItemModal({
             <label className="block text-sm font-medium mb-1">Wgraj zdjęcie *</label>
             <input
               type="file"
-              name="link"
+              name="photo"
               required
               className="w-full rounded-md border-gray-300 shadow-sm focus:border-yellow-500 focus:ring-yellow-500"
             />

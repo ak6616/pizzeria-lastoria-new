@@ -244,7 +244,7 @@ export function useOrderForm(
         });
 
       const totalPrice = calculateTotal(deliveryCost);
-      const orderDateTime = new Date().toISOString();
+      const orderDateTime = new Date().toString();
 
       await submitOrder({
         ...customerData,

@@ -33,11 +33,12 @@ export async function getGalleryImages() {
 export async function uploadGalleryImage(file: File) {
   await checkAuth();
   const formData = new FormData();
-  formData.append('file', file);
+  formData.append('photo', file);
 
   const response = await fetch(`${API_BASE_URL}/gallery/upload`, {
     method: 'POST',
-    body: formData,
+    credentials: 'include',
+    body: formData, // Remove Content-Type header, let browser set it
   });
 
   if (!response.ok) {
@@ -53,6 +54,8 @@ export async function addGalleryImageLink(data: { link: string }) {
     headers: {
       'Content-Type': 'application/json',
     },
+    credentials: 'include',
+
     body: JSON.stringify(data), // Dane sÄ… poprawnie serializowane do JSON
   });
 
@@ -66,6 +69,7 @@ export async function deleteGalleryImage(id: number) {
   await checkAuth();
   const response = await fetch(`${API_BASE_URL}/gallery/${id}`, {
     method: 'DELETE',
+    credentials: 'include',
   });
 
   if (!response.ok) {
@@ -95,6 +99,7 @@ export async function addNews(data: {
     headers: {
       'Content-Type': 'application/json',
     },
+    credentials: 'include',
     body: JSON.stringify(data),
   });
 
@@ -116,6 +121,7 @@ export async function updateNews(data: {
     headers: {
       'Content-Type': 'application/json',
     },
+    credentials: 'include',
     body: JSON.stringify(data),
   });
 
@@ -129,6 +135,7 @@ export async function deleteNews(id: number) {
   await checkAuth();
   const response = await fetch(`${API_BASE_URL}/news/${id}`, {
     method: 'DELETE',
+    credentials: 'include',
   });
 
   if (!response.ok) {
@@ -209,6 +216,7 @@ export async function deleteOrder(id: number, location: string) {
   await checkAuth();
   const response = await fetch(`${API_BASE_URL}/orders/${location}/${id}`, {
     method: 'DELETE',
+    credentials: 'include',
   });
 
   if (!response.ok) {
@@ -272,6 +280,7 @@ export async function updateMenuItem(data: {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify(data),
+      credentials: 'include',
     }
   );
 
@@ -285,6 +294,7 @@ export async function deleteAllOrders(location: string) {
   await checkAuth();
   const response = await fetch(`${API_BASE_URL}/orders/${location}`, {
     method: 'DELETE',
+    credentials: 'include',
   });
 
   if (!response.ok) {
@@ -310,7 +320,7 @@ export async function deleteMenuItem(category: string, id: number, location: str
 
   const response = await fetch(`${API_BASE_URL}/menu/${fullCategory}/${id}`, {
     method: 'DELETE',
-    credentials: 'include'
+    credentials: 'include',
   });
 
   if (!response.ok) {
@@ -351,6 +361,7 @@ export async function addDeliveryRule(data: {
       headers: {
         'Content-Type': 'application/json',
       },
+      credentials: 'include',
       body: JSON.stringify({
         ...data,
         category: fullCategory
@@ -383,6 +394,7 @@ export async function updateDeliveryRule(data: {
       headers: {
         'Content-Type': 'application/json',
       },
+      credentials: 'include',
       body: JSON.stringify(data),
     }
   );
@@ -403,6 +415,7 @@ export async function deleteDeliveryRule(location: string, category: string, id:
 
   const response = await fetch(`${API_BASE_URL}/delivery/${category}${suffix}/${id}`, {
     method: 'DELETE',
+    credentials: 'include',
   });
 
   if (!response.ok) {
@@ -410,7 +423,7 @@ export async function deleteDeliveryRule(location: string, category: string, id:
   }
   return response.json();
 }
-
+////////////logowanie
 
 export async function login(credentials: LoginCredentials) {
   const response = await fetch(`${API_BASE_URL}/login`, {
@@ -422,7 +435,7 @@ export async function login(credentials: LoginCredentials) {
       username: credentials.username,
       password: credentials.password
     }),
-    credentials: 'include'
+    credentials: 'include',
   });
   
   if (!response.ok) {
@@ -468,7 +481,7 @@ async function checkAuth() {
 
 //////////Status możliwości zamawiania
 export async function getOrderingStatus() {
-  const response = await fetch(`${API_BASE_URL}/orderingStatus`);
+  const response = await fetch(`${API_BASE_URL}/ordering-status`);
   if (!response.ok) {
     throw new Error('Failed to fetch order status');
   }
@@ -477,12 +490,13 @@ export async function getOrderingStatus() {
 
 export async function updateOrderingStatus( status: boolean ) {
   await checkAuth();
-  const response = await fetch(`${API_BASE_URL}/orderingStatus`, {
+  const response = await fetch(`${API_BASE_URL}/ordering-status`, {
     method: 'PUT',
     headers: {
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify(status),
+    credentials: 'include',
+    body: JSON.stringify({ status }),
   });
 
   if (!response.ok) {

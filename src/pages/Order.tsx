@@ -1,13 +1,13 @@
 import { useEffect, useState } from 'react';
 import OrderForm from '../../server/components/OrderForm';
-import { getDeliveryAreas } from '../../server/services/api';
+import { getDeliveryAreas, getOrderingStatus } from '../../server/services/api';
 import { MapPin, Home } from 'lucide-react';
 import { format } from 'date-fns';
 import { pl } from 'date-fns/locale';
 import { DeliveryArea } from '../../server/types';
 import RegulationsTooltip from "../../server/components/RegulationsTooltip"
 
-const isDeliveryAvailable = (location: string): { available: boolean; message?: string } => {
+const isDeliveryAvailable = async (location: string): Promise<{ available: boolean; message?: string }> => {
   const now = new Date();
   const currentHour = now.getHours();
   const currentMinute = now.getMinutes();
@@ -24,6 +24,13 @@ const isDeliveryAvailable = (location: string): { available: boolean; message?: 
       };
     }
     return { available: true };
+  }
+
+  const orderingStatus = await getOrderingStatus();
+  if (!orderingStatus) {
+    return { available: false, 
+      message: 'Przepraszamy, ale możliwość zamawiania online została zablokowana z przyczyn technicznych.'
+    };
   }
 
   // Godziny w dni powszednie
@@ -57,6 +64,15 @@ export default function Order() {
 
   const filteredAreas = new Map<string, Set<string | null>>();
   const [openCity, setOpenCity] = useState<string | null>(null);
+  const [deliveryStatus, setDeliveryStatus] = useState<{ available: boolean; message?: string } | null>(null);
+  
+      useEffect(() => {
+        async function checkDeliveryStatus() {
+          const status = await isDeliveryAvailable(selectedLocation);
+          setDeliveryStatus(status);
+        }
+        checkDeliveryStatus();
+      }, [selectedLocation]);
 
 const handleToggle = (city: string) => {
   setOpenCity(openCity === city ? null : city);
@@ -164,10 +180,10 @@ deliveryAreas.forEach((area) => {
   }
 
   if (selectedLocation) {
-    const deliveryStatus = isDeliveryAvailable(selectedLocation);
-    
-    if (!deliveryStatus.available) {
-      return (
+      
+  
+      if (deliveryStatus && !deliveryStatus.available) {
+        return (
         <div className="max-w-4xl mx-auto">
           <div className="flex justify-between items-center mb-8">
             <h1 className="text-3xl font-bold text-white">

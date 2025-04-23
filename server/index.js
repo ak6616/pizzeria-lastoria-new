@@ -12,6 +12,25 @@ import fs from 'fs';
 import https from 'https';
 import webpush from 'web-push';
 import multer from 'multer';
+import cookieParser from 'cookie-parser';
+const MySQLSession = await import('express-mysql-session');
+const MySQLStoreFn = MySQLSession.default || MySQLSession;
+const MySQLStore = MySQLStoreFn(session);
+
+const sessionStore = new MySQLStore({
+  host: process.env.DB_HOST,
+  user: process.env.DB_USER,
+  password: process.env.DB_PASSWORD,
+  database: process.env.DB_NAME,
+  port: parseInt(process.env.DB_PORT),
+  waitForConnections: true,
+  connectionLimit: 1000,
+  queueLimit: 0,
+  enableKeepAlive: true,
+  keepAliveInitialDelay: 0
+});
+
+
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -19,8 +38,9 @@ const __dirname = path.dirname(__filename);
 let tpayToken = null;
 const app = express();
 const port = process.env.PORT ;
-const storage = multer.storage({
-  destination: "/uploads",
+
+const storage = multer.diskStorage({
+  destination: path.join(__dirname, "../public/zdjecia"),
   filename: (req, file, cb) => {
     const ext = path.extname(file.originalname);
     const uniqueName = Date.now() + ext;
@@ -30,24 +50,20 @@ const storage = multer.storage({
 
 const upload = multer({storage});
 
-app.use("/uploads", express.static("uploads"));
+app.use("/zdjecia", express.static(path.join(__dirname, "../public/zdjecia")));
 
-app.post("/upload", upload.single("link"), async (req, res) => {
-  const fileUrl = `http://localhost:3000/uploads/${req.file.filename}`;
-  
-  res.json({ fileUrl });
-
-})
+app.use(cookieParser());
 
 // Serwuj pliki statyczne z folderu dist
-app.use(express.static(path.join(__dirname, '../server')));
+app.use(express.static(path.join(__dirname, '../dist')));
+app.use(express.static(path.join(__dirname, '../public')));
+
 
 app.use(cors({
-  origin: 
-  ['https://www.pizza-lastoria.pl', 'https://pizza-lastoria.pl'], // Tw�j frontendowy adres
+  origin: ['https://www.pizza-lastoria.pl', 'https://pizza-lastoria.pl'], // Your frontend address
   methods: 'GET,POST,PUT,DELETE',
-  allowedHeaders: 'Content-Type,Authorization',
-  credentials: true   
+  allowedHeaders: 'Content-Type, Authorization',
+  credentials: true
 }));
 
 app.use(express.json());
@@ -58,6 +74,7 @@ app.use(session({
   secret: 'twoj-tajny-klucz',
   resave: false,
   saveUninitialized: false,
+  store: sessionStore,
   cookie: { 
     secure: process.env.NODE_ENV === 'production',
     sameSite: 'lax',
@@ -89,9 +106,11 @@ app.use((req, res, next) => {
   // if (!req.secure) {
   //   return res.redirect(301, `https://${req.headers.host}${req.url}`);
   // }
-
+  if (process.env.NODE_ENV === 'production' && !req.secure) {
+    return res.redirect('https://' + req.headers.host + req.url);
+  }
   if (DEBUG) {
-    console.log(`${new Date().toISOString()} ${req.method} ${req.url}`);
+    console.log(`${new Date().toString()} ${req.method} ${req.url}`);
     console.log('Headers:', req.headers);
     if (req.body && Object.keys(req.body).length > 0) {
       console.log('Body:', req.body);
@@ -413,6 +432,7 @@ app.delete('/api/news/:id', async (req, res) => {
 
 app.post('/api/gallery', async (req, res) => {
   const { link } = req.body;
+  console.log(link);
   const connection = await getConnection();
 
   try {
@@ -460,6 +480,16 @@ app.get('/api/gallery', async (req, res) => {
     await connection.release();
   }
 });
+
+app.post("/api/gallery/upload", upload.single("photo"), async (req, res) => {
+  if (!req.file) {
+    return res.status(400).json({ error: "Brak przesłanego pliku." });
+  }
+  const fileUrl = `https://pizza-lastoria.pl/zdjecia/${req.file.filename}`;
+  console.log(req.file);
+  res.json({ fileUrl });
+
+})
 
 ///////////////////// Obszar dostawy
 
@@ -583,7 +613,7 @@ app.post('/api/orders/:location', async (req, res) => {
       orderData.apartmentNumber || null,
       orderData.phone,
       orderData.deliveryTime || null,
-      new Date().toISOString(),
+      new Date().toString(),
       JSON.stringify(orderData.items),  // Konwertuj tablicę na string dla bazy
       orderData.totalPrice,
       orderData.notes
@@ -801,6 +831,7 @@ app.post('/api/payment/init', async (req, res) => {
         body: JSON.stringify({
           amount: paymentData.amount,
           description: paymentData.description,
+          hiddenDescription: paymentData.hiddenDescription,
           crc: paymentData.crc,
           payer: {
             email: paymentData.email,
@@ -951,7 +982,7 @@ process.on('SIGTERM', () => {
 });
 
 ///////////////////////Status zamawiania
-let orderingStatus = true;
+let orderingStatus = null;
 
 //////////Endpoint do sprawdzania statusu możliwości zamawiania
 app.get('/api/ordering-status', (req, res) => {
@@ -959,7 +990,7 @@ app.get('/api/ordering-status', (req, res) => {
 });
 
 ////////Endpoint do zmiany statusu zamawiania
-app.post('/api/ordering-status', (req, res) => {
+app.put('/api/ordering-status', express.json(), async (req, res) => {
   const { status } = req.body;
   if (typeof status === 'boolean') {
     orderingStatus = status;

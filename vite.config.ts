@@ -10,7 +10,7 @@ export default defineConfig({
     VitePWA({
       registerType: 'autoUpdate',
       devOptions: {
-        enabled: true,
+        enabled: false,
       },
       manifest: {
         name: 'Pizza Lastoria',
@@ -35,6 +35,14 @@ export default defineConfig({
       workbox: {
         runtimeCaching: [
           {
+            // Ignoruj wszystko z /src/
+            urlPattern: /^\/src\//,
+            handler: 'NetworkOnly',
+            options: {
+              cacheName: 'skip-src-cache',
+            },
+          },
+          {
             urlPattern: ({ request }) => request.destination === 'document',
             handler: 'NetworkFirst',
             options: {
@@ -42,13 +50,25 @@ export default defineConfig({
             },
           },
           {
-            urlPattern: ({ request }) => request.destination === 'script' || request.destination === 'style',
+            urlPattern: ({ request }) => ['script', 'style', 'worker'].includes(request.destination),
             handler: 'StaleWhileRevalidate',
             options: {
               cacheName: 'assets-cache',
             },
           },
-        ],
+          {
+            urlPattern: ({ request }) => ['image', 'font'].includes(request.destination),
+            handler: 'CacheFirst',
+            options: {
+              cacheName: 'static-resources',
+              expiration: {
+                maxEntries: 100,
+                maxAgeSeconds: 60 * 60 * 24 * 30, // 30 dni
+              },
+            },
+          },
+        ]
+        
       },
     }),
     {
@@ -89,6 +109,5 @@ export default defineConfig({
       }
     },
   },
-  // 👇 Tu dodajemy middleware, który sprawdza poprawność URI
   
 });

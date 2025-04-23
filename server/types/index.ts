@@ -262,3 +262,24 @@ ulica: string;
 export interface TimerProps {
     refetch: () => void; // Funkcja do ponownego pobrania danych
   }
+
+  
+export interface OrderData {
+    firstName: string;
+    lastName: string;
+    type: string;
+    email: string;
+    city: string;
+    street: string;
+    houseNumber: string;
+    apartmentNumber?: string;
+    phone: string;
+    deliveryTime: string;
+    notes: string;
+    items: OrderItem[];
+    totalPrice: number;
+    orderDateTime: string;
+    deliveryCost: number | null;
+    location: any; // Je�li masz konkretn� struktur�, np. { lat: number; lng: number } to warto to sprecyzowa�
+  }
+  

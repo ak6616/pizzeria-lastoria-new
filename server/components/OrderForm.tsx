@@ -6,13 +6,14 @@ import { Plus, Minus, User, Users, MapPin, Home, Building2, DoorClosed, Phone, C
 import RodoTooltip from './RodoTooltip';
 import IngredientsModal from './IngredientsModal';
 import SelectedItemsBubbles from './SelectedItemsBubbles';
-import { getActiveOrdersCount } from '../services/api';
-import { OrderFormProps, CustomerData, PaymentOrderData } from '../types';
+import { getActiveOrdersCount, getOrderingStatus } from '../services/api';
+import { OrderFormProps, CustomerData, OrderData } from '../types';
+
 
 
 
 // Dodaj funkcję sprawdzającą dostępność dostawy na konkretną godzinę
-const isDeliveryTimeAvailable = (time: string, location: string): { available: boolean; message?: string } => {
+const isDeliveryTimeAvailable = async (time: string, location: string): Promise<{ available: boolean; message?: string }> => {
   if (!time) return { available: true };
 
   const [hours, minutes] = time.split(':').map(Number);
@@ -124,7 +125,7 @@ export default function OrderForm({ deliveryAreas, location, orderType }: OrderF
     checkOrderLimit();
   }, [location]);
 
-  const handlePayment = async (orderData) => {
+  const handlePayment = async (orderData: OrderData) => {
     try {
 
       const orderDescription = orderData.items
@@ -133,10 +134,24 @@ export default function OrderForm({ deliveryAreas, location, orderType }: OrderF
       })
       .join(', ');
 
+      const orderHiddenDescription = orderData.items
+      .map(item => {
+        const extras = item.addedIngredients.length 
+          ? ` (+${item.addedIngredients.map(i => i.name).join(', ')})`
+          : '';
+          const withouts = item.removedIngredients.length 
+          ? ` (-${item.removedIngredients.join(', ')})`
+          : '';
+        return `${item.name}${extras}${withouts}`;
+      
+      })
+      .join(', ');
+
       const paymentData = {
         name: `${orderData.firstName} ${orderData.lastName}`,
         amount: orderData.totalPrice,
         description: ` ${location}: ${orderDescription}`,
+        hiddenDescription: ` ${location}: ${orderHiddenDescription}`,
         crc: `${Date.now()}`,
         email: `${orderData.email}`,
         city: orderData.city == "" ? "Miejsce Piastowe" : orderData.city, 
@@ -185,7 +200,7 @@ export default function OrderForm({ deliveryAreas, location, orderType }: OrderF
     const formData = new FormData(e.currentTarget);
     const deliveryTime = formData.get('deliveryTime') as string;
     
-    const timeStatus = isDeliveryTimeAvailable(deliveryTime, location);
+    const timeStatus = await isDeliveryTimeAvailable(deliveryTime, location);
     if (!timeStatus.available) {
       setError(timeStatus.message || 'Niedostępna godzina dostawy');
       return;
@@ -240,7 +255,7 @@ export default function OrderForm({ deliveryAreas, location, orderType }: OrderF
         });
       }),
       totalPrice: Number(calculateTotal(deliveryCost)),
-      orderDateTime: new Date().toISOString(),
+      orderDateTime: new Date().toString(),
       deliveryCost,
       location,
     };

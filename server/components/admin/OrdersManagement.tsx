@@ -207,7 +207,7 @@ export default function OrdersManagement({ location }: OrdersManagementProps) {
           </button>
           <button
             onClick={() => handleDeleteAll()}
-            className="ml-4 p-2 text-red-500 hover:text-red-600 transition"
+            className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded items-center"
           >
             Usuń wszystkie zamówienia
             <Trash2 className="w-5 h-5" />

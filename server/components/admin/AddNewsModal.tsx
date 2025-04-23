@@ -17,7 +17,7 @@ export default function AddNewsModal({ onClose, onSuccess }: AddNewsModalProps) 
     const data = {
       tytul: formData.get('tytul') as string,
       tekst: formData.get('tekst') as string,
-      data: new Date().toISOString().split('T')[0],
+      data: new Date().toString().split('T')[0],
     };
 
     try {
