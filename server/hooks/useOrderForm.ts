@@ -244,7 +244,7 @@ export function useOrderForm(
         });
 
       const totalPrice = calculateTotal(deliveryCost);
-      const orderDateTime = new Date().toString();
+      const orderDateTime = new Date().toLocaleString('pl-PL');;
 
       await submitOrder({
         ...customerData,

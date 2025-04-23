@@ -39,7 +39,7 @@ export default function OrdersManagement({ location }: OrdersManagementProps) {
     const fetchOrderingStatus = async () => {
       try {
         const status = await getOrderingStatus();
-        setOrderingStatus(status === 'true');
+        setOrderingStatus(status);
       } catch (error) {
         console.error('Error fetching ordering status:', error);
       }

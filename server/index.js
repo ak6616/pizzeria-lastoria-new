@@ -110,7 +110,7 @@ app.use((req, res, next) => {
     return res.redirect('https://' + req.headers.host + req.url);
   }
   if (DEBUG) {
-    console.log(`${new Date().toString()} ${req.method} ${req.url}`);
+    console.log(`${new Date().toLocaleString('pl-PL')} ${req.method} ${req.url}`);
     console.log('Headers:', req.headers);
     if (req.body && Object.keys(req.body).length > 0) {
       console.log('Body:', req.body);
@@ -613,7 +613,7 @@ app.post('/api/orders/:location', async (req, res) => {
       orderData.apartmentNumber || null,
       orderData.phone,
       orderData.deliveryTime || null,
-      new Date().toString(),
+      new Date().toLocaleString('pl-PL'),
       JSON.stringify(orderData.items),  // Konwertuj tablicę na string dla bazy
       orderData.totalPrice,
       orderData.notes

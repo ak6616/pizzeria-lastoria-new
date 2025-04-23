@@ -11,11 +11,6 @@ function formatDate(date) {
   return date.toLocaleString('pl-PL');
 }
 
-// Stałe konfiguracyjne
-// const OUTPUT_FILE = path.join(__dirname, 'order.txt');
-
-
-
 export async function printToReceiptPrinter(orderData) {
   console.log('=== Rozpoczęcie drukowania zamówienia ===');
   console.log('Dane zamówienia:', orderData);
