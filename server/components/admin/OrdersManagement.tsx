@@ -23,6 +23,7 @@ export default function OrdersManagement({ location }: OrdersManagementProps) {
   };
   const [time, setTime] = useState<number>(30);
   const [orderingStatus, setOrderingStatus] = useState<boolean>();
+  
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -39,7 +40,8 @@ export default function OrdersManagement({ location }: OrdersManagementProps) {
     const fetchOrderingStatus = async () => {
       try {
         const status = await getOrderingStatus();
-        setOrderingStatus(status.status); 
+        setOrderingStatus(status.status);
+        console.log('Status zamówień:', status.status);
       } catch (error) {
         console.error('Error fetching ordering status:', error);
       }
@@ -160,7 +162,7 @@ export default function OrdersManagement({ location }: OrdersManagementProps) {
 
   const formatDate = (dateString: string) => {
     try {
-      const date = parseISO(dateString);
+      const date = dateString;
       if (!isValid(date)) {
         console.error('Nieprawidłowa data:', dateString);
         return 'Nieprawidłowa data';

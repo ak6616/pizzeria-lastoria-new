@@ -25,14 +25,15 @@ const isDeliveryAvailable = async (location: string): Promise<{ available: boole
     }
     return { available: true };
   }
-
-  const orderingStatus = await getOrderingStatus();
-  if (orderingStatus == "false") {
-    return { 
-      available: false, 
-      message: 'Przepraszamy, ale możliwość zamawiania online została zablokowana z przyczyn technicznych.'
-    };
-  }
+  
+  // const orderingStatus = await getOrderingStatus();
+  // console.log(orderingStatus);
+  // if (orderingStatus.status === false) {
+  //   return { 
+  //     available: false, 
+  //     message: 'Przepraszamy, ale możliwość zamawiania online została zablokowana z przyczyn technicznych.'
+  //   };
+  // }
 
   // Godziny w dni powszednie
   if (location === 'miejsce-piastowe') {
@@ -41,7 +42,9 @@ const isDeliveryAvailable = async (location: string): Promise<{ available: boole
         available: false,
         message: 'Dostawa w dni powszednie dostępna w godzinach 11:00 - 22:00'
       };
+      
     }
+   
   } else if (location === 'haczow') {
     if (currentHour < 12 || currentHour >= 22) {
       return {
