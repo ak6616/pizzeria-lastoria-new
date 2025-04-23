@@ -460,20 +460,22 @@ app.delete('/api/gallery/:id', async (req, res) => {
 
     // Usuwanie grafiki z serwera
 
-    const [filePath] = await connection.execute('SELECT link FROM galeria WHERE id = ?', [id]);
+    const [filePathResult] = await connection.execute('SELECT link FROM galeria WHERE id = ?', [id]);
+    const filePath = filePathResult[0]?.link; // Extract the 'link' field from the result
 
-    if(!filePath){
+    if (!filePath) {
       return res.status(404).json({ error: "Nie znaleziono ścieżki do pliku." });
     }
-    const absolutePath = path.join(__dirname, '../public/zdjecia', path.basename(filePath.stringify));
+
+    const absolutePath = path.join(__dirname, '../public/zdjecia', path.basename(filePath));
 
     fs.unlink(absolutePath, (err) => {
-      if(err){
+      if (err) {
         console.error("Błąd podczas usuwania pliku:", err);
-        return res.status(500).json({ error: "Nie udało się usunąć pliku."});
+        return res.status(500).json({ error: "Nie udało się usunąć pliku." });
       }
 
-      return res.json({ message: "Plik usunięty pomyślnie." });
+      console.log("Plik usunięty pomyślnie.");
     });
 
     // Usuwanie rekordu z bazy danych
