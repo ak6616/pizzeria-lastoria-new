@@ -832,7 +832,7 @@ async function getTpayToken() {
 // Pobieramy token na starcie aplikacji
 getTpayToken();
 
-// Automatyczne od�wie�anie co 1h 55min (przed wyga�ni�ciem tokena)
+// Automatyczne odświeżanie co 1h 55min (przed wygaśnięciem tokena)
 setInterval(getTpayToken, 115 * 60 * 1000); // 115 minut w milisekundach
 
 
@@ -1003,7 +1003,7 @@ process.on('SIGTERM', () => {
 });
 
 ///////////////////////Status zamawiania
-let orderingStatus = null;
+let orderingStatus = true;
 
 //////////Endpoint do sprawdzania statusu możliwości zamawiania
 app.get('/api/ordering-status', (req, res) => {

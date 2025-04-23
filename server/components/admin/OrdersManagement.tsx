@@ -22,7 +22,7 @@ export default function OrdersManagement({ location }: OrdersManagementProps) {
     refetch: () => Promise<void>
   };
   const [time, setTime] = useState<number>(30);
-  const [orderingStatus, setOrderingStatus] = useState<boolean>(true);
+  const [orderingStatus, setOrderingStatus] = useState<boolean>();
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -39,7 +39,7 @@ export default function OrdersManagement({ location }: OrdersManagementProps) {
     const fetchOrderingStatus = async () => {
       try {
         const status = await getOrderingStatus();
-        setOrderingStatus(status);
+        setOrderingStatus(status.status); 
       } catch (error) {
         console.error('Error fetching ordering status:', error);
       }
