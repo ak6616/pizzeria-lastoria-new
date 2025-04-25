@@ -168,7 +168,7 @@ export default function OrdersManagement({ location }: OrdersManagementProps) {
         console.error('Nieprawidłowa data:', dateString);
         return 'Nieprawidłowa data';
       }
-      return format(date, 'dd.MM.yyyy HH:mm', { locale: pl });
+      return format(date, 'dd.MM.yyyy HH:mm:ss', { locale: pl });
     } catch (error) {
       console.error('Błąd podczas formatowania daty:', error);
       return 'Błąd formatu daty';

@@ -706,7 +706,7 @@ app.get('/api/orders/:location', async (req, res) => {
 
   try {
     const [rows] = await connection.execute(
-      `SELECT *, DATE_FORMAT(dataGodzinaZamowienia, "%Y-%m-%dT%H:%i:%s.000Z") as dataGodzinaZamowienia 
+      `SELECT * 
        FROM zamowienia${location} 
        ORDER BY dataGodzinaZamowienia DESC`
     );
