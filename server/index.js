@@ -956,7 +956,7 @@ app.delete('/api/orders/:location', async (req, res) => {
 
   try {
     const [result] = await connection.execute(
-      `TRUNCATE TABLE zamowienia${suffix}`,
+      `TRUNCATE TABLE zamowienia${suffix}`
     );
 
     if (result.affectedRows === 0) {

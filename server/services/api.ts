@@ -224,6 +224,19 @@ export async function deleteOrder(id: number, location: string) {
   }
   return response.json();
 }
+
+export async function deleteAllOrders(location: string) {
+  await checkAuth();
+  const response = await fetch(`${API_BASE_URL}/orders/${location}`, {
+    method: 'DELETE',
+    credentials: 'include',
+  });
+
+  if (!response.ok) {
+    throw new Error('Failed to delete all orders');
+  }
+  return response.json();
+}
 //////////////////menu
 export async function getMenuItems(category: string) {
   const response = await fetch(`${API_BASE_URL}/menu/${category}`);
@@ -286,19 +299,6 @@ export async function updateMenuItem(data: {
 
   if (!response.ok) {
     throw new Error('Failed to update menu item');
-  }
-  return response.json();
-}
-
-export async function deleteAllOrders(location: string) {
-  await checkAuth();
-  const response = await fetch(`${API_BASE_URL}/orders/${location}`, {
-    method: 'DELETE',
-    credentials: 'include',
-  });
-
-  if (!response.ok) {
-    throw new Error('Failed to delete order');
   }
   return response.json();
 }
