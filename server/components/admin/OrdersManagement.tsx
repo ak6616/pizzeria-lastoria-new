@@ -163,12 +163,12 @@ export default function OrdersManagement({ location }: OrdersManagementProps) {
 
   const formatDate = (dateString: string) => {
     try {
-      const date = parseISO(dateString);
-      if (!isValid(date)) {
-        console.error('Nieprawidłowa data:', dateString);
-        return 'Nieprawidłowa data';
-      }
-      return format(date, 'dd.MM.yyyy HH:mm', { locale: pl });
+      const date = dateString;
+      // if (!isValid(date)) {
+      //   console.error('Nieprawidłowa data:', dateString);
+      //   return 'Nieprawidłowa data';
+      // }
+      return date;
     } catch (error) {
       console.error('Błąd podczas formatowania daty:', error);
       return 'Błąd formatu daty';
