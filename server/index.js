@@ -13,6 +13,7 @@ import https from 'https';
 import webpush from 'web-push';
 import multer from 'multer';
 import cookieParser from 'cookie-parser';
+import { concurrently } from 'concurrently';
 const MySQLSession = await import('express-mysql-session');
 const MySQLStoreFn = MySQLSession.default || MySQLSession;
 const MySQLStore = MySQLStoreFn(session);
@@ -1041,7 +1042,7 @@ app.post('/api/subscribe', (req, res) => {
   const subscription = req.body;
   if (!subscription || !subscription.endpoint) {
     return res.status(400).json({ error: 'Invalid subscription object' });
-  }
+  };
   subscriptions.push(subscription); // Upewnij się, że subskrypcja jest poprawnie zapisywana
   res.status(201).json({ message: 'Subscribed successfully' });
 });
@@ -1062,6 +1063,33 @@ app.post('/api/notify', async (req, res) => {
 
 });
 
-function notification(){
+async function notification(){
+  let amount = 0;
+  const {count} = async ()  => await fetch('https://pizza-lastoria.pl:3000/api/orders/miejsce-piastowe/count', {
+    credentials: 'include',
+    method: 'GET',
+  });
+  amount = count;
+  while(true){
+    setTimeout(() => {
+      const {count} = async ()  => await fetch('https://pizza-lastoria.pl:3000/api/orders/miejsce-piastowe/count', {
+        credentials: 'include',
+        method: 'GET',
+      });
+      if(count > amount) {
+        const payload = async() => await fetch('https://pizza-lastoria.pl:3000/api/notify', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+        });
+        if(!payload.ok){
+          console.error("Błąd podczas wysyłania powiadomienia:", payload.statusText);
+        }
+      };
 
-}
+    }, 1000 * 60 * 5); // co 5 minut
+  };
+};
+
+notification();

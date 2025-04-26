@@ -501,3 +501,15 @@ export async function updateOrderingStatus( status: boolean ) {
   }
   return response.json();
 }
+
+////////// Subskrypcja powiadomień push
+export async function subscribe() {
+  const response = await fetch(`${API_BASE_URL}/subscribe`, {
+    method: 'POST',});
+
+  if(!response.ok) {
+    throw new Error('Failed to subscribe to push notifications');
+  }
+  return response.json();
+  
+}

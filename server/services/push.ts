@@ -2,6 +2,8 @@ export async function registerPush(publicKey: string) {
   try {
     if ('serviceWorker' in navigator && 'PushManager' in window) {
       const sw = await navigator.serviceWorker.ready;
+      console.log("SW is ready", sw);
+
 
       const subscription = await sw.pushManager.subscribe({
         userVisibleOnly: true,
