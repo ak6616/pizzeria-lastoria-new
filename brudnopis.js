@@ -8,6 +8,8 @@
  * powiadomienia w toku, stoją w miejscu
  * --------------------------------
  * blokada zamawiania w toku
+ * 
+ * poprawić main.tsx
  * --------------------------------
  * jestem w trakcie dodawania możliwości wrzucania zdjęcia na stronę
  * skopiowałem wszystkie zdjęcia

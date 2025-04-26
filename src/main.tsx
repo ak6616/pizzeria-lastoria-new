@@ -3,6 +3,7 @@ import { createRoot } from 'react-dom/client';
 import App from './App.tsx';
 import './index.css';
 
+
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <App />
@@ -24,7 +25,7 @@ if ('serviceWorker' in navigator && 'PushManager' in window) {
       // Subskrybujemy użytkownika do Push
       const subscription = await registration.pushManager.subscribe({
         userVisibleOnly: true, // Wymagane: każde push musi wyświetlić powiadomienie
-        applicationServerKey: urlBase64ToUint8Array('<TWÓJ_PUBLICZNY_KLUCZ_VAPID>')
+        applicationServerKey: urlBase64ToUint8Array()
       });
 
       console.log('Got subscription:', subscription);
