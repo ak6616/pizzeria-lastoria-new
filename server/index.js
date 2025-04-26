@@ -1013,6 +1013,7 @@ let orderingStatus = true;
 
 //////////Endpoint do sprawdzania statusu możliwości zamawiania
 app.get('/api/ordering-status', (req, res) => {
+  console.lohg(`Zwracanie statusu zamawiania: ${orderingStatus}`);
   res.json({ orderingStatus });
 });
 
