@@ -1,36 +1,33 @@
-if ('serviceWorker' in navigator && 'PushManager' in window) {
-  navigator.serviceWorker.register('/sw.js') // plik Service Worker
-    .then(async (registration) => {
-      console.log('Service Worker registered:', registration);
+// sw.js
 
-      // Pytamy użytkownika o zgodę na powiadomienia
-      const permission = await Notification.requestPermission();
-      if (permission !== 'granted') {
-        throw new Error('Permission not granted for Notification');
-      }
+self.addEventListener('push', function(event) {
+  console.log('[Service Worker] Push Received.');
+  
+  let data = {};
+  if (event.data) {
+    data = event.data.json();
+  }
 
-      // Subskrybujemy użytkownika do Push
-      const subscription = await registration.pushManager.subscribe({
-        userVisibleOnly: true, // Wymagane: każde push musi wyświetlić powiadomienie
-        applicationServerKey: urlBase64ToUint8Array('<TWÓJ_PUBLICZNY_KLUCZ_VAPID>')
-      });
+  const title = data.title || 'Nowe powiadomienie!';
+  const options = {
+    body: data.body || 'Masz nowe wiadomości ??',
+    icon: '/icons/icon-192x192.png', // Ikona powiadomienia (dostosuj ścieżkę)
+    badge: '/icons/badge-72x72.png', // Mała plakietka (też dostosuj)
+    data: data.url || '/'
+  };
 
-      console.log('Got subscription:', subscription);
+  event.waitUntil(
+    self.registration.showNotification(title, options)
+  );
+});
 
-      // Wysyłamy subskrypcję do backendu
-      await fetch('/api/subscribe', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(subscription)
-      });
+// Obsługa kliknięcia w powiadomienie
+self.addEventListener('notificationclick', function(event) {
+  console.log('[Service Worker] Notification click Received.');
 
-    })
-    .catch(err => console.error('Error during Service Worker registration:', err));
-}
+  event.notification.close();
 
-function urlBase64ToUint8Array(base64String) {
-  const padding = '='.repeat((4 - base64String.length % 4) % 4);
-  const base64 = (base64String + padding).replace(/\-/g, '+').replace(/_/g, '/');
-  const rawData = window.atob(base64);
-  return Uint8Array.from([...rawData].map(char => char.charCodeAt(0)));
-}
+  event.waitUntil(
+    clients.openWindow(event.notification.data)
+  );
+});

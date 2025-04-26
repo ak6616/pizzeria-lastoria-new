@@ -6,7 +6,6 @@ import NewsManagement from './admin/NewsManagement';
 import GalleryManagement from './admin/GalleryManagement';
 import LoginForm from './admin/LoginForm';
 import { useAuth } from '../hooks/useAuth';
-import { subscribe } from '../services/api';
 // import {registerPush} from '../services/push'
 
 export default function AdminPanel() {

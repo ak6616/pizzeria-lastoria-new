@@ -18,6 +18,9 @@ export async function printToReceiptPrinter(orderData) {
   try {
     for(let i = 0; i < 2; i++){
       let receipt2 = '';
+      let receipt3 = '';
+      let receipt1 = '';
+
     // Header
     
     receipt2 += `${formatDate(new Date())}\n`;
@@ -36,10 +39,9 @@ export async function printToReceiptPrinter(orderData) {
      // Total
      receipt2 += `SUMA: ${orderData.suma} zł\n`;
      if (orderData.notes){
-        receipt2+= `Uwagi: ${orderData.notes}\n`
+        receipt3+= `Uwagi: ${orderData.notes}\n`
      }
     //////////////////////////////
-    let receipt1 = ''
     // Ordered products
     receipt1 += 'ZAMÓWIENIE:\n';
     let items = Array.isArray(orderData.zamowioneProdukty) 
@@ -60,13 +62,15 @@ export async function printToReceiptPrinter(orderData) {
     // Zapisz do pliku i wydrukuj
     // fs.writeFileSync(OUTPUT_FILE, receipt);
 
-    console.log('Zawartość paragonu:', receipt1, receipt2);
+    console.log('Zawartość paragonu:', receipt1, receipt2, receipt3);
 
     // Wyślij do drukarki bezpośrednio
     return new Promise((resolve, reject) => {
       // const lpProcess = exec(`lp -d ${PRINTER_NAME} ${OUTPUT_FILE}`, (error, stdout, stderr) => {
 
-      const lpProcess = exec(`echo "${receipt1}" | lp -d xprinter -o media=Custom.50x42mm -o fit-to-page -o font-size=5 -o print-quality=5 -o orientation-requested=6 && echo "${receipt2}" | lp -d xprinter -o media=Custom.50x42mm -o fit-to-page -o font-size=5 -o print-quality=5 -o orientation-requested=6`, (error, stdout, stderr) => {
+      const lpProcess = exec(`echo "${receipt3}" | lp -d xprinter -o media=Custom.50x42mm -o fit-to-page -o font-size=5 -o print-quality=5 -o orientation-requested=6 
+        && echo "${receipt2}" | lp -d xprinter -o media=Custom.50x42mm -o fit-to-page -o font-size=5 -o print-quality=5 -o orientation-requested=6 
+        && echo "${receipt1}" | lp -d xprinter -o media=Custom.50x42mm -o fit-to-page -o font-size=5 -o print-quality=5 -o orientation-requested=6`, (error, stdout, stderr) => {
         if (error) {
           console.error('Błąd drukowania:', error);
           reject(error);
