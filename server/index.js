@@ -1013,7 +1013,7 @@ let orderingStatus = true;
 
 //////////Endpoint do sprawdzania statusu możliwości zamawiania
 app.get('/api/ordering-status', (req, res) => {
-  res.json({ status: orderingStatus });
+  res.json({ orderingStatus });
 });
 
 ////////Endpoint do zmiany statusu zamawiania
@@ -1021,9 +1021,9 @@ app.put('/api/ordering-status', express.json(), async (req, res) => {
   const { status } = req.body;
   if (typeof status === 'boolean') {
     orderingStatus = status;
-    res.json({ success: true, status: orderingStatus });
+    res.json({ orderingStatus });
   } else {
-    res.status(400).json({ error: 'Invalid status' });
+    res.status(400).json({ error: 'Invalid status', orderingStatus });
   }
 });
 
@@ -1086,7 +1086,9 @@ async function notification(){
         if(!payload.ok){
           console.error("Błąd podczas wysyłania powiadomienia:", payload.statusText);
         }
-      };
+        console.log("Powiadomienie wysłane pomyślnie!");
+        count = amount;
+      };  
 
     }, 1000 * 60 * 5); // co 5 minut
   };
