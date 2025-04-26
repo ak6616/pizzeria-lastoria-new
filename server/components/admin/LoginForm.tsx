@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { LoginFormProps } from '../../types';
-import { subscribe } from '../../services/api';
 
 export default function LoginForm({ onLogin }: LoginFormProps) {
   const [error, setError] = useState('');
@@ -20,7 +19,6 @@ export default function LoginForm({ onLogin }: LoginFormProps) {
       if (!success) {
         setError('Nieprawidłowa nazwa użytkownika lub hasło');
       }
-      subscribe();
     } catch (err) {
       setError('Wystąpił błąd podczas logowania');
     } finally {
