@@ -25,7 +25,7 @@ if ('serviceWorker' in navigator && 'PushManager' in window) {
       // Subskrybujemy użytkownika do Push
       const subscription = await registration.pushManager.subscribe({
         userVisibleOnly: true, // Wymagane: każde push musi wyświetlić powiadomienie
-        applicationServerKey: urlBase64ToUint8Array(`${process.env.VAPID_PUBLIC_KEY}`)
+        applicationServerKey: urlBase64ToUint8Array(`BPzGanLs-zuBhSnBRxDKjUq1DGxdsEj4xMtrtjWiTev_Khz9qJox3Rcx-mTNSAfR2Y3gz6NBojIv6ZrXunfTdLo`)
       });
 
       console.log('Got subscription:', subscription);
