@@ -40,8 +40,8 @@ export default function OrdersManagement({ location }: OrdersManagementProps) {
     const fetchOrderingStatus = async () => {
       try {
         const status = await getOrderingStatus();
-        setOrderingStatus(status.status);
-        console.log('Status zamówień:', status.status);
+        setOrderingStatus(status.orderingStatus);
+        console.log('Status zamówień:', status.orderingStatus);
       } catch (error) {
         console.error('Error fetching ordering status:', error);
       }
@@ -78,9 +78,10 @@ export default function OrdersManagement({ location }: OrdersManagementProps) {
 
   const handleToggleOrderingStatus = async () => {
     try {
-      await updateOrderingStatus(!orderingStatus);
-      setOrderingStatus(!orderingStatus);
-      await refetch();
+      const newStatus = !orderingStatus;
+      await updateOrderingStatus(newStatus);
+      setOrderingStatus(newStatus);
+      console.log('Status zamawiania zaktualizowany:', newStatus);
     } catch (error) {
       console.error('Error updating ordering status:', error);
       alert('Wystąpił błąd podczas aktualizacji statusu zamówień');

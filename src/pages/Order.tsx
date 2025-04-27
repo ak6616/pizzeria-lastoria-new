@@ -14,6 +14,23 @@ const isDeliveryAvailable = async (location: string): Promise<{ available: boole
   const isWeekend = now.getDay() === 0 || now.getDay() === 6;
   const isHoliday = false; // TODO: Dodać sprawdzanie świąt
 
+  // Sprawdź status zamawiania
+  try {
+    const orderingStatus = await getOrderingStatus();
+    if (!orderingStatus.orderingStatus) {
+      return { 
+        available: false, 
+        message: 'Przepraszamy, ale możliwość zamawiania online została zablokowana z przyczyn technicznych.'
+      };
+    }
+  } catch (error) {
+    console.error('Błąd podczas sprawdzania statusu zamawiania:', error);
+    return { 
+      available: false, 
+      message: 'Wystąpił błąd podczas sprawdzania statusu zamawiania.'
+    };
+  }
+
   // Wspólne godziny dla weekendów i świąt
   if (isWeekend || isHoliday) {
     if (currentHour < 16 || currentHour >= 21 && currentMinute >= 30) {
@@ -26,15 +43,6 @@ const isDeliveryAvailable = async (location: string): Promise<{ available: boole
     return { available: true };
   }
   
-  const orderingStatus = await getOrderingStatus();
-  console.log(orderingStatus);
-  if (orderingStatus === "false") {
-    return { 
-      available: false, 
-      message: 'Przepraszamy, ale możliwość zamawiania online została zablokowana z przyczyn technicznych.'
-    };
-  }
-
   // Godziny w dni powszednie
   if (location === 'miejsce-piastowe') {
     if (currentHour < 11 || currentHour >= 21 && currentMinute >= 30) {
@@ -42,9 +50,7 @@ const isDeliveryAvailable = async (location: string): Promise<{ available: boole
         available: false,
         message: 'Dostawa w dni powszednie dostępna w godzinach 11:00 - 22:00'
       };
-      
     }
-   
   } else if (location === 'haczow') {
     if (currentHour < 12 || currentHour >= 22) {
       return {
@@ -88,10 +94,10 @@ deliveryAreas.forEach((area) => {
   }
 
   if (area.ulica === null) {
-    // Je�li istnieje wersja bez ulicy, usuwamy ulice i zapisujemy "ca�y obszar"
+    // Jeśli istnieje wersja bez ulicy, usuwamy ulice i zapisujemy "cały obszar"
     filteredAreas.set(area.nazwa, new Set(["Cały Obszar"]));
   } else if (!filteredAreas.get(area.nazwa)?.has("Cały Obszar")) {
-    // Je�li nie znaleziono jeszcze "ca�ego obszaru", dodajemy ulic�
+    // Jeśli nie znaleziono jeszcze "całego obszaru", dodajemy ulicę
     filteredAreas.get(area.nazwa)?.add(area.ulica);
   }
 });

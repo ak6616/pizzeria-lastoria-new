@@ -482,10 +482,11 @@ export async function getOrderingStatus() {
   if (!response.ok) {
     throw new Error('Failed to fetch order status');
   }
-  return response.json();
+  const data = await response.json();
+  return { orderingStatus: data.orderingStatus };
 }
 
-export async function updateOrderingStatus( status: boolean ) {
+export async function updateOrderingStatus(status: boolean) {
   await checkAuth();
   const response = await fetch(`${API_BASE_URL}/ordering-status`, {
     method: 'PUT',
