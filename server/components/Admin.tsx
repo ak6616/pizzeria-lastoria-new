@@ -6,17 +6,24 @@ import NewsManagement from './admin/NewsManagement';
 import GalleryManagement from './admin/GalleryManagement';
 import LoginForm from './admin/LoginForm';
 import { useAuth } from '../hooks/useAuth';
-// import {registerPush} from '../services/push'
 
 export default function AdminPanel() {
   const [selectedLocation, setSelectedLocation] = useState<string>('');
   const [selectedSection, setSelectedSection] = useState<string>('');
-  const { isAuthenticated, login } = useAuth();
+  const { isAuthenticated, isLoading, login } = useAuth();
 
   const locations = [
     { id: 'miejsce-piastowe', name: 'Miejsce Piastowe' },
     { id: 'haczow', name: 'Haczów' }
   ];
+
+  if (isLoading) {
+    return (
+      <div className="max-w-4xl mx-auto p-6 text-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mx-auto"></div>
+      </div>
+    );
+  }
 
   if (!isAuthenticated) {
     return (
@@ -48,12 +55,9 @@ export default function AdminPanel() {
         </div>
       </div>
     );
-  } 
-
-  
+  }
 
   return (
-    
     <div className="max-w-7xl mx-auto p-6">
       <div className="flex justify-between items-center mb-8">
         <h1 className="text-3xl font-bold text-white">

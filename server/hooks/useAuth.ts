@@ -9,9 +9,19 @@ export const useAuth = () => {
     const checkAuth = async () => {
       try {
         const response = await fetch('/api/check-auth', {
-          credentials: 'include'
+          method: 'GET',
+          credentials: 'include',
+          headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+          }
         });
-        setIsAuthenticated(response.ok);
+        
+        if (response.ok) {
+          setIsAuthenticated(true);
+        } else {
+          setIsAuthenticated(false);
+        }
       } catch (error) {
         console.error('Błąd sprawdzania autoryzacji:', error);
         setIsAuthenticated(false);
@@ -25,21 +35,32 @@ export const useAuth = () => {
 
   const login = async (username: string, password: string) => {
     try {
-      await apiLogin({ username, password });
-      setIsAuthenticated(true);
-      return true;
+      const response = await apiLogin({ username, password });
+      if (response.success) {
+        setIsAuthenticated(true);
+        return true;
+      }
+      return false;
     } catch (err) {
+      console.error('Błąd logowania:', err);
       return false;
     }
   };
 
   const logout = async () => {
     try {
-      await fetch('/api/logout', {
+      const response = await fetch('/api/logout', {
         method: 'POST',
-        credentials: 'include'
+        credentials: 'include',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json'
+        }
       });
-      setIsAuthenticated(false);
+      
+      if (response.ok) {
+        setIsAuthenticated(false);
+      }
     } catch (error) {
       console.error('Błąd podczas wylogowywania:', error);
     }
