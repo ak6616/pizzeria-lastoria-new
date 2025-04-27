@@ -10,40 +10,61 @@ createRoot(document.getElementById('root')!).render(
   </StrictMode>
 );
 
-
-if ('serviceWorker' in navigator && 'PushManager' in window) {
-  navigator.serviceWorker.register('/sw.js') // plik Service Worker
-    .then(async (registration) => {
-      console.log('Service Worker registered:', registration);
-
-      // Pytamy użytkownika o zgodę na powiadomienia
-      const permission = await Notification.requestPermission();
-      if (permission !== 'granted') {
-        throw new Error('Permission not granted for Notification');
-      }
-
-      // Subskrybujemy użytkownika do Push
-      const subscription = await registration.pushManager.subscribe({
-        userVisibleOnly: true, // Wymagane: każde push musi wyświetlić powiadomienie
-        applicationServerKey: urlBase64ToUint8Array(`BPzGanLs-zuBhSnBRxDKjUq1DGxdsEj4xMtrtjWiTev_Khz9qJox3Rcx-mTNSAfR2Y3gz6NBojIv6ZrXunfTdLo`)
-      });
-
-      console.log('Got subscription:', subscription);
-
-      // Wysyłamy subskrypcję do backendu
-      await fetch('/api/subscribe', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(subscription)
-      });
-
-    })  
-    .catch(err => console.error('Error during Service Worker registration:', err));
-}
-
-function urlBase64ToUint8Array(base64String: String) {
+// Funkcja do konwersji klucza VAPID
+function urlBase64ToUint8Array(base64String: string) {
   const padding = '='.repeat((4 - base64String.length % 4) % 4);
   const base64 = (base64String + padding).replace(/\-/g, '+').replace(/_/g, '/');
   const rawData = window.atob(base64);
   return Uint8Array.from([...rawData].map(char => char.charCodeAt(0)));
 }
+
+// Rejestracja Service Workera i powiadomień push
+async function registerServiceWorker() {
+  if ('serviceWorker' in navigator && 'PushManager' in window) {
+    try {
+      // Rejestracja Service Workera
+      const registration = await navigator.serviceWorker.register('/sw.js');
+      console.log('Service Worker zarejestrowany:', registration);
+
+      // Sprawdź uprawnienia do powiadomień
+      const permission = await Notification.requestPermission();
+      if (permission !== 'granted') {
+        console.warn('Brak uprawnień do powiadomień');
+        return;
+      }
+
+      // Pobierz klucz VAPID z serwera
+      const vapidResponse = await fetch('/api/vapid-key');
+      if (!vapidResponse.ok) {
+        throw new Error('Nie udało się pobrać klucza VAPID');
+      }
+      const { publicKey } = await vapidResponse.json();
+
+      // Subskrybuj do powiadomień push
+      const subscription = await registration.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: urlBase64ToUint8Array(publicKey)
+      });
+
+      console.log('Subskrypcja push zakończona sukcesem:', subscription);
+
+      // Wyślij subskrypcję do serwera
+      const subscribeResponse = await fetch('/api/subscribe', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(subscription)
+      });
+
+      if (!subscribeResponse.ok) {
+        throw new Error('Nie udało się zapisać subskrypcji na serwerze');
+      }
+
+      console.log('Subskrypcja zapisana na serwerze');
+    } catch (error) {
+      console.error('Błąd podczas rejestracji Service Workera:', error);
+    }
+  }
+}
+
+// Uruchom rejestrację
+registerServiceWorker();

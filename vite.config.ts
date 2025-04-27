@@ -105,7 +105,9 @@ export default defineConfig({
       '/api': {
         target: 'https://www.pizza-lastoria.pl:3000',
         changeOrigin: true,
-        secure: true
+        secure: true,
+        cookieDomainRewrite: 'pizza-lastoria.pl',
+        cookiePathRewrite: '/'
       }
     },
   },

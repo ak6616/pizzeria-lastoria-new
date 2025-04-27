@@ -74,15 +74,15 @@ app.use(express.json());
 // Dodaj obsługę sesji
 app.use(session({
   secret: 'twoj-tajny-klucz',
-  resave: true,
-  saveUninitialized: false,
+  resave: false,
+  saveUninitialized: true,
   store: sessionStore,
   cookie: { 
-    secure: process.env.NODE_ENV === 'production', // Używaj secure tylko w produkcji
-    sameSite: 'lax', // Ustawiono lax dla obsługi cross-origin
-    path: '/', // Dodaj ścieżkę cookiedla całej aplikacji
-    domain: process.env.NODE_ENV === 'production' ? 'pizza-lastoria.pl' : undefined, // Ustaw domenę cookie
-    maxAge: 24 * 60 * 60 * 1000 // 24 godziny w milisekundach
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'lax',
+    path: '/',
+    domain: process.env.NODE_ENV === 'production' ? 'pizza-lastoria.pl' : undefined,
+    maxAge: 24 * 60 * 60 * 1000
   }
 }));
 
@@ -1066,37 +1066,61 @@ app.post('/api/notify', async (req, res) => {
 
 });
 
-async function notification(){
-  let amount = 0;
-  const {count} = async ()  => await fetch('https://pizza-lastoria.pl:3000/api/orders/miejsce-piastowe/count', {
-    credentials: 'include',
-    method: 'GET',
-  });
-  amount = count;
-  while(true){
-    setTimeout(() => {
-      const {count} = async ()  => await fetch('https://pizza-lastoria.pl:3000/api/orders/miejsce-piastowe/count', {
+async function notification() {
+  let lastOrderCount = 0;
+  
+  while (true) {
+    try {
+      // Pobierz aktualną liczbę zamówień
+      const response = await fetch('https://pizza-lastoria.pl:3000/api/orders/miejsce-piastowe/count', {
         credentials: 'include',
         method: 'GET',
       });
-      if(count > amount) {
-        const payload = async() => await fetch('https://pizza-lastoria.pl:3000/api/notify', {
+      
+      if (!response.ok) {
+        throw new Error('Błąd podczas pobierania liczby zamówień');
+      }
+      
+      const { count } = await response.json();
+      
+      // Jeśli liczba zamówień się zwiększyła, wyślij powiadomienie
+      if (count > lastOrderCount) {
+        console.log(`Wykryto nowe zamówienie! Liczba zamówień: ${count}`);
+        
+        // Wyślij powiadomienie do wszystkich subskrybentów
+        const notifyResponse = await fetch('https://pizza-lastoria.pl:3000/api/notify', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'
           },
         });
-        if(!payload.ok){
-          console.error("Błąd podczas wysyłania powiadomienia:", payload.statusText);
+        
+        if (!notifyResponse.ok) {
+          console.error("Błąd podczas wysyłania powiadomienia:", notifyResponse.statusText);
+        } else {
+          console.log("Powiadomienie wysłane pomyślnie!");
         }
-        console.log("Powiadomienie wysłane pomyślnie!");
-        count = amount;
-      };  
+        
+        lastOrderCount = count;
+      }
+      
+      // Czekaj 5 minut przed następnym sprawdzeniem
+      await new Promise(resolve => setTimeout(resolve, 5 * 60 * 1000));
+      
+    } catch (error) {
+      console.error("Błąd w funkcji notification:", error);
+      // W przypadku błędu czekaj 1 minutę przed ponowną próbą
+      await new Promise(resolve => setTimeout(resolve, 60 * 1000));
+    }
+  }
+}
 
-    }, 1000 * 60 * 5); // co 5 minut
-  };
-};
+// Uruchom funkcję notification
+notification();
 
-// notification();
+// Endpoint do pobierania klucza VAPID
+app.get('/api/vapid-key', (req, res) => {
+  res.json({ publicKey: process.env.VAPID_PUBLIC_KEY });
+});
 
 
