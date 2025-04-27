@@ -118,11 +118,11 @@ export default function OrderForm({ deliveryAreas, location, orderType }: OrderF
         const { count } = await getActiveOrdersCount(location);
         setOrderLimitReached(count >= 5);
 
-        // Sprawdź status zamawiania
-        const orderingStatus = await getOrderingStatus();
-        if (!orderingStatus.orderingStatus) {
-          setOrderLimitReached(true);
-        }
+        // // Sprawdź status zamawiania
+        // const orderingStatus = await getOrderingStatus();
+        // if (!orderingStatus.orderingStatus) {
+        //   setOrderLimitReached(true);
+        // }
       } catch (err) {
         console.error('Error checking order limit:', err);
       }
