@@ -37,11 +37,15 @@ export default function OrdersManagement({ location }: OrdersManagementProps) {
       });
     }, 1000);
 
+    return () => clearInterval(timer);
+  }, [refetch]);
+
+  useEffect(() => {
     const fetchOrderingStatus = async () => {
       try {
         const status = await getOrderingStatus();
         setOrderingStatus(status.orderingStatus);
-        console.log('Status zamówień:', status.orderingStatus);
+        console.log('Status zamówień odświeżony:', status.orderingStatus);
       } catch (error) {
         console.error('Error fetching ordering status:', error);
       }
@@ -49,8 +53,10 @@ export default function OrdersManagement({ location }: OrdersManagementProps) {
 
     fetchOrderingStatus();
 
-    return () => clearInterval(timer);
-  }, [refetch]);
+    const interval = setInterval(fetchOrderingStatus, 30000);
+
+    return () => clearInterval(interval);
+  }, []);
 
   const handleDelete = async (id: number) => {
     if (window.confirm('Czy na pewno chcesz usunąć to zamówienie?')) {
@@ -82,6 +88,9 @@ export default function OrdersManagement({ location }: OrdersManagementProps) {
       await updateOrderingStatus(newStatus);
       setOrderingStatus(newStatus);
       console.log('Status zamawiania zaktualizowany:', newStatus);
+      
+      const updatedStatus = await getOrderingStatus();
+      setOrderingStatus(updatedStatus.orderingStatus);
     } catch (error) {
       console.error('Error updating ordering status:', error);
       alert('Wystąpił błąd podczas aktualizacji statusu zamówień');

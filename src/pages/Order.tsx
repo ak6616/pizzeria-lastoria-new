@@ -15,21 +15,21 @@ const isDeliveryAvailable = async (location: string): Promise<{ available: boole
   const isHoliday = false; // TODO: Dodać sprawdzanie świąt
 
   // Sprawdź status zamawiania
-  // try {
-  //   const orderingStatus = await getOrderingStatus();
-  //   if (!orderingStatus.orderingStatus) {
-  //     return { 
-  //       available: false, 
-  //       message: 'Przepraszamy, ale możliwość zamawiania online została zablokowana z przyczyn technicznych.'
-  //     };
-  //   }
-  // } catch (error) {
-  //   console.error('Błąd podczas sprawdzania statusu zamawiania:', error);
-  //   return { 
-  //     available: false, 
-  //     message: 'Wystąpił błąd podczas sprawdzania statusu zamawiania.'
-  //   };
-  // }
+  try {
+    const orderingStatus = await getOrderingStatus();
+    if (!orderingStatus.orderingStatus) {
+      return { 
+        available: false, 
+        message: 'Przepraszamy, ale możliwość zamawiania online została zablokowana z przyczyn technicznych.'
+      };
+    }
+  } catch (error) {
+    console.error('Błąd podczas sprawdzania statusu zamawiania:', error);
+    return { 
+      available: false, 
+      message: 'Wystąpił błąd podczas sprawdzania statusu zamawiania.'
+    };
+  }
 
   // Wspólne godziny dla weekendów i świąt
   if (isWeekend || isHoliday) {
