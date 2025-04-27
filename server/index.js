@@ -744,6 +744,30 @@ app.delete('/api/orders/:location/:id', async (req, res) => {
   }
 });
 
+////// Czyszczenie wszystkich zamówień
+app.delete('/api/orders/:location', async (req, res) => {
+  const connection = await getConnection();
+  const { location } = req.params;
+  const suffix = location === 'haczow' ? '_hacz' : '_mp';
+
+  try {
+    const [result] = await connection.execute(
+      `TRUNCATE TABLE zamowienia${suffix}`
+    );
+
+    // if (result.affectedRows === 0) {
+    //   return res.status(404).json({ error: 'Orders not found' });
+    // }
+
+    res.json({ message: 'Orders deleted successfully' });
+  } catch (error) {
+    console.error('Error deleting orders:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  } finally {
+    await connection.release();
+  }
+});
+
 // Endpoint logowania
 app.post('/api/login', async (req, res) => {
   const { username, password } = req.body;
@@ -949,29 +973,7 @@ app.post('/api/payment/status', async (req, res) => {
   }
 });
 
-////// Czyszczenie wszystkich zamówień
-app.delete('/api/orders/:location', async (req, res) => {
-  const connection = await getConnection();
-  const { location } = req.params;
-  const suffix = location === 'haczow' ? '_hacz' : '_mp';
 
-  try {
-    const [result] = await connection.execute(
-      `TRUNCATE TABLE zamowienia${suffix}`
-    );
-
-    if (result.affectedRows === 0) {
-      return res.status(404).json({ error: 'Orders not found' });
-    }
-
-    res.json({ message: 'Orders deleted successfully' });
-  } catch (error) {
-    console.error('Error deleting orders:', error);
-    res.status(500).json({ error: 'Internal server error' });
-  } finally {
-    await connection.release();
-  }
-});
 
 
 

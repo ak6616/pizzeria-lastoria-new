@@ -11,8 +11,8 @@ self.addEventListener('push', function(event) {
   const title = data.title || 'Nowe powiadomienie!';
   const options = {
     body: data.body || 'Masz nowe wiadomości ??',
-    icon: '/icons/icon-192x192.png', // Ikona powiadomienia (dostosuj ścieżkę)
-    badge: '/icons/badge-72x72.png', // Mała plakietka (też dostosuj)
+    icon: '/zdjecia/logo-192x192.png',
+    badge: '/zdjecia/logo-72x72.png',
     data: data.url || '/'
   };
 
