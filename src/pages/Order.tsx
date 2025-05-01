@@ -12,10 +12,16 @@ const isDeliveryAvailable = async (location: string): Promise<{ available: boole
   const currentHour = now.getHours();
   const currentMinute = now.getMinutes();
   const isWeekend = now.getDay() === 0 || now.getDay() === 6;
-  const isHoliday = false; // TODO: Dodać sprawdzanie świąt
 
+<<<<<<< Updated upstream
   // // Sprawdź status zamawiania
   //
+=======
+  // Lista świąt w formacie MM-DD
+  const holidays = ['01-01', '05-01', '12-25', '12-26']; // Dodaj tutaj inne święta
+  const today = `${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+  const isHoliday = holidays.includes(today);
+>>>>>>> Stashed changes
 
   // Wspólne godziny dla weekendów i świąt
   if (isWeekend || isHoliday) {
