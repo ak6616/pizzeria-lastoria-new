@@ -432,6 +432,46 @@ app.delete('/api/news/:id', async (req, res) => {
   }
 });
 
+////////////////////////Ustawienia
+
+app.put('/api/settings/:location/:key', async (req, res) => {
+  const { location, key, value, id } = req.params;
+  const suffix = location === 'haczow' ? '_hacz' : '_mp';
+  
+  const connection = await getConnection();
+
+  try {
+    const [result] = await connection.execute(
+      `UPDATE ustawienia${suffix} SET key = ?, value = ? WHERE id = ?`,
+      [key, value, id]
+    );
+    res.json(result);
+  } catch (error) {
+    console.error('Error updating settings:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  } finally {
+    await connection.release();
+  }
+});
+
+app.get('/api/settings/:location', async (req, res) => {
+  const connection = await getConnection();
+  const { location } = req.params;
+  const suffix = location === 'haczow' ? '_hacz' : '_mp';
+
+  try {
+    const [rows] = await connection.execute(
+      `SELECT * FROM ustawienia${suffix}`
+    );
+    res.json(rows);
+  } catch (error) {
+    console.error('Error fetching settings:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  } finally {
+    await connection.release();
+  }
+});
+
 ////////////////////////// Galeria
 
 app.post('/api/gallery', async (req, res) => {
