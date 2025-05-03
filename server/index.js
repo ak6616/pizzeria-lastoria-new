@@ -442,7 +442,7 @@ app.put('/api/settings/:location/:key', async (req, res) => {
 
   try {
     const [result] = await connection.execute(
-      `UPDATE ustawienia${suffix} SET key = ?, value = ? WHERE id = ?`,
+      `UPDATE ustawienia${suffix} SET klucz = ?, wartosc = ? WHERE id = ?`,
       [key, value, id]
     );
     res.json(result);
@@ -1050,25 +1050,7 @@ process.on('SIGTERM', () => {
   });
 });
 
-///////////////////////Status zamawiania
-let orderingStatus = true;
 
-//////////Endpoint do sprawdzania statusu możliwości zamawiania
-app.get('/api/ordering-status', (req, res) => {
-  console.lohg(`Zwracanie statusu zamawiania: ${orderingStatus}`);
-  res.json({ orderingStatus });
-});
-
-////////Endpoint do zmiany statusu zamawiania
-app.put('/api/ordering-status', express.json(), async (req, res) => {
-  const { status } = req.body;
-  if (typeof status === 'boolean') {
-    orderingStatus = status;
-    res.json({ orderingStatus });
-  } else {
-    res.status(400).json({ error: 'Invalid status', orderingStatus });
-  }
-});
 
 
 ////////Handler dla powiadomień push

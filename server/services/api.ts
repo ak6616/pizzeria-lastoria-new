@@ -143,6 +143,39 @@ export async function deleteNews(id: number) {
   }
   return response.json();
 }
+
+export async function updateSettings(location: string, data: {
+  id: number;
+  wartosc: string;
+}) {
+  await checkAuth();
+  const suffix = getLocationSuffix(location);
+
+  const response = await fetch(`${API_BASE_URL}/settings${suffix}/${data.id}`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    credentials: 'include',
+    body: JSON.stringify(data.wartosc),
+  });
+
+  if (!response.ok) {
+    throw new Error('Failed to update settings');
+  }
+  return response.json();
+}
+
+export async function getSettings(location: string) {
+  await checkAuth();
+  const suffix = getLocationSuffix(location);
+
+  const response = await fetch(`${API_BASE_URL}/settings${suffix}` );
+  if (!response.ok) {
+    throw new Error('Failed to fetch settings');
+  }
+  return response.json();
+}
 ////////////obszar dostawy
 export async function getDeliveryAreas(location: string) {
   const suffix = getLocationSuffix(location);
@@ -473,34 +506,6 @@ async function checkAuth() {
   if (!response.ok) {
     throw new Error('Unauthorized');
   }
-}
-
-
-//////////Status możliwości zamawiania
-export async function getOrderingStatus() {
-  const response = await fetch(`${API_BASE_URL}/ordering-status`);
-  if (!response.ok) {
-    throw new Error('Failed to fetch order status');
-  }
-  const data = await response.json();
-  return { orderingStatus: data.orderingStatus };
-}
-
-export async function updateOrderingStatus(status: boolean) {
-  await checkAuth();
-  const response = await fetch(`${API_BASE_URL}/ordering-status`, {
-    method: 'PUT',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    credentials: 'include',
-    body: JSON.stringify({ status }),
-  });
-
-  if (!response.ok) {
-    throw new Error('Failed to update order status');
-  }
-  return response.json();
 }
 
 ////////// Subskrypcja powiadomień push
