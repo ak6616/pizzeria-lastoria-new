@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import OrderForm from '../../server/components/OrderForm';
-import { getDeliveryAreas, getOrderingStatus } from '../../server/services/api';
+import { getDeliveryAreas } from '../../server/services/api';
 import { MapPin, Home } from 'lucide-react';
 import { format } from 'date-fns';
 import { pl } from 'date-fns/locale';
@@ -37,22 +37,7 @@ const isDeliveryAvailable = async (location: string): Promise<{ available: boole
         available: false,
         message: 'Dostawa w dni powszednie dostępna w godzinach 11:00 - 22:00'
       };
-    }
-     try {
-    const orderingStatus = await getOrderingStatus();
-    if (!orderingStatus.orderingStatus) {
-      return { 
-        available: false, 
-        message: 'Przepraszamy, ale możliwość zamawiania online została zablokowana z przyczyn technicznych.'
-      };
-    }
-  } catch (error) {
-    console.error('Błąd podczas sprawdzania statusu zamawiania:', error);
-    return { 
-      available: false, 
-      message: 'Wystąpił błąd podczas sprawdzania statusu zamawiania.'
-    };
-  }         
+    }       
   } else if (location === 'haczow') {
     if (currentHour < 12 || currentHour >= 22) {
       return {

@@ -6,7 +6,7 @@ import { Plus, Minus, User, Users, MapPin, Home, Building2, DoorClosed, Phone, C
 import RodoTooltip from './RodoTooltip';
 import IngredientsModal from './IngredientsModal';
 import SelectedItemsBubbles from './SelectedItemsBubbles';
-import { getActiveOrdersCount, getOrderingStatus } from '../services/api';
+import { getActiveOrdersCount } from '../services/api';
 import { OrderFormProps, CustomerData, OrderData } from '../types';
 
 
@@ -117,12 +117,6 @@ export default function OrderForm({ deliveryAreas, location, orderType }: OrderF
       try {
         const { count } = await getActiveOrdersCount(location);
         setOrderLimitReached(count >= 5);
-
-        // // Sprawdź status zamawiania
-        // const orderingStatus = await getOrderingStatus();
-        // if (!orderingStatus.orderingStatus) {
-        //   setOrderLimitReached(true);
-        // }
       } catch (err) {
         console.error('Error checking order limit:', err);
       }

@@ -1,7 +1,7 @@
 import { Trash2 } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { useOrders } from '../../hooks/useOrders';
-import { deleteOrder, deleteAllOrders, updateOrderingStatus, getOrderingStatus } from '../../services/api';
+import { deleteOrder, deleteAllOrders } from '../../services/api';
 import { format, isValid, parseISO } from 'date-fns';
 import { pl } from 'date-fns/locale';
 import React from 'react';
@@ -22,7 +22,6 @@ export default function OrdersManagement({ location }: OrdersManagementProps) {
     refetch: () => Promise<void>
   };
   const [time, setTime] = useState<number>(30);
-  const [orderingStatus, setOrderingStatus] = useState<boolean>();
   
 
   useEffect(() => {
@@ -39,24 +38,6 @@ export default function OrdersManagement({ location }: OrdersManagementProps) {
 
     return () => clearInterval(timer);
   }, [refetch]);
-
-  useEffect(() => {
-    const fetchOrderingStatus = async () => {
-      try {
-        const status = await getOrderingStatus();
-        setOrderingStatus(status.orderingStatus);
-        console.log('Status zamówień odświeżony:', status.orderingStatus);
-      } catch (error) {
-        console.error('Error fetching ordering status:', error);
-      }
-    };
-
-    fetchOrderingStatus();
-
-    const interval = setInterval(fetchOrderingStatus, 30000);
-
-    return () => clearInterval(interval);
-  }, []);
 
   const handleDelete = async (id: number) => {
     if (window.confirm('Czy na pewno chcesz usunąć to zamówienie?')) {
@@ -79,21 +60,6 @@ export default function OrdersManagement({ location }: OrdersManagementProps) {
         console.error('Error deleting orders:', err);
         alert('Wystąpił błąd podczas usuwania zamówień');
       }
-    }
-  };
-
-  const handleToggleOrderingStatus = async () => {
-    try {
-      const newStatus = !orderingStatus;
-      await updateOrderingStatus(newStatus);
-      setOrderingStatus(newStatus);
-      console.log('Status zamawiania zaktualizowany:', newStatus);
-      
-      const updatedStatus = await getOrderingStatus();
-      setOrderingStatus(updatedStatus.orderingStatus);
-    } catch (error) {
-      console.error('Error updating ordering status:', error);
-      alert('Wystąpił błąd podczas aktualizacji statusu zamówień');
     }
   };
 
@@ -206,18 +172,6 @@ export default function OrdersManagement({ location }: OrdersManagementProps) {
       <div className="flex justify-between items-center">
         <h2 className="text-xl font-semibold">Zamówienia</h2>
         <div className="flex items-center space-x-4">
-          <div>
-            Status zamówień:{' '}
-            <span className={orderingStatus ? 'text-green-500' : 'text-red-500'}>
-              {orderingStatus ? 'Włączone' : 'Wyłączone'}
-            </span>
-          </div>
-          <button
-            onClick={handleToggleOrderingStatus}
-            className="bg-yellow-500 hover:bg-yellow-700 text-white font-bold py-2 px-4 rounded"
-          >
-            {orderingStatus ? 'Wyłącz zamówienia' : 'Włącz zamówienia'}
-          </button>
           <button
             onClick={() => handleDeleteAll()}
             className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded items-center"
