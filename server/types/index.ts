@@ -163,11 +163,11 @@ export interface NewsArticle {
     data: string;
     tekst: string;
 }
-
-
-  
-
-  
+export interface Setting {
+    id: number;
+    klucz: string;
+    wartosc: string;
+}
 
 export interface Orders extends Order {}
 export interface AddDeliveryRuleModalProps {
@@ -205,6 +205,12 @@ export interface EditMenuItemModalProps {
 }
 export interface EditNewsModalProps {
     article: NewsArticle;
+    onClose: () => void;
+    onSuccess: () => void;
+}
+export interface EditSettingsModalProps {
+    location: string;
+    setting: Setting;
     onClose: () => void;
     onSuccess: () => void;
 }
