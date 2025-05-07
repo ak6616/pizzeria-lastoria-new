@@ -628,13 +628,17 @@ export default function OrderForm({ deliveryAreas, location, orderType }: OrderF
                             <div className="flex flex-col h-full">
                               <div className="flex justify-between items-start mb-2">
                                 <div>
-                                  <h4 className="font-medium">{item.nazwa}</h4>
+                                <ol>
+                                  <li>
+                                    <h4 className="font-medium">{item.nazwa}</h4>
                                   {item.skladniki && (
                                     <p className="text-sm text-gray-600">{item.skladniki}</p>
                                   )}
                                   <p className="text-sm font-semibold mt-1">
                                     {item.cena} zł
                                   </p>
+                                  </li>
+                                </ol>
                                 </div>
 
                                 <div className="flex items-center space-x-2">
