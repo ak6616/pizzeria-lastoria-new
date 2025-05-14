@@ -1,6 +1,6 @@
 
 import { useParams, Navigate } from 'react-router-dom';
-import MenuSection from '../../../server/components/MenuSection';
+import MenuSection from '../../../client/src/components/MenuSection';
 import { useMenuItems } from '../../../server/hooks/useMenuItems';
 
 export default function Menu() {
