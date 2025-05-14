@@ -31,7 +31,7 @@ export default function Navbar() {
         <div className="flex items-center justify-between h-16">
           <Link to="/" className="flex items-center space-x-2 shrink-0">
             <img
-              src="../../public/zdjecia/logo.png"
+              src="zdjecia/logo.png"
               alt="logo-lastoria"
               className="w-[60px] h-auto"
             />
