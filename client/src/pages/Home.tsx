@@ -46,7 +46,7 @@ export default function Home() {
   return (
     <div className="text-center text-white">
       <div className="max-w-4xl mx-auto">
-        <img src="/zdjecia/logo.png" className="h-[200px] w-[200px] mx-auto mb-8" />
+        <img src="../../public/zdjecia/logo.png" className="h-[200px] w-[200px] mx-auto mb-8" />
         <h1 className="text-5xl font-bold mb-6">Pizzeria Lastoria</h1>
 
         <div className="mb-12 overflow-hidden">
