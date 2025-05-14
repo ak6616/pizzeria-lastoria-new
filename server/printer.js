@@ -58,9 +58,6 @@ export async function printToReceiptPrinter(orderData) {
         receipt1 += `  DODATKI: ${item.addedIngredients.map(i => i.name).join(', ')}\n`;
       }
     });
-   
-    // Zapisz do pliku i wydrukuj
-    // fs.writeFileSync(OUTPUT_FILE, receipt);
 
     console.log('Zawartość paragonu:', receipt1, receipt2, receipt3);
 

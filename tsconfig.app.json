@@ -20,5 +20,5 @@
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true
   },
-  "include": ["src", "server/components/Admin.tsx"]
+  "include": ["client/src", "server/components/Admin.tsx"]
 }
