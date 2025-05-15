@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { X } from 'lucide-react';
-import { updateSettings } from '../../../../server/services/api';
-import { EditSettingsModalProps } from '../../../../server/types';
+import { updateSettings } from '../../services/api';
+import { EditSettingsModalProps } from '../../types';
 
 export default function EditSettingsModal({ setting, onClose, onSuccess, location }: EditSettingsModalProps) {
   const [wartosc, setWartosc] = useState(setting.wartosc);

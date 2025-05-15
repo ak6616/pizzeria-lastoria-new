@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
-import { getMenuItems, getAdditionalIngredients } from '../../../server/services/api';
-import { MenuItem, AdditionalIngredient } from '../../../server/types';
+import { getMenuItems, getAdditionalIngredients } from '../services/api';
+import { MenuItem, AdditionalIngredient } from '../types';
 
 
 

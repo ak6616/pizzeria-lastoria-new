@@ -1,11 +1,11 @@
 import { useState } from 'react';
 import React from 'react';
-import { MenuManagementProps } from '../../../../server/types';
+import { MenuManagementProps } from '../../types';
 import { Edit2, Trash2, Plus } from 'lucide-react';
 import { useMenuItems } from '../../hooks/useMenuItems';
 import AddMenuItemModal from './AddMenuItemModal';
 import EditMenuItemModal from './EditMenuItemModal';
-import { deleteMenuItem } from '../../../../server/services/api';
+import { deleteMenuItem } from '../../services/api';
 
 const CATEGORY_NAMES: Record<string, string> = {
   pizza: 'Pizza',

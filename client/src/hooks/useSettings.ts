@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
-import { getSettings } from '../../../server/services/api';
-import { Setting } from '../../../server/types';
+import { getSettings } from '../services/api';
+import { Setting } from '../types';
 
 
 

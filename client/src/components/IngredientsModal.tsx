@@ -1,6 +1,6 @@
 import { X } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
-import { IngredientsModalProps } from '../../../server/types';
+import { IngredientsModalProps } from '../types';
 
 export default function IngredientsModal({
   item,

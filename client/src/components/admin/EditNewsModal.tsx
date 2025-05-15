@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { X } from 'lucide-react';
-import { updateNews } from '../../../../server/services/api';
-import { EditNewsModalProps, NewsArticle } from '../../../../server/types';
+import { updateNews } from '../../services/api';
+import { EditNewsModalProps, NewsArticle } from '../..//types';
 
 
 export default function EditNewsModal({ article, onClose, onSuccess }: EditNewsModalProps) {

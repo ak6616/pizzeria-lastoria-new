@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { X } from 'lucide-react';
-import { addGalleryImageLink } from '../../../../server/services/api';
-import { uploadGalleryImage } from '../../../../server/services/api';
-import { AddGalleryItemModalProps } from '../../../../server/types';
+import { addGalleryImageLink } from '../../services/api';
+import { uploadGalleryImage } from '../../services/api';
+import { AddGalleryItemModalProps } from '../../types';
 
 
 export default function AddGalleryItemModal({

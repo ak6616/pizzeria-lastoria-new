@@ -1,5 +1,5 @@
 import React from 'react';
-import { RegulationsTooltipProps } from '../../../server/types';
+import { RegulationsTooltipProps } from '../types';
 import { Link } from 'react-router-dom';
 
 export default function RegulationsTooltip({ children }: RegulationsTooltipProps) {

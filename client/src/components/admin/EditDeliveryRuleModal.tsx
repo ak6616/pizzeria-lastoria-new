@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { X } from 'lucide-react';
-import { updateDeliveryRule } from '../../../../server/services/api';
-import { EditDeliveryRuleModalProps } from '../../../../server/types';
+import { updateDeliveryRule } from '../../services/api';
+import { EditDeliveryRuleModalProps } from '../../types';
 
 
 export default function EditDeliveryRuleModal({

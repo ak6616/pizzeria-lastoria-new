@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { LoginFormProps } from '../../../../server/types';
+import { LoginFormProps } from '../../types';
 
 export default function LoginForm({ onLogin }: LoginFormProps) {
   const [error, setError] = useState('');

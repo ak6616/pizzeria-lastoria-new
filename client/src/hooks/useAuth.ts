@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { login as apiLogin } from '../../../server/services/api';
+import { login as apiLogin } from '../services/api';
 
 export const useAuth = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);

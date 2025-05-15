@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
-import { getOrders } from '../../../server/services/api';
-import { Order}  from '../../../server/types';
+import { getOrders } from '../services/api';
+import { Order}  from '../types';
 
 interface Orders extends Order {}
 

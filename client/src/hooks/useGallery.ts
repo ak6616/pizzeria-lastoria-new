@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
-import { getGalleryImages } from '../../../server/services/api';
-import { GalleryImage } from '../../../server/types';
+import { getGalleryImages } from '../services/api';
+import { GalleryImage } from '../types';
 
 
 export function useGallery() {

@@ -1,5 +1,5 @@
 import React from 'react';
-import { RodoTooltipProps } from '../../../server/types';
+import { RodoTooltipProps } from '../types';
 import { Link } from 'react-router-dom';
 
 export default function RodoTooltip({ children }: RodoTooltipProps) {

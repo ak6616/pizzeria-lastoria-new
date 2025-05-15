@@ -4,8 +4,8 @@ import { Edit2, Trash2, Plus } from 'lucide-react';
 import { useDeliveryRules } from '../../hooks/useDeliveryRules';
 import AddDeliveryRuleModal from './AddDeliveryRuleModal';
 import EditDeliveryRuleModal from './EditDeliveryRuleModal';
-import { deleteDeliveryRule } from '../../../../server/services/api';
-import { DeliveryManagementProps } from '../../../../server/types';
+import { deleteDeliveryRule } from '../../services/api';
+import { DeliveryManagementProps } from '../../types';
 
 const CATEGORY_NAMES: Record<string, string> = {
   dostawaweekend: 'Weekend',

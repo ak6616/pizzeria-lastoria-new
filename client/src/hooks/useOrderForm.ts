@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import { submitOrder } from '../../../server/services/api';
-import { ProductCustomization, MenuItem, CustomerData, OrderItem} from '../../../server/types';
+import { submitOrder } from '../services/api';
+import { ProductCustomization, MenuItem, CustomerData, OrderItem} from '../types';
 
 
 

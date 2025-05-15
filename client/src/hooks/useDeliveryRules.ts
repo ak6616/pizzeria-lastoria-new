@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
-import { getDeliveryRules } from '../../../server/services/api';
-import { DeliveryRuleResponse } from '../../../server/types';
+import { getDeliveryRules } from '../services/api';
+import { DeliveryRuleResponse } from '../types';
 
 
 export function useDeliveryRules(location: string) {

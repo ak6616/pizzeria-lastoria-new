@@ -1,5 +1,5 @@
 import React from 'react';
-import { MenuSectionProps, MenuItem } from '../../../server/types';
+import { MenuSectionProps, MenuItem } from '../types';
 
 
 

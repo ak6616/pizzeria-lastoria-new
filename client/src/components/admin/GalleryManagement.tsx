@@ -4,7 +4,7 @@ import React from 'react';
 import { Trash2, Plus } from 'lucide-react';
 import { useGallery } from '../../hooks/useGallery';
 import AddGalleryItemModal from './AddGalleryItemModal';
-import { deleteGalleryImage } from '../../../../server/services/api';
+import { deleteGalleryImage } from '../../services/api';
 import { X, ChevronLeft, ChevronRight } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 

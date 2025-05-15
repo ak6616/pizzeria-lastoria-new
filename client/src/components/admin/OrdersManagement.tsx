@@ -2,10 +2,7 @@ import { Trash2 } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { useOrders } from '../../hooks/useOrders';
 import { deleteOrder, deleteAllOrders } from '../../../../server/services/api';
-import { format, isValid, parseISO } from 'date-fns';
-import { pl } from 'date-fns/locale';
-import React from 'react';
-import { OrdersManagementProps, Order, OrderItem, TimerProps } from '../../../../server/types';
+import { OrdersManagementProps, Order, OrderItem, TimerProps } from '../../types';
 
 
 

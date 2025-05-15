@@ -6,8 +6,8 @@ import { Plus, Minus, User, Users, MapPin, Home, Building2, DoorClosed, Phone, C
 import RodoTooltip from './RodoTooltip';
 import IngredientsModal from './IngredientsModal';
 import SelectedItemsBubbles from './SelectedItemsBubbles';
-import { getActiveOrdersCount, getSetting } from '../../../server/services/api';
-import { OrderFormProps, CustomerData, OrderData } from '../../../server/types';
+import { getActiveOrdersCount, getSetting } from '../services/api';
+import { OrderFormProps, CustomerData, OrderData } from '../types';
 
 
 

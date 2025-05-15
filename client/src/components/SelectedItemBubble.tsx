@@ -1,6 +1,6 @@
 import { Edit2, X } from 'lucide-react';
 import React from 'react';
-import { SelectedItemBubbleProps } from '../../../server/types';
+import { SelectedItemBubbleProps } from '../types';
 
 
 

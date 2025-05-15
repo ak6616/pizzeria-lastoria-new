@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react';
 import OrderForm from '../components/OrderForm';
-import { getDeliveryAreas, getSetting } from '../../../server/services/api';
+import { getDeliveryAreas, getSetting } from '../services/api';
 import { MapPin, Home } from 'lucide-react';
 import { format } from 'date-fns';
 import { pl } from 'date-fns/locale';
-import { DeliveryArea } from '../../../server/types';
+import { DeliveryArea } from '../types';
 import RegulationsTooltip from "../components/RegulationsTooltip"
 
 const isDeliveryAvailable = async (location: string): Promise<{ available: boolean; message?: string }> => {

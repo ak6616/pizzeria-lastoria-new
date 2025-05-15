@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
-import { getNews } from '../../../server/services/api';
-import { NewsArticle } from '../../../server/types';
+import { getNews } from '../services/api';
+import { NewsArticle } from '../types';
 
 
 

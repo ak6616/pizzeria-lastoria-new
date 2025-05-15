@@ -1,6 +1,6 @@
 import SelectedItemBubble from './SelectedItemBubble';
 import React from 'react';
-import { SelectedItemsBubblesProps } from '../../../server/types';
+import { SelectedItemsBubblesProps } from '../types';
 
 
 

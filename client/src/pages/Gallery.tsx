@@ -1,5 +1,5 @@
 
-import ImageGallery from '../../../client/src/components/ImageGallery';
+import ImageGallery from '../components/ImageGallery';
 
 export default function Gallery() {
   return (

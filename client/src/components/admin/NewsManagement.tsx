@@ -5,7 +5,7 @@ import { Edit2, Trash2, Plus } from 'lucide-react';
 import { useNews } from '../../hooks/useNews';
 import AddNewsModal from './AddNewsModal';
 import EditNewsModal from './EditNewsModal';
-import { deleteNews } from '../../../../server/services/api';
+import { deleteNews } from '../../services/api';
 import { format } from 'date-fns';
 import { pl } from 'date-fns/locale';
 

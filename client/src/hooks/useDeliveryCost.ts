@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { calculateDeliveryCost } from '../../../server/services/api';
+import { calculateDeliveryCost } from '../services/api';
 
 export function useDeliveryCost(city: string, street: string, pizzaCount: number) {
   const [deliveryCost, setDeliveryCost] = useState<number | null>(null);

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { X } from 'lucide-react';
-import { addMenuItem } from '../../../../server/services/api';
-import { AddMenuItemModalProps } from '../../../../server/types';
+import { addMenuItem } from '../../services/api';
+import { AddMenuItemModalProps } from '../../types';
 
 
 export default function AddMenuItemModal({ onClose, onSuccess, location }: AddMenuItemModalProps) {
