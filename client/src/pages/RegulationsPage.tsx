@@ -2,10 +2,10 @@ import React from 'react';
 
 export default function RegulationsPage() {
   return (
-    <div className="max-w-3xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
-      <h2 className="text-3xl font-extrabold text-gray-900 sm:text-4xl">
+    <div className="max-w-4xl mx-auto bg-white/90 rounded-lg p-8">
+      <h1 className="text-3xl font-bold mb-8 text-center">
         Regulamin Płatności Internetowych
-      </h2>
+      </h1>
       <div className="mt-6 prose prose-lg text-gray-700">
         <h3 className="font-bold mt-4 mb-2">1. Postanowienia ogólne</h3>
         <p className="mb-4">
