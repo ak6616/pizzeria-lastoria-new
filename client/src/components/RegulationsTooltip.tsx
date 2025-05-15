@@ -24,7 +24,7 @@ export default function RegulationsTooltip({ children }: RegulationsTooltipProps
         {children}
       </span>
       {isOpen && (
-        <div className="absolute bottom-full left-0 mb-2 w-full max-w-md md:w-[600px] p-4 md:p-6 bg-white/95 rounded-lg shadow-lg text-sm text-gray-700 z-50 max-h-[80vh] overflow-y-auto">
+        <div className="absolute bottom-full left-0 mb-2 w-screen max-w-none md:max-w-md lg:max-w-2xl p-4 md:p-6 bg-white/95 rounded-lg shadow-lg text-sm text-gray-700 z-50 max-h-[80vh] overflow-y-auto">
           <div className="prose prose-sm max-w-none">
             <h2 className="text-lg font-bold mb-4">Regulamin Płatności Internetowych</h2>
             
