@@ -22,6 +22,7 @@ const isDeliveryAvailable = async (location: string): Promise<{ available: boole
 
     const openWeekdayHour = parseInt(openWeekdayHourResponse.wartosc);
     console.log('openWeekdayHour', openWeekdayHour);
+    console.log('closeWeekdayHour', closeWeekdayHourResponse);
     const closeWeekdayHour = parseInt(closeWeekdayHourResponse.wartosc);
     const openWeekendHour = parseInt(openWeekendHourResponse.wartosc);
     const closeWeekendHour = parseInt(closeWeekendHourResponse.wartosc);
