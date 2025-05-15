@@ -1,3 +1,4 @@
+import { error } from "console";
 import { OrderItem, LoginCredentials, PaymentOrderData } from "../types";
 const API_BASE_URL = import.meta.env.VITE_API_URL;
 
@@ -547,4 +548,28 @@ export async function vapidResponse() {
     throw new Error('Nie udało się pobrać klucza VAPID');
   }
   return response.json();
+}
+
+
+export async function initializePayment(paymentData: any) {
+  const response = await fetch(`${API_BASE_URL}/payment/init`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(paymentData)
+  });
+  if (!response.ok) {
+    throw new Error('Failed to initialize payment');
+  }
+  return response.json();
+}
+
+export async function checkPaymentStatus(location: string, orderData: any, transaction: any) {
+  const response = await fetch(`${API_BASE_URL}/payment/status`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ transactionId: transaction.transactionId, location, orderData })
+  });
+  if (!response.ok) {
+    throw new Error('Failed to check payment status');
+  }
 }

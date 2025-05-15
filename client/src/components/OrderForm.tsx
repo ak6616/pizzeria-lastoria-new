@@ -6,7 +6,7 @@ import { Plus, Minus, User, Users, MapPin, Home, Building2, DoorClosed, Phone, C
 import RodoTooltip from './RodoTooltip';
 import IngredientsModal from './IngredientsModal';
 import SelectedItemsBubbles from './SelectedItemsBubbles';
-import { getActiveOrdersCount, getSetting } from '../services/api';
+import { getActiveOrdersCount, getSetting, initializePayment, checkPaymentStatus } from '../services/api';
 import { OrderFormProps, CustomerData, OrderData } from '../types';
 
 
@@ -180,26 +180,10 @@ export default function OrderForm({ deliveryAreas, location, orderType }: OrderF
         
       };
 
-      const initResponse = await fetch('/api/payment/init', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(paymentData)
-      });
-
-      const transaction = await initResponse.json();
+      const transaction = await initializePayment(paymentData);
       if (transaction.transactionId) {
-        fetch('/api/payment/status', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ transactionId: transaction.transactionId, location, orderData })
-        }).then(res => res.json())
-          .then(status => {
-            console.log('Status płatności:', status);
-          })
-          .catch(error => {
-            console.error('Błąd sprawdzania statusu płatności:', error);
-          });
-          window.location.href = transaction.transactionPaymentUrl;
+        await checkPaymentStatus(location, orderData, transaction.transactionId);
+        window.location.href = transaction.transactionPaymentUrl;
       }
       
     } catch (error) {
