@@ -7,6 +7,7 @@ import GalleryManagement from './admin/GalleryManagement';
 import SettingsManagement from './admin/SettingsManagement';
 import LoginForm from './admin/LoginForm';
 import { useAuth } from '../hooks/useAuth';
+import { vapidResponse, subscribe } from '../services/api';
 
 export default function AdminPanel() {
   const [selectedLocation, setSelectedLocation] = useState<string>('');
@@ -48,11 +49,8 @@ export default function AdminPanel() {
         }
 
         // Pobierz klucz VAPID z serwera
-        const vapidResponse = await fetch('/api/vapid-key');
-        if (!vapidResponse.ok) {
-          throw new Error('Nie udało się pobrać klucza VAPID');
-        }
-        const { publicKey } = await vapidResponse.json();
+
+        const { publicKey } = await vapidResponse();
 
         // Subskrybuj do powiadomień push
         const subscription = await registration.pushManager.subscribe({
@@ -63,11 +61,7 @@ export default function AdminPanel() {
         console.log('Subskrypcja push zakończona sukcesem:', subscription);
 
         // Wyślij subskrypcję do serwera
-        const subscribeResponse = await fetch('/api/subscribe', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(subscription)
-        });
+        const subscribeResponse = await subscribe(subscription);
 
         if (!subscribeResponse.ok) {
           throw new Error('Nie udało się zapisać subskrypcji na serwerze');

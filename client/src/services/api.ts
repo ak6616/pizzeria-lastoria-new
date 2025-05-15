@@ -520,13 +520,24 @@ async function checkAuth() {
 }
 
 ////////// Subskrypcja powiadomień push
-export async function subscribe() {
+export async function subscribe(subscription: PushSubscription) {
   const response = await fetch(`${API_BASE_URL}/subscribe`, {
-    method: 'POST',});
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(subscription)
+  });
 
-  if(!response.ok) {
+  if (!response.ok) {
     throw new Error('Failed to subscribe to push notifications');
   }
   return response.json();
   
+}
+
+export async function vapidResponse() {
+  const response = await fetch(`${API_BASE_URL}/vapid-key`);
+  if (!response.ok) {
+    throw new Error('Nie udało się pobrać klucza VAPID');
+  }
+  return response.json();
 }
