@@ -19,7 +19,7 @@ const isDeliveryTimeAvailable = async (time: string, location: string): Promise<
   const [hours, minutes] = time.split(':').map(Number);
   const now = new Date();
   const isWeekend = now.getDay() === 0 || now.getDay() === 6;
-  const isHoliday = false; // TODO: Dodać sprawdzanie świąt
+  const isHoliday = false;
 
   try {
     const openWeekdayHourResponse = await getSetting(location, 2);
@@ -27,24 +27,24 @@ const isDeliveryTimeAvailable = async (time: string, location: string): Promise<
     const openWeekendHourResponse = await getSetting(location, 4);
     const closeWeekendHourResponse = await getSetting(location, 5);
 
-    const openWeekdayHour = parseInt(openWeekdayHourResponse.wartosc);
-    const closeWeekdayHour = parseInt(closeWeekdayHourResponse.wartosc);
-    const openWeekendHour = parseInt(openWeekendHourResponse.wartosc);
-    const closeWeekendHour = parseInt(closeWeekendHourResponse.wartosc);
+    const [openWeekdayHour, openWeekdayMinute] = openWeekdayHourResponse.wartosc.split(':').map(Number);
+    const [closeWeekdayHour, closeWeekdayMinute] = closeWeekdayHourResponse.wartosc.split(':').map(Number);
+    const [openWeekendHour, openWeekendMinute] = openWeekendHourResponse.wartosc.split(':').map(Number);
+    const [closeWeekendHour, closeWeekendMinute] = closeWeekendHourResponse.wartosc.split(':').map(Number);
 
     // Sprawdź czy wybrana godzina mieści się w zakresie
     if (isWeekend || isHoliday) {
-      if (hours < openWeekendHour || hours >= closeWeekendHour) {
+      if (hours < openWeekendHour || hours >= closeWeekendHour && minutes > closeWeekendMinute) {
         return {
           available: false,
-          message: `W weekendy i święta dowozimy tylko w godzinach ${openWeekendHour}:00 - ${closeWeekendHour}:00`
+          message: `W weekendy i święta dowozimy tylko w godzinach ${openWeekendHour}:${openWeekendMinute} - ${closeWeekendHour - 1}:${closeWeekendMinute}`
         };
       }
     } else {
-      if (hours < openWeekdayHour || hours >= closeWeekdayHour) {
+      if (hours < openWeekdayHour || hours >= closeWeekdayHour && minutes > closeWeekdayMinute) {
         return {
           available: false,
-          message: `W dni powszednie dowozimy w godzinach ${openWeekdayHour}:00 - ${closeWeekdayHour}:00`
+          message: `W dni powszednie dowozimy w godzinach ${openWeekdayHour}:${openWeekdayMinute} - ${closeWeekdayHour}:${closeWeekdayMinute}`
         };
       }
     }
