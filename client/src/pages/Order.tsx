@@ -20,12 +20,11 @@ const isDeliveryAvailable = async (location: string): Promise<{ available: boole
     const closeWeekendHourResponse = await getSetting(location, 5);
     const orderingStatusResponse = await getSetting(location, 1);
 
-    const openWeekdayHour = parseInt(openWeekdayHourResponse.wartosc);
-    console.log('openWeekdayHour', openWeekdayHour);
-    console.log('closeWeekdayHour', closeWeekdayHourResponse);
-    const closeWeekdayHour = parseInt(closeWeekdayHourResponse.wartosc);
-    const openWeekendHour = parseInt(openWeekendHourResponse.wartosc);
-    const closeWeekendHour = parseInt(closeWeekendHourResponse.wartosc);
+    const [openWeekdayHour, openWeekdayMinute] = openWeekdayHourResponse.wartosc.split(':').map(Number);
+    const [closeWeekdayHour, closeWeekdayMinute] = closeWeekdayHourResponse.wartosc.split(':').map(Number);
+    const [openWeekendHour, openWeekendMinute] = openWeekendHourResponse.wartosc.split(':').map(Number);
+    const [closeWeekendHour, closeWeekendMinute] = closeWeekendHourResponse.wartosc.split(':').map(Number);
+    
     const orderingStatus = orderingStatusResponse.wartosc === 'true';
 
     // Lista świąt w formacie MM-DD
@@ -42,21 +41,31 @@ const isDeliveryAvailable = async (location: string): Promise<{ available: boole
 
     // Wspólne godziny dla weekendów i świąt
     if (isWeekend || isHoliday) {
-      if (currentHour < openWeekendHour || currentHour >= closeWeekendHour) {
+      if (
+        currentHour < openWeekendHour ||
+        (currentHour === openWeekendHour && currentMinute < openWeekendMinute) ||
+        currentHour > closeWeekendHour ||
+        (currentHour === closeWeekendHour && currentMinute >= closeWeekendMinute)
+      ) {
         return {
           available: false,
-          message: `Dostawa w weekendy i święta dostępna w godzinach ${openWeekendHour} - ${closeWeekendHour}. 
-                   Zapraszamy ${format(now, 'EEEE', { locale: pl })} od ${openWeekendHour}.`
+          message: `Dostawa w weekendy i święta dostępna w godzinach ${openWeekendHour}:${String(openWeekendMinute).padStart(2, '0')} - ${closeWeekendHour}:${String(closeWeekendMinute).padStart(2, '0')}. 
+                   Zapraszamy ${format(now, 'EEEE', { locale: pl })} od ${openWeekendHour}:${String(openWeekendMinute).padStart(2, '0')}.`
         };
       }
       return { available: true };
     }
 
     // Godziny w dni powszednie
-    if (currentHour < openWeekdayHour || currentHour >= closeWeekdayHour) {
+    if (
+      currentHour < openWeekdayHour ||
+      (currentHour === openWeekdayHour && currentMinute < openWeekdayMinute) ||
+      currentHour > closeWeekdayHour ||
+      (currentHour === closeWeekdayHour && currentMinute >= closeWeekdayMinute)
+    ) {
       return {
         available: false,
-        message: `Dostawa w dni powszednie dostępna w godzinach ${openWeekdayHour}:00 - ${closeWeekdayHour}:00`
+        message: `Dostawa w dni powszednie dostępna w godzinach ${openWeekdayHour}:${String(openWeekdayMinute).padStart(2, '0')} - ${closeWeekdayHour}:${String(closeWeekdayMinute).padStart(2, '0')}`
       };
     }
 
