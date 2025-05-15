@@ -9,6 +9,8 @@ import Order from './pages/Order';
 import Admin from '../../client/src/components/Admin';
 import PaymentSuccess from './pages/PaymentSuccess';
 import PaymentFailed from './pages/PaymentFailed';
+import RegulationsPage from './pages/RegulationsPage';
+import RodoPage from './pages/RodoPage';
 
 function App() {
   return (
@@ -24,6 +26,8 @@ function App() {
           <Route path="paymentSuccess" element={<PaymentSuccess />} />
           <Route path="paymentFailed" element={<PaymentFailed />} />
           <Route path="*" element={<Navigate to="/" replace />} />
+          <Route path="/regulamin" element={<RegulationsPage />} />
+          <Route path="/rodo" element={<RodoPage />} />
         </Route>
       </Routes>
     </BrowserRouter>
