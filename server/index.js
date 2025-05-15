@@ -434,16 +434,17 @@ app.delete('/api/news/:id', async (req, res) => {
 
 ////////////////////////Ustawienia
 
-app.put('/api/settings/:location/:key', async (req, res) => {
-  const { location, key, value, id } = req.params;
-  const suffix = location === 'haczow' ? '_hacz' : '_mp';
-  
+app.put('/api/settings:location/:id', async (req, res) => {
+  const { location, id } = req.params;
+  const { wartosc } = req.body;
+  const suffix = location === '_hacz' ? '_hacz' : '_mp';
+
   const connection = await getConnection();
 
   try {
     const [result] = await connection.execute(
-      `UPDATE ustawienia${suffix} SET klucz = ?, wartosc = ? WHERE id = ?`,
-      [key, value, id]
+      `UPDATE ustawienia${suffix} SET wartosc = ? WHERE id = ?`,
+      [wartosc, id]
     );
     res.json(result);
   } catch (error) {
@@ -454,10 +455,10 @@ app.put('/api/settings/:location/:key', async (req, res) => {
   }
 });
 
-app.get('/api/settings/:location', async (req, res) => {
-  const connection = await getConnection();
+app.get('/api/settings:location', async (req, res) => {
   const { location } = req.params;
-  const suffix = location === 'haczow' ? '_hacz' : '_mp';
+  const suffix = location === '_hacz' ? '_hacz' : '_mp';
+  const connection = await getConnection();
 
   try {
     const [rows] = await connection.execute(

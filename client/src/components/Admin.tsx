@@ -4,6 +4,7 @@ import MenuManagement from './admin/MenuManagement';
 import DeliveryManagement from './admin/DeliveryManagement';
 import NewsManagement from './admin/NewsManagement';
 import GalleryManagement from './admin/GalleryManagement';
+import SettingsManagement from './admin/SettingsManagement';
 import LoginForm from './admin/LoginForm';
 import { useAuth } from '../hooks/useAuth';
 
@@ -123,6 +124,16 @@ export default function AdminPanel() {
           >
             Galeria
           </button>
+          <button
+            onClick={() => setSelectedSection('settings')}
+            className={`px-4 py-2 rounded-md transition ${
+              selectedSection === 'settings'
+                ? 'bg-yellow-500 text-white'
+                : 'bg-gray-200 hover:bg-gray-300'
+            }`}
+          >
+            Ustawienia
+          </button>
         </div>
 
         {selectedSection === 'orders' && <OrdersManagement location={selectedLocation} />}
@@ -130,6 +141,7 @@ export default function AdminPanel() {
         {selectedSection === 'delivery' && <DeliveryManagement location={selectedLocation} />}
         {selectedSection === 'news' && <NewsManagement />}
         {selectedSection === 'gallery' && <GalleryManagement />}
+        {selectedSection === 'settings' && <SettingsManagement location={selectedLocation} />}
       </div>
     </div>
   );

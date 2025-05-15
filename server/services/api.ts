@@ -157,7 +157,7 @@ export async function updateSettings(location: string, data: {
       'Content-Type': 'application/json',
     },
     credentials: 'include',
-    body: JSON.stringify(data.wartosc),
+    body: JSON.stringify({ wartosc: data.wartosc }), // Send only the 'wartosc' in the body
   });
 
   if (!response.ok) {
