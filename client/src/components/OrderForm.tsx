@@ -632,13 +632,11 @@ export default function OrderForm({ deliveryAreas, location, orderType }: OrderF
                         const quantity = selectedItems[item.uniqueId] || 0;
                         
                         return (
-                          <ol>
-                          <li key={item.uniqueId} className="border rounded-lg p-4">
+                          
+                          <div key={item.uniqueId} className="border rounded-lg p-4">
                             <div className="flex flex-col h-full">
                               <div className="flex justify-between items-start mb-2">
                                 <div>
-                                <ol>
-                                  <li>
                                     <h4 className="font-medium">{index + 1}. {item.nazwa}</h4>
                                   {item.skladniki && (
                                     <p className="text-sm text-gray-600">{item.skladniki}</p>
@@ -646,8 +644,6 @@ export default function OrderForm({ deliveryAreas, location, orderType }: OrderF
                                   <p className="text-sm font-semibold mt-1">
                                     {item.cena} zł
                                   </p>
-                                  </li>
-                                </ol>
                                 </div>
 
                                 <div className="flex items-center space-x-2">
@@ -669,8 +665,7 @@ export default function OrderForm({ deliveryAreas, location, orderType }: OrderF
                                 </div>
                               </div>
                             </div>
-                          </li>
-                          </ol>
+                          </div>
                         );
                       })}
                     </div>
