@@ -35,27 +35,25 @@ export default function SettingsManagement({ location }: SettingsManagementProps
   return (
     <div className="space-y-6">
       <h2 className="text-2xl font-semibold">Ustawienia</h2>
-      <div className="grid grid-cols-1 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {settings?.map((setting) => (
           <div
             key={setting.id}
-            className="border rounded-lg p-4 hover:shadow-md transition"
+            className="border rounded-lg p-4 hover:shadow-md transition flex flex-col justify-between"
           >
-            <div className="flex justify-between items-start">
-              <div className="flex-1">
-                <h3 className="font-medium text-lg">{setting.klucz}</h3>
-                <p className="mt-2 text-gray-600 whitespace-pre-line">
-                  {setting.wartosc}
-                </p>
-              </div>
-              <div className="flex space-x-2 ml-4">
-                <button
-                  onClick={() => setEditingSetting(setting)}
-                  className="p-1 text-blue-500 hover:text-blue-600 transition"
-                >
-                  <Edit2 className="w-4 h-4" />
-                </button>
-              </div>
+            <div>
+              <h3 className="font-medium text-lg">{setting.klucz}</h3>
+              <p className="mt-2 text-gray-600 whitespace-pre-line">
+                {setting.wartosc}
+              </p>
+            </div>
+            <div className="flex justify-end">
+              <button
+                onClick={() => setEditingSetting(setting)}
+                className="p-1 text-blue-500 hover:text-blue-600 transition mt-4"
+              >
+                <Edit2 className="w-4 h-4" />
+              </button>
             </div>
           </div>
         ))}
