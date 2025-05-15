@@ -473,6 +473,30 @@ app.get('/api/settings:location', async (req, res) => {
   }
 });
 
+app.get('/api/settings:location/:id', async (req, res) => {
+  const { location, id } = req.params;
+  const suffix = location === '_hacz' ? '_hacz' : '_mp';
+  const connection = await getConnection();
+
+  try {
+    const [rows] = await connection.execute(
+      `SELECT wartosc FROM ustawienia${suffix} WHERE id = ?`,
+      [id]
+    );
+
+    if (rows.length === 0) {
+      return res.status(404).json({ error: 'Setting not found' });
+    }
+
+    res.json(rows[0]); // Return only the 'wartosc'
+  } catch (error) {
+    console.error('Error fetching setting:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  } finally {
+    await connection.release();
+  }
+});
+
 ////////////////////////// Galeria
 
 app.post('/api/gallery', async (req, res) => {
@@ -1041,6 +1065,11 @@ const server = https.createServer(sslOptions, app).listen(port, () => {
     console.error('Błąd podczas uruchamiania serwera:', err);
   }
   process.exit(1);
+});
+
+server.on('clientError', (err, socket) => {
+  console.error('Client error:', err.message);
+  socket.destroy(); // 👈 TO JEST KLUCZOWE
 });
 
 // Dodaj obsługę zamknięcia

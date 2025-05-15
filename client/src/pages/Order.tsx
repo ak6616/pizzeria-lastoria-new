@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import OrderForm from '../components/OrderForm';
-import { getDeliveryAreas } from '../../../server/services/api';
+import { getDeliveryAreas, getSetting } from '../../../server/services/api';
 import { MapPin, Home } from 'lucide-react';
 import { format } from 'date-fns';
 import { pl } from 'date-fns/locale';
@@ -12,42 +12,60 @@ const isDeliveryAvailable = async (location: string): Promise<{ available: boole
   const currentHour = now.getHours();
   const currentMinute = now.getMinutes();
   const isWeekend = now.getDay() === 0 || now.getDay() === 6;
-
-  // Lista świąt w formacie MM-DD
-  const holidays = ['01-01', '05-01', '12-25', '12-26']; // Dodaj tutaj inne święta
-  const today = `${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
-  const isHoliday = holidays.includes(today);
-
-  // Wspólne godziny dla weekendów i świąt
-  if (isWeekend || isHoliday) {
-    if (currentHour < 16 || currentHour >= 21 && currentMinute >= 30) {
-      return {
-        available: false,
-        message: `Dostawa w weekendy i święta dostępna w godzinach 16:00 - 22:00. 
-                 Zapraszamy ${format(now, 'EEEE', { locale: pl })} od 16:00.`
-      };
-    }
-    return { available: true };
-  }
   
-  // Godziny w dni powszednie
-  if (location === 'miejsce-piastowe') {
-    if (currentHour < 11 || currentHour >= 21 && currentMinute >= 30) {
+  try {
+    const openWeekdayHourResponse = await getSetting(location, 2);
+    const closeWeekdayHourResponse = await getSetting(location, 3);
+    const openWeekendHourResponse = await getSetting(location, 4);
+    const closeWeekendHourResponse = await getSetting(location, 5);
+    const orderingStatusResponse = await getSetting(location, 1);
+
+    const openWeekdayHour = parseInt(openWeekdayHourResponse.wartosc);
+    const closeWeekdayHour = parseInt(closeWeekdayHourResponse.wartosc);
+    const openWeekendHour = parseInt(openWeekendHourResponse.wartosc);
+    const closeWeekendHour = parseInt(closeWeekendHourResponse.wartosc);
+    const orderingStatus = orderingStatusResponse.wartosc === 'true';
+
+    // Lista świąt w formacie MM-DD
+    const holidays = ['05-01']; // Dodaj tutaj inne święta
+    const today = `${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+    const isHoliday = holidays.includes(today);
+
+    if (!orderingStatus) {
       return {
         available: false,
-        message: 'Dostawa w dni powszednie dostępna w godzinach 11:00 - 22:00'
-      };
-    }       
-  } else if (location === 'haczow') {
-    if (currentHour < 12 || currentHour >= 22) {
-      return {
-        available: false,
-        message: 'Dostawa w dni powszednie dostępna w godzinach 12:00 - 22:00'
+        message: 'Przepraszamy, aktualnie nie przyjmujemy zamówień.'
       };
     }
-  }
 
-  return { available: true };
+    // Wspólne godziny dla weekendów i świąt
+    if (isWeekend || isHoliday) {
+      if (currentHour < openWeekendHour || currentHour >= closeWeekendHour) {
+        return {
+          available: false,
+          message: `Dostawa w weekendy i święta dostępna w godzinach ${openWeekendHour}:00 - ${closeWeekendHour}:00. 
+                   Zapraszamy ${format(now, 'EEEE', { locale: pl })} od ${openWeekendHour}:00.`
+        };
+      }
+      return { available: true };
+    }
+
+    // Godziny w dni powszednie
+    if (currentHour < openWeekdayHour || currentHour >= closeWeekdayHour) {
+      return {
+        available: false,
+        message: `Dostawa w dni powszednie dostępna w godzinach ${openWeekdayHour}:00 - ${closeWeekdayHour}:00`
+      };
+    }
+
+    return { available: true };
+  } catch (error) {
+    console.error('Błąd podczas sprawdzania dostępności dostawy:', error);
+    return {
+      available: false,
+      message: 'Wystąpił błąd podczas sprawdzania dostępności dostawy.'
+    };
+  }
 };
 
 type OrderType = 'delivery' | 'pickup' | null;

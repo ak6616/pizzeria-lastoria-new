@@ -6,7 +6,7 @@ import { Plus, Minus, User, Users, MapPin, Home, Building2, DoorClosed, Phone, C
 import RodoTooltip from './RodoTooltip';
 import IngredientsModal from './IngredientsModal';
 import SelectedItemsBubbles from './SelectedItemsBubbles';
-import { getActiveOrdersCount } from '../../../server/services/api';
+import { getActiveOrdersCount, getSetting } from '../../../server/services/api';
 import { OrderFormProps, CustomerData, OrderData } from '../../../server/types';
 
 
@@ -21,36 +21,53 @@ const isDeliveryTimeAvailable = async (time: string, location: string): Promise<
   const isWeekend = now.getDay() === 0 || now.getDay() === 6;
   const isHoliday = false; // TODO: Dodać sprawdzanie świąt
 
-  // Sprawdź czy wybrana godzina mieści się w zakresie
-  if (isWeekend || isHoliday) {
-    if (hours < 16 || hours >= 22) {
-      return {
-        available: false,
-        message: 'W weekendy i święta dowozimy tylko w godzinach 16:00 - 22:00'
-      };
-    }
-  } else {
-    const minHour = location === 'miejsce-piastowe' ? 11 : 12;
-    if (hours < minHour || hours >= 22) {
-      return {
-        available: false,
-        message: `W dni powszednie dowozimy w godzinach ${minHour}:00 - 22:00`
-      };
-    }
-  }
+  try {
+    const openWeekdayHourResponse = await getSetting(location, 2);
+    const closeWeekdayHourResponse = await getSetting(location, 3);
+    const openWeekendHourResponse = await getSetting(location, 4);
+    const closeWeekendHourResponse = await getSetting(location, 5);
 
-  // Sprawdź czy wybrana godzina nie jest w przeszłości
-  const selectedTime = new Date();
-  selectedTime.setHours(hours, minutes, 0, 0);
-  
-  if (selectedTime < now) {
+    const openWeekdayHour = parseInt(openWeekdayHourResponse.wartosc);
+    const closeWeekdayHour = parseInt(closeWeekdayHourResponse.wartosc);
+    const openWeekendHour = parseInt(openWeekendHourResponse.wartosc);
+    const closeWeekendHour = parseInt(closeWeekendHourResponse.wartosc);
+
+    // Sprawdź czy wybrana godzina mieści się w zakresie
+    if (isWeekend || isHoliday) {
+      if (hours < openWeekendHour || hours >= closeWeekendHour) {
+        return {
+          available: false,
+          message: `W weekendy i święta dowozimy tylko w godzinach ${openWeekendHour}:00 - ${closeWeekendHour}:00`
+        };
+      }
+    } else {
+      if (hours < openWeekdayHour || hours >= closeWeekdayHour) {
+        return {
+          available: false,
+          message: `W dni powszednie dowozimy w godzinach ${openWeekdayHour}:00 - ${closeWeekdayHour}:00`
+        };
+      }
+    }
+
+    // Sprawdź czy wybrana godzina nie jest w przeszłości
+    const selectedTime = new Date();
+    selectedTime.setHours(hours, minutes, 0, 0);
+
+    if (selectedTime < now) {
+      return {
+        available: false,
+        message: 'Nie można zamówić dostawy na godzinę w przeszłości'
+      };
+    }
+
+    return { available: true };
+  } catch (error) {
+    console.error('Błąd podczas sprawdzania dostępności dostawy:', error);
     return {
       available: false,
-      message: 'Nie można zamówić dostawy na godzinę w przeszłości'
+      message: 'Wystąpił błąd podczas sprawdzania dostępności dostawy.'
     };
   }
-
-  return { available: true };
 };
 
 export default function OrderForm({ deliveryAreas, location, orderType }: OrderFormProps) {
@@ -115,8 +132,10 @@ export default function OrderForm({ deliveryAreas, location, orderType }: OrderF
   useEffect(() => {
     async function checkOrderLimit() {
       try {
+        const maxOrdersResponse = await getSetting(location, 6);
+        const maxOrders = parseInt(maxOrdersResponse.wartosc);
         const { count } = await getActiveOrdersCount(location);
-        setOrderLimitReached(count >= 5);
+        setOrderLimitReached(count >= maxOrders);
       } catch (err) {
         console.error('Error checking order limit:', err);
       }
@@ -180,12 +199,7 @@ export default function OrderForm({ deliveryAreas, location, orderType }: OrderF
           .catch(error => {
             console.error('Błąd sprawdzania statusu płatności:', error);
           });
-      }
-      
-      if (transaction.transactionPaymentUrl) {
-        window.location.href = transaction.transactionPaymentUrl;
-      } else {
-        throw new Error('Nie udało się utworzyć transakcji');
+          window.location.href = transaction.transactionPaymentUrl;
       }
       
     } catch (error) {

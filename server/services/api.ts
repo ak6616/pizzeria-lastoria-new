@@ -176,6 +176,17 @@ export async function getSettings(location: string) {
   }
   return response.json();
 }
+
+export async function getSetting(location: string, id: number) {
+  await checkAuth();
+  const suffix = getLocationSuffix(location);
+
+  const response = await fetch(`${API_BASE_URL}/settings${suffix}/${id}`);
+  if (!response.ok) {
+    throw new Error('Failed to fetch settings');
+  }
+  return response.json();
+}
 ////////////obszar dostawy
 export async function getDeliveryAreas(location: string) {
   const suffix = getLocationSuffix(location);
