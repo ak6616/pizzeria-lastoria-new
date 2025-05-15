@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useSettings } from '../../hooks/useSettings';
 import EditSettingsModal from './EditSettingsModal';
-import { Edit2, Trash2 } from 'lucide-react';
+import { Edit2 } from 'lucide-react';
 import { Setting } from '../../../../server/types';
 
 interface SettingsManagementProps {
