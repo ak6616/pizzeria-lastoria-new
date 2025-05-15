@@ -21,6 +21,7 @@ const isDeliveryAvailable = async (location: string): Promise<{ available: boole
     const orderingStatusResponse = await getSetting(location, 1);
 
     const openWeekdayHour = parseInt(openWeekdayHourResponse.wartosc);
+    console.log('openWeekdayHour', openWeekdayHour);
     const closeWeekdayHour = parseInt(closeWeekdayHourResponse.wartosc);
     const openWeekendHour = parseInt(openWeekendHourResponse.wartosc);
     const closeWeekendHour = parseInt(closeWeekendHourResponse.wartosc);
@@ -43,8 +44,8 @@ const isDeliveryAvailable = async (location: string): Promise<{ available: boole
       if (currentHour < openWeekendHour || currentHour >= closeWeekendHour) {
         return {
           available: false,
-          message: `Dostawa w weekendy i święta dostępna w godzinach ${openWeekendHour}:00 - ${closeWeekendHour}:00. 
-                   Zapraszamy ${format(now, 'EEEE', { locale: pl })} od ${openWeekendHour}:00.`
+          message: `Dostawa w weekendy i święta dostępna w godzinach ${openWeekendHour} - ${closeWeekendHour}. 
+                   Zapraszamy ${format(now, 'EEEE', { locale: pl })} od ${openWeekendHour}.`
         };
       }
       return { available: true };
