@@ -1,7 +1,7 @@
 import { Trash2 } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { useOrders } from '../../hooks/useOrders';
-import { deleteOrder, deleteAllOrders } from '../../../../server/services/api';
+import { deleteOrder, deleteAllOrders } from '../../services/api';
 import { OrdersManagementProps, Order, OrderItem, TimerProps } from '../../types';
 
 
