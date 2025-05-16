@@ -1,18 +1,23 @@
 import { useState, useEffect } from 'react';
-import { login as apiLogin, checkAuth } from '../services/api';
+import { login as apiLogin } from '../services/api';
 
 export const useAuth = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const checkAuthStatus = async () => {
+    const checkAuth = async () => {
       try {
-        const response = await checkAuth();
+        const response = await fetch('/api/check-auth', {
+          method: 'GET',
+          credentials: 'include',
+          headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+          }
+        });
         
-        // Adjust this logic based on what checkAuth actually returns.
-        // For example, if checkAuth returns a boolean:
-        if (response === true) {
+        if (response.ok) {
           setIsAuthenticated(true);
         } else {
           setIsAuthenticated(false);
@@ -25,7 +30,7 @@ export const useAuth = () => {
       }
     };
 
-    checkAuthStatus();
+    checkAuth();
   }, []);
 
   const login = async (username: string, password: string) => {

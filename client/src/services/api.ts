@@ -510,21 +510,14 @@ export async function getActiveOrdersCount(location: string) {
 
 ///////////////// autoryzacja
 
-export async function checkAuth() {
+async function checkAuth() {
   const response = await fetch(`${API_BASE_URL}/check-auth`, {
-    method: 'GET',
-    credentials: 'include',
-    headers: {
-      'Accept': 'application/json',
-      'Content-Type': 'application/json'
-    }
+    credentials: 'include'
   });
   
   if (!response.ok) {
     throw new Error('Unauthorized');
   }
-
-  return response.json();
 }
 
 ////////// Subskrypcja powiadomień push
