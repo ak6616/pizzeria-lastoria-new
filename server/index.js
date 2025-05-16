@@ -1005,7 +1005,7 @@ app.post('/api/payment/status', async (req, res) => {
             console.log("Płatność zakończona sukcesem!");
             
             // Jeśli płatność się powiedzie, wysyłamy zamówienie
-            const response = await fetch(`https://pizza-lastoria.pl/api/orders/${location}`, {
+            const response = await fetch(`https://pizza-lastoria.pl:3000/api/orders/${location}`, {
               method: 'POST',
               headers: {
                 'Content-Type': 'application/json',
