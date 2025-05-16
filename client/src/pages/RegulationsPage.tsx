@@ -27,6 +27,8 @@ export default function RegulationsPage() {
         Płatność internetowa jest równoznaczna z potwierdzeniem zamówienia.
           Po dokonaniu płatności Klient otrzymuje potwierdzenie na podany adres e-mail.
           Jeśli płatność nie zostanie zaksięgowana w ciągu 15 minut, zamówienie może zostać anulowane.
+          Jeżeli klient dokonał zamówienia na obszar nie objęty dostawą, zamówienie zostanie anulowane, bądź klient zostanie poproszony o jego odbiór w lokalizacji znajdującej się w obszarze dostawy.
+          Jeżeli zamówienie zostało złożone na adres inny niż rzeczywisty adres dostawy, klient może zostać obciążony dodatkowymi kosztami dostawy.
         </p>
         
         <h3 className="font-bold mt-4 mb-2">4. Zwroty i reklamacje</h3>
