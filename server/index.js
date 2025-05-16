@@ -14,10 +14,11 @@ import webpush from 'web-push';
 import multer from 'multer';
 import cookieParser from 'cookie-parser';
 import { concurrently } from 'concurrently';
+import Redis from 'ioredis';
 const MySQLSession = await import('express-mysql-session');
 const MySQLStoreFn = MySQLSession.default || MySQLSession;
 const MySQLStore = MySQLStoreFn(session);
-
+const redis = new Redis();
 const sessionStore = new MySQLStore({
   host: process.env.DB_HOST,
   user: process.env.DB_USER,
@@ -938,7 +939,7 @@ app.post('/api/payment/init', async (req, res) => {
 
     async function initializePayment(paymentData) {
       // Tutaj implementacja integracji z API TPay
-      const response = await fetch('https://api.tpay.com/transactions', {
+      const response = await fetch('https://secure.tpay.com/api/gw/transaction/register', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -958,8 +959,9 @@ app.post('/api/payment/init', async (req, res) => {
           },
           country: paymentData.country,
           
-          return_url: process.env.TPAY_RETURN_URL,
-          return_error_url: process.env.TPAY_ERROR_URL
+          notification_url: process.env.TPAY_NOTIFICATION_URL,
+          success_url: process.env.TPAY_RETURN_URL,
+          error_url: process.env.TPAY_ERROR_URL
         })
         
       });
@@ -968,6 +970,13 @@ app.post('/api/payment/init', async (req, res) => {
     } 
 
     const transaction = await initializePayment(req.body);
+    if (transaction.transactionId) {
+      // Przechowaj dane zamówienia na 15 minut
+      await redis.setex(`order:${transaction.transactionId}`, 900, JSON.stringify({
+        orderData: req.body.orderData,
+        location: req.body.location
+      }));
+    }
     res.json(transaction);
     
   } catch (error) {
@@ -976,80 +985,119 @@ app.post('/api/payment/init', async (req, res) => {
   }
 });
 
-
-////// Endpoint do sprawdzania statusu płatności
-app.post('/api/payment/status', async (req, res) => {
+app.post('/api/payment/webhook', async (req, res) => {
   try {
-    const { transactionId, location, orderData} = req.body;
-    if (!transactionId) {
-      return res.status(400).json({ error: 'Brak transactionId' });
+    const { title, transactionId, status } = req.body;
+
+    console.log('Webhook od Tpay:', req.body);
+
+    if (status !== 'correct') {
+      return res.status(200).send('Płatność nie została zakończona poprawnie');
     }
-      for(let i = 0; i < 15; i++) {
-        try {
-          const response = await fetch(`https://api.tpay.com/transactions/${transactionId}`, {
-            method: "GET",
-            headers: {
-              "Content-Type": "application/json",
-              "Authorization": `Bearer ${tpayToken}` // Zaktualizuj token
-            }
-          });
-  
-          if (!response.ok) {
-            throw new Error(`Błąd HTTP! Status: ${response.status}`);
-          }
-  
-          const data = await response.json();
-          console.log(`Odpowiedź z API:`, data);
-  
-          if (data.status === "correct") {
-            console.log("Płatność zakończona sukcesem!");
-            
-            // Jeśli płatność się powiedzie, wysyłamy zamówienie
-            const response = await fetch(`https://pizza-lastoria.pl:3000/api/orders/${location}`, {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-              },
-              body: JSON.stringify(orderData)
-              
-            });
-            i = 14;
-            if (!response.ok) {
-              throw new Error('Błąd podczas składania zamówienia');
-            }
-            return res.json({ status: "correct", data }); // Odpowiedź do klienta
-          } else if(data.status === "canceled") {
-            i = 14;
-            console.log(`Płatność została anulowana: ${data.status}`);
-          }
-           else {
-            console.log(`Płatność w trakcie: ${data.status}`);
-          }
-        } catch (error) {
-          console.error("Błąd podczas pobierania statusu transakcji:", error);
-        }
-        await new Promise(resolve => setTimeout(resolve, 64000)); // Czekaj 1 sekundę
-        console.log(`Czekam ${i + 1} minuty...`);
-      }
-      
-    } catch (error) {
-    console.error('Błąd statusu płatności:', error);
-    res.status(500).json({ error: 'Błąd statusu płatności' });
+
+    const orderInfoStr = await redis.get(`order:${transactionId}`);
+
+    if (!orderInfoStr) {
+      console.warn(`Brak danych zamówienia w Redis dla transakcji ${transactionId}`);
+      return res.status(404).send('Dane zamówienia nie znalezione');
+    }
+
+    const { orderData, location } = JSON.parse(orderInfoStr);
+
+    // Wywołanie zapisującego endpointu
+    const response = await fetch(`https://pizza-lastoria.pl:3000/api/orders/${location}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(orderData)
+    });
+
+    if (!response.ok) {
+      throw new Error('Błąd podczas zapisu zamówienia');
+    }
+
+    await redis.del(`order:${transactionId}`); // opcjonalne — sprzątanie po sobie
+
+    res.status(200).send('OK');
+  } catch (err) {
+    console.error('Błąd obsługi webhooka:', err);
+    res.status(500).send('Błąd serwera');
   }
 });
 
 
-
-
-
-
-// // Obsługa wszystkich pozostałych ścieżek - przekieruj do index.html
-// app.get('*', (req, res) => {
-//   // Nie przekierowuj żądań API
-//   if (!req.url.startsWith('/api')) {
-//     res.sendFile(path.join(__dirname, '../index.html'));
+// ////// Endpoint do sprawdzania statusu płatności
+// app.post('/api/payment/status', async (req, res) => {
+//   try {
+//     const { transactionId, location, orderData} = req.body;
+//     if (!transactionId) {
+//       return res.status(400).json({ error: 'Brak transactionId' });
+//     }
+//       for(let i = 0; i < 15; i++) {
+//         try {
+//           const response = await fetch(`https://api.tpay.com/transactions/${transactionId}`, {
+//             method: "GET",
+//             headers: {
+//               "Content-Type": "application/json",
+//               "Authorization": `Bearer ${tpayToken}` // Zaktualizuj token
+//             }
+//           });
+  
+//           if (!response.ok) {
+//             throw new Error(`Błąd HTTP! Status: ${response.status}`);
+//           }
+  
+//           const data = await response.json();
+//           console.log(`Odpowiedź z API:`, data);
+  
+//           if (data.status === "correct") {
+//             console.log("Płatność zakończona sukcesem!");
+            
+//             // Jeśli płatność się powiedzie, wysyłamy zamówienie
+//             const response = await fetch(`https://pizza-lastoria.pl:3000/api/orders/${location}`, {
+//               method: 'POST',
+//               headers: {
+//                 'Content-Type': 'application/json',
+//               },
+//               body: JSON.stringify(orderData)
+              
+//             });
+//             i = 14;
+//             if (!response.ok) {
+//               throw new Error('Błąd podczas składania zamówienia');
+//             }
+//             return res.json({ status: "correct", data }); // Odpowiedź do klienta
+//           } else if(data.status === "canceled") {
+//             i = 14;
+//             console.log(`Płatność została anulowana: ${data.status}`);
+//           }
+//            else {
+//             console.log(`Płatność w trakcie: ${data.status}`);
+//           }
+//         } catch (error) {
+//           console.error("Błąd podczas pobierania statusu transakcji:", error);
+//         }
+//         await new Promise(resolve => setTimeout(resolve, 64000)); // Czekaj 1 sekundę
+//         console.log(`Czekam ${i + 1} minuty...`);
+//       }
+      
+//     } catch (error) {
+//     console.error('Błąd statusu płatności:', error);
+//     res.status(500).json({ error: 'Błąd statusu płatności' });
 //   }
 // });
+
+
+
+
+
+
+// Obsługa wszystkich pozostałych ścieżek - przekieruj do index.html
+app.get('*', (req, res) => {
+  // Nie przekierowuj żądań API
+  if (!req.url.startsWith('/api')) {
+    res.sendFile(path.join(__dirname, '../index.html'));
+  }
+});
 
 const sslOptions = {
   key: fs.readFileSync('/etc/letsencrypt/live/pizza-lastoria.pl/privkey.pem'),
