@@ -939,7 +939,7 @@ app.post('/api/payment/init', async (req, res) => {
 
     async function initializePayment(paymentData) {
       // Tutaj implementacja integracji z API TPay
-      const response = await fetch('https://secure.tpay.com/api/gw/transaction/register', {
+      const response = await fetch('https://api.tpay.com/transactions', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
