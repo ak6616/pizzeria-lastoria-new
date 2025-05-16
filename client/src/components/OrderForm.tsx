@@ -9,6 +9,7 @@ import SelectedItemsBubbles from './SelectedItemsBubbles';
 import { getActiveOrdersCount, getSetting } from '../services/api';
 import { OrderFormProps, CustomerData, OrderData } from '../types';
 
+const API_BASE_URL = import.meta.env.VITE_API_URL;
 
 
 
@@ -180,7 +181,7 @@ export default function OrderForm({ deliveryAreas, location, orderType }: OrderF
         
       };
 
-      const initResponse = await fetch('/api/payment/init', {
+      const initResponse = await fetch(`${API_BASE_URL}/payment/init`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(paymentData)
@@ -188,7 +189,7 @@ export default function OrderForm({ deliveryAreas, location, orderType }: OrderF
 
       const transaction = await initResponse.json();
       if (transaction.transactionId) {
-        fetch('/api/payment/status', {
+        fetch(`${API_BASE_URL}/payment/status`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ transactionId: transaction.transactionId, location, orderData })
