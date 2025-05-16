@@ -178,7 +178,6 @@ export async function getSettings(location: string) {
 }
 
 export async function getSetting(location: string, id: number) {
-  await checkAuth();
   const suffix = getLocationSuffix(location);
 
   const response = await fetch(`${API_BASE_URL}/settings${suffix}/${id}`);
