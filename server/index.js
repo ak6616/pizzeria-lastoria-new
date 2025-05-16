@@ -1043,13 +1043,13 @@ app.post('/api/payment/status', async (req, res) => {
 
 
 
-// Obsługa wszystkich pozostałych ścieżek - przekieruj do index.html
-app.get('*', (req, res) => {
-  // Nie przekierowuj żądań API
-  if (!req.url.startsWith('/api')) {
-    res.sendFile(path.join(__dirname, '../index.html'));
-  }
-});
+// // Obsługa wszystkich pozostałych ścieżek - przekieruj do index.html
+// app.get('*', (req, res) => {
+//   // Nie przekierowuj żądań API
+//   if (!req.url.startsWith('/api')) {
+//     res.sendFile(path.join(__dirname, '../index.html'));
+//   }
+// });
 
 const sslOptions = {
   key: fs.readFileSync('/etc/letsencrypt/live/pizza-lastoria.pl/privkey.pem'),
