@@ -45,7 +45,7 @@ const isDeliveryAvailable = async (location: string): Promise<{ available: boole
         currentHour < openWeekendHour ||
         (currentHour === openWeekendHour && currentMinute < openWeekendMinute) ||
         currentHour > closeWeekendHour ||
-        (currentHour === closeWeekendHour && currentMinute >= closeWeekendMinute)
+        (currentHour === closeWeekendHour && currentMinute >= closeWeekendMinute - 30)
       ) {
         return {
           available: false,
@@ -61,7 +61,7 @@ const isDeliveryAvailable = async (location: string): Promise<{ available: boole
       currentHour < openWeekdayHour ||
       (currentHour === openWeekdayHour && currentMinute < openWeekdayMinute) ||
       currentHour > closeWeekdayHour ||
-      (currentHour === closeWeekdayHour && currentMinute >= closeWeekdayMinute)
+      (currentHour === closeWeekdayHour && currentMinute >= closeWeekdayMinute - 30)
     ) {
       return {
         available: false,
