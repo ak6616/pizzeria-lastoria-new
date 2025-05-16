@@ -45,13 +45,13 @@ export default function GalleryManagement() {
     );
   }
 
-  if (images.length === 0) {
-    return (
-      <div className="text-center text-white py-8">
-        <p>Brak zdjęć w galerii</p>
-      </div>
-    );
-  }
+  // if (images.length === 0) {
+  //   return (
+  //     <div className="text-center text-white py-8">
+  //       <p>Brak zdjęć w galerii</p>
+  //     </div>
+  //   );
+  // }
 
   const handleDelete = async (id: number) => {
     if (window.confirm('Czy na pewno chcesz usunąć ten obraz?')) {
