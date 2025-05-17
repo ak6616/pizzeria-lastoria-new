@@ -189,17 +189,17 @@ export default function OrderForm({ deliveryAreas, location, orderType }: OrderF
 
       const transaction = await initResponse.json();
       if (transaction.transactionId) {
-        // fetch(`${API_BASE_URL}/payment/status`, {
-        //   method: 'POST',
-        //   headers: { 'Content-Type': 'application/json' },
-        //   body: JSON.stringify({ transactionId: transaction.transactionId, location, orderData })
-        // }).then(res => res.json())
-        //   .then(status => {
-        //     console.log('Status płatności:', status);
-        //   })
-        //   .catch(error => {
-        //     console.error('Błąd sprawdzania statusu płatności:', error);
-        //   });
+        fetch(`${API_BASE_URL}/payment/status`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ transactionId: transaction.transactionId, location, orderData })
+        }).then(res => res.json())
+          .then(status => {
+            console.log('Status płatności:', status);
+          })
+          .catch(error => {
+            console.error('Błąd sprawdzania statusu płatności:', error);
+          });
           window.location.href = transaction.transactionPaymentUrl;
       }
       
