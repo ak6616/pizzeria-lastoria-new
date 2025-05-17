@@ -1273,7 +1273,7 @@ const sslOptions = {
   cert: fs.readFileSync('/etc/letsencrypt/live/pizza-lastoria.pl/fullchain.pem'),
 };
 
-const server = https.createServer(verifyJWSSignature, sslOptions, app).listen(port, () => {
+const server = https.createServer(sslOptions, app, verifyJWSSignature).listen(port, () => {
   console.log(`Server running on port ${port}`);
 }).on('error', (err) => {
   if (err.code === 'EADDRINUSE') {
