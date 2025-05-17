@@ -13,12 +13,10 @@ import https from 'https';
 import webpush from 'web-push';
 import multer from 'multer';
 import cookieParser from 'cookie-parser';
-import Redis from 'ioredis';
 import { concurrently } from 'concurrently';
 const MySQLSession = await import('express-mysql-session');
 const MySQLStoreFn = MySQLSession.default || MySQLSession;
 const MySQLStore = MySQLStoreFn(session);
-const redis = new Redis();
 
 const sessionStore = new MySQLStore({
   host: process.env.DB_HOST,
@@ -439,7 +437,7 @@ app.delete('/api/news/:id', async (req, res) => {
 app.put('/api/settings:location/:id', async (req, res) => {
   const { location, id } = req.params;
   const { wartosc } = req.body;
-  const suffix = location === 'haczow' ? '_hacz' : '_mp';
+  const suffix = location === '_hacz' ? '_hacz' : '_mp';
 
   const connection = await getConnection();
 
@@ -459,7 +457,7 @@ app.put('/api/settings:location/:id', async (req, res) => {
 
 app.get('/api/settings:location', async (req, res) => {
   const { location } = req.params;
-  const suffix = location === 'haczow' ? '_hacz' : '_mp';
+  const suffix = location === '_hacz' ? '_hacz' : '_mp';
   const connection = await getConnection();
 
   try {
@@ -477,7 +475,7 @@ app.get('/api/settings:location', async (req, res) => {
 
 app.get('/api/settings:location/:id', async (req, res) => {
   const { location, id } = req.params;
-  const suffix = location === 'haczow' ? '_hacz' : '_mp';
+  const suffix = location === '_hacz' ? '_hacz' : '_mp';
   const connection = await getConnection();
 
   try {
@@ -502,13 +500,13 @@ app.get('/api/settings:location/:id', async (req, res) => {
 ////////////////////////// Galeria
 
 app.post('/api/gallery', async (req, res) => {
-  const { link, location } = req.body;
-  const suffix = location === 'haczow' ? '_hacz' : '_mp';
+  const { link } = req.body;
+  console.log(link);
   const connection = await getConnection();
 
   try {
     const [result] = await connection.execute(
-      `INSERT INTO galeria${suffix} (link) VALUES (?)`,
+      'INSERT INTO galeria (link) VALUES (?)',
       [link]
     );
     res.json(result);
@@ -520,16 +518,15 @@ app.post('/api/gallery', async (req, res) => {
   }
 });
 
-app.delete('/api/gallery/:location/:id', async (req, res) => {
-  const { id, location } = req.params;
-  const suffix = location === 'haczow' ? '_hacz' : '_mp';
+app.delete('/api/gallery/:id', async (req, res) => {
+  const { id } = req.params;
   const connection = await getConnection();
 
   try {
 
     // Usuwanie grafiki z serwera
 
-    const [filePathResult] = await connection.execute(`SELECT link FROM galeria${suffix} WHERE id = ?`, [id]);
+    const [filePathResult] = await connection.execute('SELECT link FROM galeria WHERE id = ?', [id]);
     const filePath = filePathResult[0]?.link; // Extract the 'link' field from the result
 
     if (!filePath) {
@@ -550,7 +547,7 @@ app.delete('/api/gallery/:location/:id', async (req, res) => {
     // Usuwanie rekordu z bazy danych
 
     const [result] = await connection.execute(
-      `DELETE FROM galeria${suffix} WHERE id = ?`,
+      'DELETE FROM galeria WHERE id = ?',
       [id]
     );
     res.json(result);
@@ -562,13 +559,11 @@ app.delete('/api/gallery/:location/:id', async (req, res) => {
   }
 });
 
-app.get('/api/gallery/:location', async (req, res) => {
-  const { location } = req.params;
-  const suffix = location === 'haczow' ? '_hacz' : '_mp';
+app.get('/api/gallery', async (req, res) => {
   const connection = await getConnection();
 
   try {
-    const [rows] = await connection.execute(`SELECT * FROM galeria${suffix}`);
+    const [rows] = await connection.execute('SELECT * FROM galeria');
     res.json(rows);
   } catch (error) {
     console.error('Error fetching gallery images:', error);
@@ -589,7 +584,7 @@ app.post("/api/gallery/upload", upload.single("photo"), async (req, res) => {
 
 ///////////////////// Obszar dostawy
 
-app.get('/api/delivery-areas/:location', async (req, res) => {
+app.get('/api/delivery-areas:location', async (req, res) => {
   const { location } = req.params;
   const validLocations = ['_mp', '_hacz'];
   
@@ -600,7 +595,7 @@ app.get('/api/delivery-areas/:location', async (req, res) => {
   const connection = await getConnection();
 
   try {
-    const [rows] = await connection.execute(`SELECT id, nazwa, ulica FROM dostawaweekday${suffix}`);
+    const [rows] = await connection.execute(`SELECT id, nazwa, ulica FROM dostawaweekday${location}`);
     res.json(rows);
   } catch (error) {
     console.error('Error fetching delivery areas:', error);
@@ -721,7 +716,6 @@ app.post('/api/orders/:location', async (req, res) => {
           numerTelefonu, zamowienieNaGodzine, dataGodzinaZamowienia,
           zamowioneProdukty, suma, uwagi
         ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-
         orderValues
       );
   
@@ -900,7 +894,7 @@ app.get('/api/orders/:location/count', async (req, res) => {
     await connection.release();
   }
 });
- 
+
 
 
 
@@ -936,13 +930,15 @@ getTpayToken();
 // Automatyczne odświeżanie co 1h 55min (przed wygaśnięciem tokena)
 setInterval(getTpayToken, 115 * 60 * 1000); // 115 minut w milisekundach
 
+
+
 ////// Endpoint do inicjalizacji płatności
 app.post('/api/payment/init', async (req, res) => {
   try {
 
     async function initializePayment(paymentData) {
       // Tutaj implementacja integracji z API TPay
-      const response = await fetch('https://secure.tpay.com/api/gw/transaction/register', {
+      const response = await fetch('https://api.tpay.com/transactions', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -961,9 +957,9 @@ app.post('/api/payment/init', async (req, res) => {
             phone: paymentData.phone,
           },
           country: paymentData.country,
-          notification_url: process.env.TPAY_NOTIFICATION_URL,
-          success_url: process.env.TPAY_RETURN_URL,
-          error_url: process.env.TPAY_ERROR_URL
+          
+          return_url: process.env.TPAY_RETURN_URL,
+          return_error_url: process.env.TPAY_ERROR_URL
         })
         
       });
@@ -972,15 +968,6 @@ app.post('/api/payment/init', async (req, res) => {
     } 
 
     const transaction = await initializePayment(req.body);
-
-    if (transaction.transactionId) {
-      // Przechowaj dane zamówienia na 15 minut
-      await redis.setex(`order:${transaction.transactionId}`, 900, JSON.stringify({
-        orderData: req.body.orderData,
-        location: req.body.location
-      }));
-    }
-
     res.json(transaction);
     
   } catch (error) {
@@ -989,114 +976,80 @@ app.post('/api/payment/init', async (req, res) => {
   }
 });
 
-app.post('/api/payment/webhook', async (req, res) => {
+
+////// Endpoint do sprawdzania statusu płatności
+app.post('/api/payment/status', async (req, res) => {
   try {
-    const { title, transactionId, status } = req.body;
-
-    console.log('Webhook od Tpay:', req.body);
-
-    if (status !== 'correct') {
-      return res.status(200).send('Płatność nie została zakończona poprawnie');
+    const { transactionId, location, orderData} = req.body;
+    if (!transactionId) {
+      return res.status(400).json({ error: 'Brak transactionId' });
     }
-
-    const orderInfoStr = await redis.get(`order:${transactionId}`);
-
-    if (!orderInfoStr) {
-      console.warn(`Brak danych zamówienia w Redis dla transakcji ${transactionId}`);
-      return res.status(404).send('Dane zamówienia nie znalezione');
-    }
-
-    const { orderData, location } = JSON.parse(orderInfoStr);
-
-    // Wywołanie zapisującego endpointu
-    const response = await fetch(`https://pizza-lastoria.pl:3000/api/orders/${location}`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(orderData)
-    });
-
-    if (!response.ok) {
-      throw new Error('Błąd podczas zapisu zamówienia');
-    }
-
-    await redis.del(`order:${transactionId}`); // opcjonalne — sprzątanie po sobie
-
-    res.status(200).send('OK');
-  } catch (err) {
-    console.error('Błąd obsługi webhooka:', err);
-    res.status(500).send('Błąd serwera');
+      for(let i = 0; i < 15; i++) {
+        try {
+          const response = await fetch(`https://api.tpay.com/transactions/${transactionId}`, {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+              "Authorization": `Bearer ${tpayToken}` // Zaktualizuj token
+            }
+          });
+  
+          if (!response.ok) {
+            throw new Error(`Błąd HTTP! Status: ${response.status}`);
+          }
+  
+          const data = await response.json();
+          console.log(`Odpowiedź z API:`, data);
+  
+          if (data.status === "correct") {
+            console.log("Płatność zakończona sukcesem!");
+            
+            // Jeśli płatność się powiedzie, wysyłamy zamówienie
+            const response = await fetch(`https://pizza-lastoria.pl:3000/api/orders/${location}`, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify(orderData)
+              
+            });
+            i = 14;
+            if (!response.ok) {
+              throw new Error('Błąd podczas składania zamówienia');
+            }
+            return res.json({ status: "correct", data }); // Odpowiedź do klienta
+          } else if(data.status === "canceled") {
+            i = 14;
+            console.log(`Płatność została anulowana: ${data.status}`);
+          }
+           else {
+            console.log(`Płatność w trakcie: ${data.status}`);
+          }
+        } catch (error) {
+          console.error("Błąd podczas pobierania statusu transakcji:", error);
+        }
+        await new Promise(resolve => setTimeout(resolve, 64000)); // Czekaj 1 sekundę
+        console.log(`Czekam ${i + 1} minuty...`);
+      }
+      
+    } catch (error) {
+    console.error('Błąd statusu płatności:', error);
+    res.status(500).json({ error: 'Błąd statusu płatności' });
   }
 });
 
-// ////// Endpoint do sprawdzania statusu płatności
-// app.post('/api/payment/status', async (req, res) => {
-//   try {
-//     const { transactionId, location, orderData} = req.body;
-//     if (!transactionId) {
-//       return res.status(400).json({ error: 'Brak transactionId' });
-//     }
-//       for(let i = 0; i < 15; i++) {
-//         try {
-//           const response = await fetch(`https://api.tpay.com/transactions/${transactionId}`, {
-//             method: "GET",
-//             headers: {
-//               "Content-Type": "application/json",
-//               "Authorization": `Bearer ${tpayToken}` // Zaktualizuj token
-//             }
-//           });
-  
-//           if (!response.ok) {
-//             throw new Error(`Błąd HTTP! Status: ${response.status}`);
-//           }
-  
-//           const data = await response.json();
-//           console.log(`Odpowiedź z API:`, data);
-  
-//           if (data.status === "correct") {
-//             console.log("Płatność zakończona sukcesem!");
-            
-//             // Jeśli płatność się powiedzie, wysyłamy zamówienie
-//             const response = await fetch(`https://pizza-lastoria.pl:3000/api/orders/${location}`, {
-//               method: 'POST',
-//               headers: {
-//                 'Content-Type': 'application/json',
-//               },
-//               body: JSON.stringify(orderData)
-              
 
-//             });
-//             i = 14;
-//             if (!response.ok) {
-//               throw new Error('Błąd podczas składania zamówienia');
-//             }
-//             return res.json({ status: "correct", data }); // Odpowiedź do klienta
-//           } else if(data.status === "canceled") {
-//             i = 14;
-//             console.log(`Płatność została anulowana: ${data.status}`);
-//           }
-//            else {
-//             console.log(`Płatność w trakcie: ${data.status}`);
-//           }
-//         } catch (error) {
-//           console.error("Błąd podczas pobierania statusu transakcji:", error);
-//         }
-//         await new Promise(resolve => setTimeout(resolve, 64000)); // Czekaj 1 sekundę
-//         console.log(`Czekam ${i + 1} minuty...`);
-//       }
-      
-//     } catch (error) {
-//     console.error('Błąd statusu płatności:', error);
-//     res.status(500).json({ error: 'Błąd statusu płatności' });
+
+
+
+
+// // Obsługa wszystkich pozostałych ścieżek - przekieruj do index.html
+// app.get('*', (req, res) => {
+//   // Nie przekierowuj żądań API
+//   if (!req.url.startsWith('/api')) {
+//     res.sendFile(path.join(__dirname, '../index.html'));
 //   }
 // });
- 
-// Obsługa wszystkich pozostałych ścieżek - przekieruj do index.html
-app.get('*', (req, res) => {
-  // Nie przekierowuj żądań API
-  if (!req.url.startsWith('/api')) {
-    res.sendFile(path.join(__dirname, '../index.html'));
-  }
-});
 
 const sslOptions = {
   key: fs.readFileSync('/etc/letsencrypt/live/pizza-lastoria.pl/privkey.pem'),
@@ -1126,7 +1079,7 @@ process.on('SIGTERM', () => {
     process.exit(0);
   });
 });
- 
+
 
 
 
@@ -1159,8 +1112,8 @@ app.post('/api/notify', async (req, res) => {
     subscriptions.map((sub) => 
     webpush.sendNotification(sub, payload).catch(err => {
       console.error("Błąd podczas wysyłania powiadomienia:", err);
-    })));
-
+    }))
+  )
   res.json({ success: true, results })
 
 });
