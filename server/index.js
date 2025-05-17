@@ -15,6 +15,7 @@ import multer from 'multer';
 import cookieParser from 'cookie-parser';
 import { concurrently } from 'concurrently';
 import Redis from 'ioredis';
+import { X509Certificate, createVerify } from 'crypto';
 const MySQLSession = await import('express-mysql-session');
 const MySQLStoreFn = MySQLSession.default || MySQLSession;
 const MySQLStore = MySQLStoreFn(session);
@@ -1018,6 +1019,7 @@ app.post('/api/payment/webhook', async (req, res) => {
     await redis.del(`order:${transactionId}`); // opcjonalne — sprzątanie po sobie
 
     res.status(200).send('OK');
+    return res.end("TRUE")
   } catch (err) {
     console.error('Błąd obsługi webhooka:', err);
     res.status(500).send('Błąd serwera');
@@ -1086,11 +1088,6 @@ app.post('/api/payment/webhook', async (req, res) => {
 //   }
 // });
 
-
-
-
-
-
 // Obsługa wszystkich pozostałych ścieżek - przekieruj do index.html
 app.get('*', (req, res) => {
   // Nie przekierowuj żądań API
@@ -1098,37 +1095,6 @@ app.get('*', (req, res) => {
     res.sendFile(path.join(__dirname, '../index.html'));
   }
 });
-
-const sslOptions = {
-  key: fs.readFileSync('/etc/letsencrypt/live/pizza-lastoria.pl/privkey.pem'),
-  cert: fs.readFileSync('/etc/letsencrypt/live/pizza-lastoria.pl/fullchain.pem'),
-};
-
-const server = https.createServer(sslOptions, app).listen(port, () => {
-  console.log(`Server running on port ${port}`);
-}).on('error', (err) => {
-  if (err.code === 'EADDRINUSE') {
-    console.error(`Port ${port} jest już w użyciu. Upewnij się, że żaden inny proces nie używa tego portu.`);
-  } else {
-    console.error('Błąd podczas uruchamiania serwera:', err);
-  }
-  process.exit(1);
-});
-
-server.on('clientError', (err, socket) => {
-  console.error('Client error:', err.message);
-  socket.destroy(); // 👈 TO JEST KLUCZOWE
-});
-
-// Dodaj obsługę zamknięcia
-process.on('SIGTERM', () => {
-  server.close(() => {
-    console.log('Serwer został zamknięty');
-    process.exit(0);
-  });
-});
-
-
 
 
 ////////Handler dla powiadomień push
@@ -1222,5 +1188,114 @@ notification();
 app.get('/api/vapid-key', (req, res) => {
   res.json({ publicKey: process.env.VAPID_PUBLIC_KEY });
 });
+
+
+async function readBody(req) {
+  return new Promise((resolve, reject) => {
+    let body = "";
+    req.on("data", (chunk) => {
+      body += chunk;
+    });
+    req.on("end", () => {
+      resolve(body);
+    });
+    req.on("error", (err) => {
+      reject(err);
+    });
+  });
+}
+
+async function verifyJWSSignature(req, res) {
+  // Get the JWS signature from the request headers
+  const jws = req.headers["x-jws-signature"];
+
+  if (!jws) {
+    return res.end("FALSE - Missing JWS header");
+  }
+
+  // Split the JWS into parts (header, payload, and signature)
+  const jwsData = jws.split(".");
+  const headerPart = jwsData[0];
+  const signaturePart = jwsData[2];
+  // Convert the body content of the request (which is typically an object) into a URL-encoded query string format
+  // This is necessary for constructing the payload that will be used in the signature verification
+  const bodyContent = await readBody(req);
+  const rawBody = new URLSearchParams(JSON.parse(bodyContent)).toString();
+  // Decode and parse the JWS header
+  const headerDecoded = Buffer.from(headerPart.replace(/-/g, "+").replace(/_/g, "/"), "base64").toString("ascii");
+  const headerJson = JSON.parse(headerDecoded);
+
+  if (!headerJson.x5u) {
+    return res.end("FALSE - Missing x5u header");
+  }
+
+  if (!headerJson.x5u.startsWith("https://secure.tpay.com")) {
+    return res.end("FALSE - Wrong x5u URL");
+  }
+
+  // Fetch the JWS signing certificate and the trusted CA certificate
+  const [signingCert, caCert] = await Promise.all([fetch(headerJson.x5u).then((res) => res.text()), fetch("https://secure.tpay.com/x509/tpay-jws-root.pem").then((res) => res.text())]);
+
+  // Load certificates
+  const x5uCert = new X509Certificate(signingCert);
+  const caCertPublicKey = new X509Certificate(caCert).publicKey;
+
+  // Verify that the signing certificate is signed by the CA certificate
+  if (!x5uCert.verify(caCertPublicKey)) {
+    return res.end("FALSE - Signing certificate is not signed by Tpay CA certificate");
+  }
+
+  // Prepare the payload (body content) in base64url encoding
+  const payload = Buffer.from(rawBody, "utf8").toString("base64").replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+
+  // Decode the signature from base64url
+  const decodedSignature = Buffer.from(signaturePart.replace(/-/g, "+").replace(/_/g, "/"), "base64");
+
+  // Verify the signature
+  const verifier = createVerify("SHA256");
+  verifier.update(`${headerPart}.${payload}`);
+  verifier.end();
+
+  const publicKey = x5uCert.publicKey;
+  const isValid = verifier.verify(publicKey, decodedSignature);
+
+  if (!isValid) {
+    return res.end("FALSE - Invalid JWS signature");
+  }
+
+  // Here you can process transactions based on POST data
+  // JWS signature verified successfully.
+  return res.end("TRUE");
+}
+
+const sslOptions = {
+  key: fs.readFileSync('/etc/letsencrypt/live/pizza-lastoria.pl/privkey.pem'),
+  cert: fs.readFileSync('/etc/letsencrypt/live/pizza-lastoria.pl/fullchain.pem'),
+};
+
+const server = https.createServer(verifyJWSSignature, sslOptions, app).listen(port, () => {
+  console.log(`Server running on port ${port}`);
+}).on('error', (err) => {
+  if (err.code === 'EADDRINUSE') {
+    console.error(`Port ${port} jest już w użyciu. Upewnij się, że żaden inny proces nie używa tego portu.`);
+  } else {
+    console.error('Błąd podczas uruchamiania serwera:', err);
+  }
+  process.exit(1);
+});
+
+server.on('clientError', (err, socket) => {
+  console.error('Client error:', err.message);
+  socket.destroy(); // 👈 TO JEST KLUCZOWE
+});
+
+// Dodaj obsługę zamknięcia
+process.on('SIGTERM', () => {
+  server.close(() => {
+    console.log('Serwer został zamknięty');
+    process.exit(0);
+  });
+});
+
 
 
