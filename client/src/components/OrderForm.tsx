@@ -183,7 +183,7 @@ export default function OrderForm({ deliveryAreas, location, orderType }: OrderF
       const initResponse = await fetch(`${API_BASE_URL}/payment/init`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(paymentData)
+        body: JSON.stringify({paymentData, orderData, location})
       });
 
       const transaction = await initResponse.json();

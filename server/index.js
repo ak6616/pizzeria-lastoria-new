@@ -973,7 +973,7 @@ app.post('/api/payment/init', async (req, res) => {
       return response.json();
     } 
 
-    const transaction = await initializePayment(req.body);
+    const transaction = await initializePayment(req.body.paymentData);
     if (transaction.transactionId) {
       // Przechowaj dane zamówienia na 15 minut
       await redis.setex(`order:${transaction.hiddenDescription}`, 900, JSON.stringify({
