@@ -17,6 +17,8 @@ import { concurrently } from 'concurrently';
 import Redis from 'ioredis';
 import { X509Certificate, createVerify } from 'crypto';
 import fetch from 'node-fetch';
+import { URLSearchParams } from 'url';
+
 const MySQLSession = await import('express-mysql-session');
 const MySQLStoreFn = MySQLSession.default || MySQLSession;
 const MySQLStore = MySQLStoreFn(session);
@@ -1321,7 +1323,7 @@ app.post('/api/payment/webhook', (req, res, next) => {
     if (!isValid) return res.end("FALSE - Invalid JWS signature");
 
     // ✅ Podpis poprawny — parsujemy dane transakcji
-    const bodyObj = JSON.parse(req.rawBody);
+    const bodyObj = Object.fromEntries(new URLSearchParams(req.rawBody)); // ✅
     const { title, transactionId, status } = bodyObj;
 
     console.log('Webhook od Tpay:', bodyObj);
