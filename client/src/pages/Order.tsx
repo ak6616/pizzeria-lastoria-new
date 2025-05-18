@@ -58,8 +58,8 @@ const isDeliveryAvailable = async (location: string): Promise<{ available: boole
       ) {
         return {
           available: false,
-          message: `Dostawa w weekendy i święta dostępna w godzinach ${startOrderingWeekendHour}:${String(startOrderingWeekendMinute).padStart(2, '0')} - ${stopOrderingWeekendHour}:${String(stopOrderingWeekendMinute).padStart(2, '0')}. 
-                   Zapraszamy ${format(now, 'EEEE', { locale: pl })} od ${startOrderingWeekendHour}:${String(startOrderingWeekendMinute).padStart(2, '0')}.`
+          message: `Dostawa w weekendy i święta dostępna w godzinach ${startOrderingWeekendHour}:${startOrderingWeekendMinute} - ${stopOrderingWeekendHour}:${stopOrderingWeekendMinute}. 
+                   Zapraszamy ${format(now, 'EEEE', { locale: pl })} od ${startOrderingWeekendHour}:${startOrderingWeekendMinute}.`
         };
       }
       return { available: true };
@@ -70,11 +70,11 @@ const isDeliveryAvailable = async (location: string): Promise<{ available: boole
       currentHour < startOrderingWeekdayHour ||
       (currentHour === startOrderingWeekdayHour && currentMinute < startOrderingWeekdayMinute) ||
       currentHour > stopOrderingWeekdayHour ||
-      (currentHour === stopOrderingWeekdayHour && currentMinute >= stopOrderingWeekdayMinute - 30)
+      (currentHour === stopOrderingWeekdayHour && currentMinute >= stopOrderingWeekdayMinute)
     ) {
       return {
         available: false,
-        message: `Dostawa w dni powszednie dostępna w godzinach ${startOrderingWeekdayHour}:${String(startOrderingWeekdayMinute).padStart(2, '0')} - ${stopOrderingWeekdayHour}:${String(stopOrderingWeekdayMinute).padStart(2, '0')}`
+        message: `Dostawa w dni powszednie dostępna w godzinach ${startOrderingWeekdayHour}:${startOrderingWeekdayMinute} - ${stopOrderingWeekdayHour}:${stopOrderingWeekdayMinute}`
       };
     }
 
