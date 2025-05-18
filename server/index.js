@@ -980,6 +980,7 @@ app.post('/api/payment/init', async (req, res) => {
         orderData: req.body.orderData,
         location: req.body.location
       }));
+      console.log('Zamówienie zapisane w Redis:', transaction.transactionId);
     }
     res.json(transaction);
     
@@ -1193,20 +1194,20 @@ app.get('/api/vapid-key', (req, res) => {
 });
 
 
-async function readBody(req) {
-  return new Promise((resolve, reject) => {
-    let body = "";
-    req.on("data", (chunk) => {
-      body += chunk;
-    });
-    req.on("end", () => {
-      resolve(body);
-    });
-    req.on("error", (err) => {
-      reject(err);
-    });
-  });
-}
+// async function readBody(req) {
+//   return new Promise((resolve, reject) => {
+//     let body = "";
+//     req.on("data", (chunk) => {
+//       body += chunk;
+//     });
+//     req.on("end", () => {
+//       resolve(body);
+//     });
+//     req.on("error", (err) => {
+//       reject(err);
+//     });
+//   });
+// }
 
 // app.post('/api/payment/webhook', async (req, res) => {
 //   // Get the JWS signature from the request headers
