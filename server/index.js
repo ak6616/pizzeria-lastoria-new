@@ -1272,99 +1272,88 @@ async function readBody(req) {
 // });
 
 // Middleware do przechwytywania surowego body
-app.post('/api/payment/webhook', (req, res, next) => {
-  let data = '';
-  req.setEncoding('utf8');
-  req.on('data', chunk => data += chunk);
-  req.on('end', () => {
-    req.rawBody = data;
-    next();
-  });
-}, async (req, res) => {
+app.use('/api/payment/webhook', express.raw({ type: 'application/x-www-form-urlencoded' }));
+
+app.post('/api/payment/webhook', async (req, res) => {
   try {
     const jws = req.headers["x-jws-signature"];
 
-    if (!jws) return res.end("FALSE - Missing JWS header");
+    if (!jws) {
+      return res.end("FALSE - Missing JWS header");
+    }
 
     const jwsData = jws.split(".");
-    if (jwsData.length !== 3) return res.end("FALSE - Invalid JWS format");
-
-    const [headerPart, , signaturePart] = jwsData;
+    const headerPart = jwsData[0];
+    const signaturePart = jwsData[2];
+    const rawBody = req.body.toString(); // surowe dane (x-www-form-urlencoded)
 
     const headerDecoded = Buffer.from(headerPart.replace(/-/g, "+").replace(/_/g, "/"), "base64").toString("ascii");
     const headerJson = JSON.parse(headerDecoded);
 
-    if (!headerJson.x5u || !headerJson.x5u.startsWith("https://secure.tpay.com"))
-      return res.end("FALSE - Invalid x5u header");
+    if (!headerJson.x5u || !headerJson.x5u.startsWith("https://secure.tpay.com")) {
+      return res.end("FALSE - Invalid x5u URL");
+    }
 
     const [signingCert, caCert] = await Promise.all([
-      fetch(headerJson.x5u).then(res => res.text()),
-      fetch("https://secure.tpay.com/x509/tpay-jws-root.pem").then(res => res.text())
+      fetch(headerJson.x5u).then((res) => res.text()),
+      fetch("https://secure.tpay.com/x509/tpay-jws-root.pem").then((res) => res.text())
     ]);
 
     const x5uCert = new X509Certificate(signingCert);
     const caCertPublicKey = new X509Certificate(caCert).publicKey;
 
-    if (!x5uCert.verify(caCertPublicKey))
-      return res.end("FALSE - Certificate not signed by Tpay CA");
+    if (!x5uCert.verify(caCertPublicKey)) {
+      return res.end("FALSE - Cert verification failed");
+    }
 
-    // Parsowanie body
-    const rawBody = new URLSearchParams(JSON.parse(req.rawBody)).toString();
     const payload = Buffer.from(rawBody, "utf8").toString("base64")
       .replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+
     const decodedSignature = Buffer.from(signaturePart.replace(/-/g, "+").replace(/_/g, "/"), "base64");
 
     const verifier = createVerify("SHA256");
     verifier.update(`${headerPart}.${payload}`);
     verifier.end();
 
-    const isValid = verifier.verify(x5uCert.publicKey, decodedSignature);
-
-    if (!isValid) return res.end("FALSE - Invalid JWS signature");
-
-    // ✅ Podpis poprawny — parsujemy dane transakcji
-    let bodyObj;
-    try {
-      bodyObj = Object.fromEntries(new URLSearchParams(req.rawBody));
-    } catch (err) {
-      console.error("Nie można sparsować body:", req.rawBody);
-      return res.end("FALSE - Invalid body format");
-    }
-    // const bodyObj = Object.fromEntries(new URLSearchParams(req.rawBody)); // ✅
-    const { title, transactionId, status } = bodyObj;
-
-    console.log('Webhook od Tpay:', bodyObj);
-
-    if (status !== 'correct') {
-      return res.end('TRUE'); // ważne: odpowiedz TRUE mimo błędnego statusu, by uniknąć retrialu
+    if (!verifier.verify(x5uCert.publicKey, decodedSignature)) {
+      return res.end("FALSE - Signature verification failed");
     }
 
+    // ✅ JWS is verified, parse URL-encoded body
+    const bodyObj = Object.fromEntries(new URLSearchParams(rawBody));
+
+    console.log("Tpay webhook dane:", bodyObj);
+
+    if (bodyObj.tr_status !== "TRUE") {
+      return res.status(200).send("Płatność nie została zakończona poprawnie");
+    }
+
+    const transactionId = bodyObj.tr_id;
     const orderInfoStr = await redis.get(`order:${transactionId}`);
 
     if (!orderInfoStr) {
       console.warn(`Brak danych zamówienia w Redis dla transakcji ${transactionId}`);
-      return res.end("TRUE"); // też zwróć TRUE, by nie powtarzali webhooka
+      return res.status(404).send("Dane zamówienia nie znalezione");
     }
 
     const { orderData, location } = JSON.parse(orderInfoStr);
 
     const response = await fetch(`https://pizza-lastoria.pl:3000/api/orders/${location}`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify(orderData)
     });
 
     if (!response.ok) {
-      console.error('Błąd podczas zapisu zamówienia');
-      return res.end("FALSE - Order save error");
+      throw new Error("Błąd podczas zapisu zamówienia");
     }
 
     await redis.del(`order:${transactionId}`);
+    res.status(200).send("TRUE");
 
-    return res.end("TRUE"); // ✅ Sukces
   } catch (err) {
-    console.error('Błąd obsługi webhooka:', err);
-    return res.end("FALSE - Exception");
+    console.error("Błąd obsługi webhooka:", err);
+    res.status(500).send("Błąd serwera");
   }
 });
 
