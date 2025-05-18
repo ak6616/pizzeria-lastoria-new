@@ -1018,7 +1018,7 @@ app.post('/api/payment/webhook', async (req, res) => {
 
     await redis.del(`order:${transactionId}`); // opcjonalne — sprzątanie po sobie
 
-    res.status(200).send('TRUE');
+    res.status(200).send('OK');
     return res.end("TRUE")
   } catch (err) {
     console.error('Błąd obsługi webhooka:', err);
@@ -1205,76 +1205,75 @@ async function readBody(req) {
   });
 }
 
-// app.post('/api/payment/webhook', async (req, res) => {
-//   // Get the JWS signature from the request headers
-//   const jws = req.headers["x-jws-signature"];
+async function verifyJWSSignature(req, res) {
+  // Get the JWS signature from the request headers
+  const jws = req.headers["x-jws-signature"];
 
-//   if (!jws) {
-//     return res.end("FALSE - Missing JWS header");
-//   }
+  if (!jws) {
+    return res.end("FALSE - Missing JWS header");
+  }
 
-//   // Split the JWS into parts (header, payload, and signature)
-//   const jwsData = jws.split(".");
-//   const headerPart = jwsData[0];
-//   const signaturePart = jwsData[2];
-//   // Convert the body content of the request (which is typically an object) into a URL-encoded query string format
-//   // This is necessary for constructing the payload that will be used in the signature verification
-//   const bodyContent = await readBody(req);
-//   const rawBody = new URLSearchParams(JSON.parse(bodyContent)).toString();
-//   // Decode and parse the JWS header
-//   const headerDecoded = Buffer.from(headerPart.replace(/-/g, "+").replace(/_/g, "/"), "base64").toString("ascii");
-//   const headerJson = JSON.parse(headerDecoded);
+  // Split the JWS into parts (header, payload, and signature)
+  const jwsData = jws.split(".");
+  const headerPart = jwsData[0];
+  const signaturePart = jwsData[2];
+  // Convert the body content of the request (which is typically an object) into a URL-encoded query string format
+  // This is necessary for constructing the payload that will be used in the signature verification
+  const bodyContent = await readBody(req);
+  const rawBody = new URLSearchParams(JSON.parse(bodyContent)).toString();
+  // Decode and parse the JWS header
+  const headerDecoded = Buffer.from(headerPart.replace(/-/g, "+").replace(/_/g, "/"), "base64").toString("ascii");
+  const headerJson = JSON.parse(headerDecoded);
 
-//   if (!headerJson.x5u) {
-//     return res.end("FALSE - Missing x5u header");
-//   }
+  if (!headerJson.x5u) {
+    return res.end("FALSE - Missing x5u header");
+  }
 
-//   if (!headerJson.x5u.startsWith("https://secure.tpay.com")) {
-//     return res.end("FALSE - Wrong x5u URL");
-//   }
+  if (!headerJson.x5u.startsWith("https://secure.tpay.com")) {
+    return res.end("FALSE - Wrong x5u URL");
+  }
 
-//   // Fetch the JWS signing certificate and the trusted CA certificate
-//   const [signingCert, caCert] = await Promise.all([fetch(headerJson.x5u).then((res) => res.text()), fetch("https://secure.tpay.com/x509/tpay-jws-root.pem").then((res) => res.text())]);
+  // Fetch the JWS signing certificate and the trusted CA certificate
+  const [signingCert, caCert] = await Promise.all([fetch(headerJson.x5u).then((res) => res.text()), fetch("https://secure.tpay.com/x509/tpay-jws-root.pem").then((res) => res.text())]);
 
-//   // Load certificates
-//   const x5uCert = new X509Certificate(signingCert);
-//   const caCertPublicKey = new X509Certificate(caCert).publicKey;
+  // Load certificates
+  const x5uCert = new X509Certificate(signingCert);
+  const caCertPublicKey = new X509Certificate(caCert).publicKey;
 
-//   // Verify that the signing certificate is signed by the CA certificate
-//   if (!x5uCert.verify(caCertPublicKey)) {
-//     return res.end("FALSE - Signing certificate is not signed by Tpay CA certificate");
-//   }
+  // Verify that the signing certificate is signed by the CA certificate
+  if (!x5uCert.verify(caCertPublicKey)) {
+    return res.end("FALSE - Signing certificate is not signed by Tpay CA certificate");
+  }
 
-//   // Prepare the payload (body content) in base64url encoding
-//   const payload = Buffer.from(rawBody, "utf8").toString("base64").replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+  // Prepare the payload (body content) in base64url encoding
+  const payload = Buffer.from(rawBody, "utf8").toString("base64").replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
 
-//   // Decode the signature from base64url
-//   const decodedSignature = Buffer.from(signaturePart.replace(/-/g, "+").replace(/_/g, "/"), "base64");
+  // Decode the signature from base64url
+  const decodedSignature = Buffer.from(signaturePart.replace(/-/g, "+").replace(/_/g, "/"), "base64");
 
-//   // Verify the signature
-//   const verifier = createVerify("SHA256");
-//   verifier.update(`${headerPart}.${payload}`);
-//   verifier.end();
+  // Verify the signature
+  const verifier = createVerify("SHA256");
+  verifier.update(`${headerPart}.${payload}`);
+  verifier.end();
 
-//   const publicKey = x5uCert.publicKey;
-//   const isValid = verifier.verify(publicKey, decodedSignature);
+  const publicKey = x5uCert.publicKey;
+  const isValid = verifier.verify(publicKey, decodedSignature);
 
-//   if (!isValid) {
-//     return res.end("FALSE - Invalid JWS signature");
-//   }
+  if (!isValid) {
+    return res.end("FALSE - Invalid JWS signature");
+  }
 
-//   // Here you can process transactions based on POST data
-//   // JWS signature verified successfully.
-//   res.status(200).json({ message: "TRUE" });
-//   return res.end("TRUE");
-// });
+  // Here you can process transactions based on POST data
+  // JWS signature verified successfully.
+  return res.end("TRUE");
+}
 
 const sslOptions = {
   key: fs.readFileSync('/etc/letsencrypt/live/pizza-lastoria.pl/privkey.pem'),
   cert: fs.readFileSync('/etc/letsencrypt/live/pizza-lastoria.pl/fullchain.pem'),
 };
 
-const server = https.createServer(sslOptions, app).listen(port, () => {
+const server = https.createServer(sslOptions, app, verifyJWSSignature).listen(port, () => {
   console.log(`Server running on port ${port}`);
 }).on('error', (err) => {
   if (err.code === 'EADDRINUSE') {
