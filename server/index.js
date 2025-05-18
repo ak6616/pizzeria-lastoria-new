@@ -1265,6 +1265,7 @@ app.post('/api/payment/webhook', async (req, res) => {
 
   // Here you can process transactions based on POST data
   // JWS signature verified successfully.
+  res.status(200).json({ message: "TRUE" });
   return res.end("TRUE");
 });
 
