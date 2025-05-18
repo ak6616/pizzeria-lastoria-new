@@ -15,13 +15,14 @@ export default function MenuSection({ title, items }: MenuSectionProps) {
             className="flex justify-between items-start p-4 bg-white/50 rounded-lg shadow-sm"
           >
             <div>
-              
-                   <h3 className="font-medium text-lg">{index + 1}. {item.nazwa}</h3>
+              {title === "Pizza" ? (
+                <h3 className="font-medium text-lg">{index + 1}. {item.nazwa}</h3>
+              ) : (
+                <h3 className="font-medium text-lg">{item.nazwa}</h3>
+              )}
               {item.skladniki && (
                 <p className="text-sm text-gray-600 mt-1">{item.skladniki}</p>
-              )}
-               
-             
+              )} 
             </div>
             <span className="font-semibold text-lg">{item.cena} zł</span>
           </li>

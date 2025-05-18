@@ -14,7 +14,7 @@ export interface OrderItem {
   name: string;
   quantity: number;
   price: number;
-  doughType: string | "Grube";
+  doughType: string | "Grube" | null;
   removedIngredients: string[];
   addedIngredients: Array<{
     id: string | number;

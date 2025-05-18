@@ -254,7 +254,7 @@ export default function OrderForm({ deliveryAreas, location, orderType }: OrderF
             name: item?.nazwa || '',
             quantity: 1, // każda sztuka ma ilość 1
             price: item?.cena || 0,
-            doughType: customization?.doughType || 'Grube',
+            doughType: item?.category === 'pizza' ? (customization?.doughType ?? 'Grube') : null,
             removedIngredients: customization?.removedIngredients || [],
             addedIngredients: (customization?.addedIngredients || []).map(id => {
               const ingredient = additionalIngredients.find(i => i.id === id);
