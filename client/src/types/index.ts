@@ -91,7 +91,7 @@ export interface PaymentOrderData {
     firstName: string;
     lastName: string;
     city?: string;
-    crc?: string;
+    hiddenDescription?: string;
     street?: string;
     houseNumber: string;
     description?: string;

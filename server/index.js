@@ -18,6 +18,7 @@ import Redis from 'ioredis';
 import { X509Certificate, createVerify } from 'crypto';
 import fetch from 'node-fetch';
 import { URLSearchParams } from 'url';
+import { error } from 'console';
 
 const MySQLSession = await import('express-mysql-session');
 const MySQLStoreFn = MySQLSession.default || MySQLSession;
@@ -754,10 +755,10 @@ app.post('/api/orders/:location', async (req, res) => {
           console.error('Stack trace:', printError.stack);
         }
       // }
-    } else {      
-      console.error('Płatność nieudana:', transactionStatus);
-      throw new Error('Płatność nieudana');
-    }
+      } else {
+        console.error('Błąd:', error);
+        throw new Error('Operacja nie powiodła się');
+      }
   
       res.json({ success: true, orderId: result.insertId });
         
@@ -953,7 +954,6 @@ app.post('/api/payment/init', async (req, res) => {
           amount: paymentData.amount,
           description: paymentData.description,
           hiddenDescription: paymentData.hiddenDescription,
-          crc: paymentData.crc,
           payer: {
             email: paymentData.email,
             city: paymentData.city,

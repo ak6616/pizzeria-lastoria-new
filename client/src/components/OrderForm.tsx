@@ -154,25 +154,24 @@ export default function OrderForm({ deliveryAreas, location, orderType }: OrderF
       })
       .join(', ');
 
-      const orderHiddenDescription = orderData.items
-      .map(item => {
-        const extras = item.addedIngredients.length 
-          ? ` (+${item.addedIngredients.map(i => i.name).join(', ')})`
-          : '';
-          const withouts = item.removedIngredients.length 
-          ? ` (-${item.removedIngredients.join(', ')})`
-          : '';
-        return `${item.name}${extras}${withouts}`;
+      // const orderHiddenDescription = orderData.items
+      // .map(item => {
+      //   const extras = item.addedIngredients.length 
+      //     ? ` (+${item.addedIngredients.map(i => i.name).join(', ')})`
+      //     : '';
+      //     const withouts = item.removedIngredients.length 
+      //     ? ` (-${item.removedIngredients.join(', ')})`
+      //     : '';
+      //   return `${item.name}${extras}${withouts}`;
       
-      })
-      .join(', ');
+      // })
+      // .join(', ');
 
       const paymentData = {
         name: `${orderData.firstName} ${orderData.lastName}`,
         amount: orderData.totalPrice,
         description: ` ${location}: ${orderDescription}`,
-        hiddenDescription: ` ${location}: ${orderHiddenDescription}`,
-        crc: `${Date.now()}`,
+        hiddenDescription: `${Date.now()}`,
         email: `${orderData.email}`,
         city: orderData.city == "" ? "Miejsce Piastowe" : orderData.city, 
         address: `${orderData.street == "" ? 'Krośnieńska' : orderData.street} ${orderData.houseNumber == "" ? '1' : orderData.houseNumber}${orderData.apartmentNumber ? '/' + orderData.apartmentNumber : ''}`,
