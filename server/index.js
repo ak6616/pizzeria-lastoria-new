@@ -986,45 +986,45 @@ app.post('/api/payment/init', async (req, res) => {
   }
 });
 
-app.post('/api/payment/webhook', async (req, res) => {
-  try {
-    const { title, transactionId, status } = req.body;
+// app.post('/api/payment/webhook', async (req, res) => {
+//   try {
+//     const { title, transactionId, status } = req.body;
 
-    console.log('Webhook od Tpay:', req.body);
+//     console.log('Webhook od Tpay:', req.body);
 
-    if (status !== 'correct') {
-      return res.status(200).send('Płatność nie została zakończona poprawnie');
-    }
+//     if (status !== 'correct') {
+//       return res.status(200).send('Płatność nie została zakończona poprawnie');
+//     }
 
-    const orderInfoStr = await redis.get(`order:${transactionId}`);
+//     const orderInfoStr = await redis.get(`order:${transactionId}`);
 
-    if (!orderInfoStr) {
-      console.warn(`Brak danych zamówienia w Redis dla transakcji ${transactionId}`);
-      return res.status(404).send('Dane zamówienia nie znalezione');
-    }
+//     if (!orderInfoStr) {
+//       console.warn(`Brak danych zamówienia w Redis dla transakcji ${transactionId}`);
+//       return res.status(404).send('Dane zamówienia nie znalezione');
+//     }
 
-    const { orderData, location } = JSON.parse(orderInfoStr);
+//     const { orderData, location } = JSON.parse(orderInfoStr);
 
-    // Wywołanie zapisującego endpointu
-    const response = await fetch(`https://pizza-lastoria.pl:3000/api/orders/${location}`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(orderData)
-    });
+//     // Wywołanie zapisującego endpointu
+//     const response = await fetch(`https://pizza-lastoria.pl:3000/api/orders/${location}`, {
+//       method: 'POST',
+//       headers: { 'Content-Type': 'application/json' },
+//       body: JSON.stringify(orderData)
+//     });
 
-    if (!response.ok) {
-      throw new Error('Błąd podczas zapisu zamówienia');
-    }
+//     if (!response.ok) {
+//       throw new Error('Błąd podczas zapisu zamówienia');
+//     }
 
-    await redis.del(`order:${transactionId}`); // opcjonalne — sprzątanie po sobie
+//     await redis.del(`order:${transactionId}`); // opcjonalne — sprzątanie po sobie
 
-    res.status(200).send('OK');
-    return res.end("TRUE")
-  } catch (err) {
-    console.error('Błąd obsługi webhooka:', err);
-    res.status(500).send('Błąd serwera');
-  }
-});
+//     res.status(200).send('OK');
+//     return res.end("TRUE")
+//   } catch (err) {
+//     console.error('Błąd obsługi webhooka:', err);
+//     res.status(500).send('Błąd serwera');
+//   }
+// });
 
 
 // ////// Endpoint do sprawdzania statusu płatności
@@ -1205,7 +1205,7 @@ async function readBody(req) {
   });
 }
 
-async function verifyJWSSignature(req, res) {
+app.post('/api/payment/webhook', async (req, res) => {
   // Get the JWS signature from the request headers
   const jws = req.headers["x-jws-signature"];
 
@@ -1266,14 +1266,14 @@ async function verifyJWSSignature(req, res) {
   // Here you can process transactions based on POST data
   // JWS signature verified successfully.
   return res.end("TRUE");
-}
+});
 
 const sslOptions = {
   key: fs.readFileSync('/etc/letsencrypt/live/pizza-lastoria.pl/privkey.pem'),
   cert: fs.readFileSync('/etc/letsencrypt/live/pizza-lastoria.pl/fullchain.pem'),
 };
 
-const server = https.createServer(sslOptions, app, verifyJWSSignature).listen(port, () => {
+const server = https.createServer(sslOptions, app).listen(port, () => {
   console.log(`Server running on port ${port}`);
 }).on('error', (err) => {
   if (err.code === 'EADDRINUSE') {
