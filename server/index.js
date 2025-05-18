@@ -976,11 +976,11 @@ app.post('/api/payment/init', async (req, res) => {
     const transaction = await initializePayment(req.body);
     if (transaction.transactionId) {
       // Przechowaj dane zamówienia na 15 minut
-      await redis.setex(`order:${transaction.transactionId}`, 900, JSON.stringify({
+      await redis.setex(`order:${transaction.hiddenDescription}`, 900, JSON.stringify({
         orderData: req.body.orderData,
         location: req.body.location
       }));
-      console.log('Zamówienie zapisane w Redis:', transaction.transactionId);
+      console.log('Zamówienie zapisane w Redis:', transaction.hiddenDescription);
     }
     res.json(transaction);
     
@@ -1329,11 +1329,11 @@ app.post('/api/payment/webhook', async (req, res) => {
       return res.status(200).send("Płatność nie została zakończona poprawnie");
     }
 
-    const transactionId = bodyObj.tr_id;
-    const orderInfoStr = await redis.get(`order:${transactionId}`);
+    const crc = bodyObj.tr_crc;
+    const orderInfoStr = await redis.get(`order:${crc}`);
 
     if (!orderInfoStr) {
-      console.warn(`Brak danych zamówienia w Redis dla transakcji ${transactionId}`);
+      console.warn(`Brak danych zamówienia w Redis dla transakcji ${crc}`);
       return res.status(404).send("Dane zamówienia nie znalezione");
     }
 
@@ -1349,7 +1349,7 @@ app.post('/api/payment/webhook', async (req, res) => {
       throw new Error("Błąd podczas zapisu zamówienia");
     }
 
-    await redis.del(`order:${transactionId}`);
+    await redis.del(`order:${crc}`);
     res.status(200).send("TRUE");
 
   } catch (err) {
