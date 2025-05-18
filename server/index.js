@@ -1323,7 +1323,14 @@ app.post('/api/payment/webhook', (req, res, next) => {
     if (!isValid) return res.end("FALSE - Invalid JWS signature");
 
     // ✅ Podpis poprawny — parsujemy dane transakcji
-    const bodyObj = Object.fromEntries(new URLSearchParams(req.rawBody)); // ✅
+    let bodyObj;
+    try {
+      bodyObj = Object.fromEntries(new URLSearchParams(req.rawBody));
+    } catch (err) {
+      console.error("Nie można sparsować body:", req.rawBody);
+      return res.end("FALSE - Invalid body format");
+    }
+    // const bodyObj = Object.fromEntries(new URLSearchParams(req.rawBody)); // ✅
     const { title, transactionId, status } = bodyObj;
 
     console.log('Webhook od Tpay:', bodyObj);
