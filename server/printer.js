@@ -50,21 +50,22 @@ export async function printToReceiptPrinter(orderData) {
 
     items.forEach(item => {
       receipt1 += `${item.name} x${item.quantity}\n`;
-      receipt1 += `Ciasto: ${item.doughType}\n`
+      if (item.doughType) {
+        receipt1 += `Ciasto: ${item.doughType}\n`;
+      }
       if (item.removedIngredients?.length) {
         receipt1 += `  BEZ: ${item.removedIngredients.join(', ')}\n`;
       }
       if (item.addedIngredients?.length) {
         receipt1 += `  DODATKI: ${item.addedIngredients.map(i => i.name).join(', ')}\n`;
       }
+      console.log("Kategoria produktu:", item.category);
     });
 
     console.log('Zawartość paragonu:', receipt1, receipt2, receipt3);
 
     // Wyślij do drukarki bezpośrednio
     return new Promise((resolve, reject) => {
-      // const lpProcess = exec(`lp -d ${PRINTER_NAME} ${OUTPUT_FILE}`, (error, stdout, stderr) => {
-
       const lpProcess = exec(`echo "${receipt3}" | lp -d xprinter -o media=Custom.50x42mm -o fit-to-page -o font-size=5 -o print-quality=5 -o orientation-requested=6 && echo "${receipt1}" | lp -d xprinter -o media=Custom.50x42mm -o fit-to-page -o font-size=5 -o print-quality=5 -o orientation-requested=6 && echo "${receipt2}" | lp -d xprinter -o media=Custom.50x42mm -o fit-to-page -o font-size=5 -o print-quality=5 -o orientation-requested=6`, (error, stdout, stderr) => {
         if (error) {
           console.error('Błąd drukowania:', error);

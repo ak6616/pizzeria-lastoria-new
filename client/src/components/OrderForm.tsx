@@ -11,8 +11,6 @@ import { OrderFormProps, CustomerData, OrderData } from '../types';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL;
 
-
-
 // Dodaj funkcję sprawdzającą dostępność dostawy na konkretną godzinę
 const isDeliveryTimeAvailable = async (time: string, location: string): Promise<{ available: boolean; message?: string }> => {
   if (!time) return { available: true };
@@ -254,7 +252,7 @@ export default function OrderForm({ deliveryAreas, location, orderType }: OrderF
             name: item?.nazwa || '',
             quantity: 1, // każda sztuka ma ilość 1
             price: item?.cena || 0,
-            doughType: item?.category === 'pizza' ? (customization?.doughType ?? 'Grube') : null,
+            doughType: customization?.doughType || 'Grube',
             removedIngredients: customization?.removedIngredients || [],
             addedIngredients: (customization?.addedIngredients || []).map(id => {
               const ingredient = additionalIngredients.find(i => i.id === id);

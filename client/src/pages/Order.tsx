@@ -14,16 +14,25 @@ const isDeliveryAvailable = async (location: string): Promise<{ available: boole
   const isWeekend = now.getDay() === 0 || now.getDay() === 6;
   
   try {
-    const openWeekdayHourResponse = await getSetting(location, 2);
-    const closeWeekdayHourResponse = await getSetting(location, 3);
-    const openWeekendHourResponse = await getSetting(location, 4);
-    const closeWeekendHourResponse = await getSetting(location, 5);
+    // const openWeekdayHourResponse = await getSetting(location, 2);
+    // const closeWeekdayHourResponse = await getSetting(location, 3);
+    // const openWeekendHourResponse = await getSetting(location, 4);
+    // const closeWeekendHourResponse = await getSetting(location, 5);
     const orderingStatusResponse = await getSetting(location, 1);
+    const startOrderingWeekdayResponse = await getSetting(location, 7);
+    const startOrderingWeekendResponse = await getSetting(location, 9);
+    const stopOrderingWeekdayResponse = await getSetting(location, 8);
+    const stopOrderingWeekendResponse = await getSetting(location, 10);
 
-    const [openWeekdayHour, openWeekdayMinute] = openWeekdayHourResponse.wartosc.split(':').map(Number);
-    const [closeWeekdayHour, closeWeekdayMinute] = closeWeekdayHourResponse.wartosc.split(':').map(Number);
-    const [openWeekendHour, openWeekendMinute] = openWeekendHourResponse.wartosc.split(':').map(Number);
-    const [closeWeekendHour, closeWeekendMinute] = closeWeekendHourResponse.wartosc.split(':').map(Number);
+    // const [openWeekdayHour, openWeekdayMinute] = openWeekdayHourResponse.wartosc.split(':').map(Number);
+    // const [closeWeekdayHour, closeWeekdayMinute] = closeWeekdayHourResponse.wartosc.split(':').map(Number);
+    // const [openWeekendHour, openWeekendMinute] = openWeekendHourResponse.wartosc.split(':').map(Number);
+    // const [closeWeekendHour, closeWeekendMinute] = closeWeekendHourResponse.wartosc.split(':').map(Number);
+    const [startOrderingWeekendHour, startOrderingWeekendMinute] = startOrderingWeekendResponse.wartosc.split(':').map(Number);
+    const [stopOrderingWeekendHour, stopOrderingWeekendMinute] = stopOrderingWeekendResponse.wartosc.split(':').map(Number);
+    const [startOrderingWeekdayHour, startOrderingWeekdayMinute] = startOrderingWeekdayResponse.wartosc.split(':').map(Number);
+    const [stopOrderingWeekdayHour, stopOrderingWeekdayMinute] = stopOrderingWeekdayResponse.wartosc.split(':').map(Number);
+
     
     const orderingStatus = orderingStatusResponse.wartosc === 'true';
 
@@ -42,15 +51,15 @@ const isDeliveryAvailable = async (location: string): Promise<{ available: boole
     // Wspólne godziny dla weekendów i świąt
     if (isWeekend || isHoliday) {
       if (
-        currentHour < openWeekendHour ||
-        (currentHour === openWeekendHour && currentMinute < openWeekendMinute) ||
-        currentHour > closeWeekendHour ||
-        (currentHour === closeWeekendHour && currentMinute >= closeWeekendMinute - 30)
+        currentHour < startOrderingWeekendHour ||
+        (currentHour === startOrderingWeekendHour && currentMinute < startOrderingWeekendMinute) ||
+        currentHour > stopOrderingWeekendHour ||
+        (currentHour === stopOrderingWeekendHour && currentMinute >= stopOrderingWeekendMinute)
       ) {
         return {
           available: false,
-          message: `Dostawa w weekendy i święta dostępna w godzinach ${openWeekendHour}:${String(openWeekendMinute).padStart(2, '0')} - ${closeWeekendHour}:${String(closeWeekendMinute).padStart(2, '0')}. 
-                   Zapraszamy ${format(now, 'EEEE', { locale: pl })} od ${openWeekendHour}:${String(openWeekendMinute).padStart(2, '0')}.`
+          message: `Dostawa w weekendy i święta dostępna w godzinach ${startOrderingWeekendHour}:${String(startOrderingWeekendMinute).padStart(2, '0')} - ${stopOrderingWeekendHour}:${String(stopOrderingWeekendMinute).padStart(2, '0')}. 
+                   Zapraszamy ${format(now, 'EEEE', { locale: pl })} od ${startOrderingWeekendHour}:${String(startOrderingWeekendMinute).padStart(2, '0')}.`
         };
       }
       return { available: true };
@@ -58,14 +67,14 @@ const isDeliveryAvailable = async (location: string): Promise<{ available: boole
 
     // Godziny w dni powszednie
     if (
-      currentHour < openWeekdayHour ||
-      (currentHour === openWeekdayHour && currentMinute < openWeekdayMinute) ||
-      currentHour > closeWeekdayHour ||
-      (currentHour === closeWeekdayHour && currentMinute >= closeWeekdayMinute - 30)
+      currentHour < startOrderingWeekdayHour ||
+      (currentHour === startOrderingWeekdayHour && currentMinute < startOrderingWeekdayMinute) ||
+      currentHour > stopOrderingWeekdayHour ||
+      (currentHour === stopOrderingWeekdayHour && currentMinute >= stopOrderingWeekdayMinute - 30)
     ) {
       return {
         available: false,
-        message: `Dostawa w dni powszednie dostępna w godzinach ${openWeekdayHour}:${String(openWeekdayMinute).padStart(2, '0')} - ${closeWeekdayHour}:${String(closeWeekdayMinute).padStart(2, '0')}`
+        message: `Dostawa w dni powszednie dostępna w godzinach ${startOrderingWeekdayHour}:${String(startOrderingWeekdayMinute).padStart(2, '0')} - ${stopOrderingWeekdayHour}:${String(stopOrderingWeekdayMinute).padStart(2, '0')}`
       };
     }
 
