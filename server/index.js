@@ -986,45 +986,45 @@ app.post('/api/payment/init', async (req, res) => {
   }
 });
 
-// app.post('/api/payment/webhook', async (req, res) => {
-//   try {
-//     const { title, transactionId, status } = req.body;
+app.post('/api/payment/webhook', async (req, res) => {
+  try {
+    const { title, transactionId, status } = req.body;
 
-//     console.log('Webhook od Tpay:', req.body);
+    console.log('Webhook od Tpay:', req.body);
 
-//     if (status !== 'correct') {
-//       return res.status(200).send('Płatność nie została zakończona poprawnie');
-//     }
+    if (status !== 'correct') {
+      return res.status(200).send('Płatność nie została zakończona poprawnie');
+    }
 
-//     const orderInfoStr = await redis.get(`order:${transactionId}`);
+    const orderInfoStr = await redis.get(`order:${transactionId}`);
 
-//     if (!orderInfoStr) {
-//       console.warn(`Brak danych zamówienia w Redis dla transakcji ${transactionId}`);
-//       return res.status(404).send('Dane zamówienia nie znalezione');
-//     }
+    if (!orderInfoStr) {
+      console.warn(`Brak danych zamówienia w Redis dla transakcji ${transactionId}`);
+      return res.status(404).send('Dane zamówienia nie znalezione');
+    }
 
-//     const { orderData, location } = JSON.parse(orderInfoStr);
+    const { orderData, location } = JSON.parse(orderInfoStr);
 
-//     // Wywołanie zapisującego endpointu
-//     const response = await fetch(`https://pizza-lastoria.pl:3000/api/orders/${location}`, {
-//       method: 'POST',
-//       headers: { 'Content-Type': 'application/json' },
-//       body: JSON.stringify(orderData)
-//     });
+    // Wywołanie zapisującego endpointu
+    const response = await fetch(`https://pizza-lastoria.pl:3000/api/orders/${location}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(orderData)
+    });
 
-//     if (!response.ok) {
-//       throw new Error('Błąd podczas zapisu zamówienia');
-//     }
+    if (!response.ok) {
+      throw new Error('Błąd podczas zapisu zamówienia');
+    }
 
-//     await redis.del(`order:${transactionId}`); // opcjonalne — sprzątanie po sobie
+    await redis.del(`order:${transactionId}`); // opcjonalne — sprzątanie po sobie
 
-//     res.status(200).send('OK');
-//     return res.end("TRUE")
-//   } catch (err) {
-//     console.error('Błąd obsługi webhooka:', err);
-//     res.status(500).send('Błąd serwera');
-//   }
-// });
+    res.status(200).send('TRUE');
+    return res.end("TRUE")
+  } catch (err) {
+    console.error('Błąd obsługi webhooka:', err);
+    res.status(500).send('Błąd serwera');
+  }
+});
 
 
 // ////// Endpoint do sprawdzania statusu płatności
@@ -1205,69 +1205,69 @@ async function readBody(req) {
   });
 }
 
-app.post('/api/payment/webhook', async (req, res) => {
-  // Get the JWS signature from the request headers
-  const jws = req.headers["x-jws-signature"];
+// app.post('/api/payment/webhook', async (req, res) => {
+//   // Get the JWS signature from the request headers
+//   const jws = req.headers["x-jws-signature"];
 
-  if (!jws) {
-    return res.end("FALSE - Missing JWS header");
-  }
+//   if (!jws) {
+//     return res.end("FALSE - Missing JWS header");
+//   }
 
-  // Split the JWS into parts (header, payload, and signature)
-  const jwsData = jws.split(".");
-  const headerPart = jwsData[0];
-  const signaturePart = jwsData[2];
-  // Convert the body content of the request (which is typically an object) into a URL-encoded query string format
-  // This is necessary for constructing the payload that will be used in the signature verification
-  const bodyContent = await readBody(req);
-  const rawBody = new URLSearchParams(JSON.parse(bodyContent)).toString();
-  // Decode and parse the JWS header
-  const headerDecoded = Buffer.from(headerPart.replace(/-/g, "+").replace(/_/g, "/"), "base64").toString("ascii");
-  const headerJson = JSON.parse(headerDecoded);
+//   // Split the JWS into parts (header, payload, and signature)
+//   const jwsData = jws.split(".");
+//   const headerPart = jwsData[0];
+//   const signaturePart = jwsData[2];
+//   // Convert the body content of the request (which is typically an object) into a URL-encoded query string format
+//   // This is necessary for constructing the payload that will be used in the signature verification
+//   const bodyContent = await readBody(req);
+//   const rawBody = new URLSearchParams(JSON.parse(bodyContent)).toString();
+//   // Decode and parse the JWS header
+//   const headerDecoded = Buffer.from(headerPart.replace(/-/g, "+").replace(/_/g, "/"), "base64").toString("ascii");
+//   const headerJson = JSON.parse(headerDecoded);
 
-  if (!headerJson.x5u) {
-    return res.end("FALSE - Missing x5u header");
-  }
+//   if (!headerJson.x5u) {
+//     return res.end("FALSE - Missing x5u header");
+//   }
 
-  if (!headerJson.x5u.startsWith("https://secure.tpay.com")) {
-    return res.end("FALSE - Wrong x5u URL");
-  }
+//   if (!headerJson.x5u.startsWith("https://secure.tpay.com")) {
+//     return res.end("FALSE - Wrong x5u URL");
+//   }
 
-  // Fetch the JWS signing certificate and the trusted CA certificate
-  const [signingCert, caCert] = await Promise.all([fetch(headerJson.x5u).then((res) => res.text()), fetch("https://secure.tpay.com/x509/tpay-jws-root.pem").then((res) => res.text())]);
+//   // Fetch the JWS signing certificate and the trusted CA certificate
+//   const [signingCert, caCert] = await Promise.all([fetch(headerJson.x5u).then((res) => res.text()), fetch("https://secure.tpay.com/x509/tpay-jws-root.pem").then((res) => res.text())]);
 
-  // Load certificates
-  const x5uCert = new X509Certificate(signingCert);
-  const caCertPublicKey = new X509Certificate(caCert).publicKey;
+//   // Load certificates
+//   const x5uCert = new X509Certificate(signingCert);
+//   const caCertPublicKey = new X509Certificate(caCert).publicKey;
 
-  // Verify that the signing certificate is signed by the CA certificate
-  if (!x5uCert.verify(caCertPublicKey)) {
-    return res.end("FALSE - Signing certificate is not signed by Tpay CA certificate");
-  }
+//   // Verify that the signing certificate is signed by the CA certificate
+//   if (!x5uCert.verify(caCertPublicKey)) {
+//     return res.end("FALSE - Signing certificate is not signed by Tpay CA certificate");
+//   }
 
-  // Prepare the payload (body content) in base64url encoding
-  const payload = Buffer.from(rawBody, "utf8").toString("base64").replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+//   // Prepare the payload (body content) in base64url encoding
+//   const payload = Buffer.from(rawBody, "utf8").toString("base64").replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
 
-  // Decode the signature from base64url
-  const decodedSignature = Buffer.from(signaturePart.replace(/-/g, "+").replace(/_/g, "/"), "base64");
+//   // Decode the signature from base64url
+//   const decodedSignature = Buffer.from(signaturePart.replace(/-/g, "+").replace(/_/g, "/"), "base64");
 
-  // Verify the signature
-  const verifier = createVerify("SHA256");
-  verifier.update(`${headerPart}.${payload}`);
-  verifier.end();
+//   // Verify the signature
+//   const verifier = createVerify("SHA256");
+//   verifier.update(`${headerPart}.${payload}`);
+//   verifier.end();
 
-  const publicKey = x5uCert.publicKey;
-  const isValid = verifier.verify(publicKey, decodedSignature);
+//   const publicKey = x5uCert.publicKey;
+//   const isValid = verifier.verify(publicKey, decodedSignature);
 
-  if (!isValid) {
-    return res.end("FALSE - Invalid JWS signature");
-  }
+//   if (!isValid) {
+//     return res.end("FALSE - Invalid JWS signature");
+//   }
 
-  // Here you can process transactions based on POST data
-  // JWS signature verified successfully.
-  res.status(200).json({ message: "TRUE" });
-  return res.end("TRUE");
-});
+//   // Here you can process transactions based on POST data
+//   // JWS signature verified successfully.
+//   res.status(200).json({ message: "TRUE" });
+//   return res.end("TRUE");
+// });
 
 const sslOptions = {
   key: fs.readFileSync('/etc/letsencrypt/live/pizza-lastoria.pl/privkey.pem'),
