@@ -14,15 +14,26 @@ const isDeliveryAvailable = async (location: string): Promise<{ available: boole
   const isWeekend = now.getDay() === 0 || now.getDay() === 6;
   
   try {
+    // const openWeekdayHourResponse = await getSetting(location, 2);
+    // const closeWeekdayHourResponse = await getSetting(location, 3);
+    // const openWeekendHourResponse = await getSetting(location, 4);
+    // const closeWeekendHourResponse = await getSetting(location, 5);
     const orderingStatusResponse = await getSetting(location, 1);
     const startOrderingWeekdayResponse = await getSetting(location, 7);
     const startOrderingWeekendResponse = await getSetting(location, 9);
     const stopOrderingWeekdayResponse = await getSetting(location, 8);
     const stopOrderingWeekendResponse = await getSetting(location, 10);
+
+    // const [openWeekdayHour, openWeekdayMinute] = openWeekdayHourResponse.wartosc.split(':').map(Number);
+    // const [closeWeekdayHour, closeWeekdayMinute] = closeWeekdayHourResponse.wartosc.split(':').map(Number);
+    // const [openWeekendHour, openWeekendMinute] = openWeekendHourResponse.wartosc.split(':').map(Number);
+    // const [closeWeekendHour, closeWeekendMinute] = closeWeekendHourResponse.wartosc.split(':').map(Number);
     const [startOrderingWeekendHour, startOrderingWeekendMinute] = startOrderingWeekendResponse.wartosc.split(':').map(Number);
     const [stopOrderingWeekendHour, stopOrderingWeekendMinute] = stopOrderingWeekendResponse.wartosc.split(':').map(Number);
     const [startOrderingWeekdayHour, startOrderingWeekdayMinute] = startOrderingWeekdayResponse.wartosc.split(':').map(Number);
     const [stopOrderingWeekdayHour, stopOrderingWeekdayMinute] = stopOrderingWeekdayResponse.wartosc.split(':').map(Number);
+
+    
     const orderingStatus = orderingStatusResponse.wartosc === 'true';
 
     // Lista świąt w formacie MM-DD
@@ -79,7 +90,7 @@ const isDeliveryAvailable = async (location: string): Promise<{ available: boole
 
 type OrderType = 'delivery' | 'pickup' | null;
 
-export default async function Order() {
+export default function Order() {
   const [selectedLocation, setSelectedLocation] = useState<string>('');
   const [deliveryAreas, setDeliveryAreas] = useState<DeliveryArea[]>([]);
   const [loading, setLoading] = useState(true);
@@ -141,28 +152,6 @@ deliveryAreas.forEach((area) => {
   ];
 
   if (!selectedLocation) {
-    const openWeekdayHourResponseMp = await getSetting('miejsce-piastowe', 2);
-    const closeWeekdayHourResponseMp = await getSetting('miejsce-piastowe', 3);
-    const openWeekendHourResponseMp = await getSetting('miejsce-piastowe', 4);
-    const closeWeekendHourResponseMp = await getSetting('miejsce-piastowe', 5);
-    const openWeekdayHourResponseHacz = await getSetting('haczow', 2);
-    const closeWeekdayHourResponseHacz = await getSetting('haczow', 3);
-    const openWeekendHourResponseHacz = await getSetting('haczow', 4);
-    const closeWeekendHourResponseHacz = await getSetting('haczow', 5);
-    const [openWeekdayHourMp, openWeekdayMinuteMp] = openWeekdayHourResponseMp.wartosc.split(':').map(Number);
-    const [closeWeekdayHourMp, closeWeekdayMinuteMp] = closeWeekdayHourResponseMp.wartosc.split(':').map(Number);
-    const [openWeekendHourMp, openWeekendMinuteMp] = openWeekendHourResponseMp.wartosc.split(':').map(Number);
-    const [closeWeekendHourMp, closeWeekendMinuteMp] = closeWeekendHourResponseMp.wartosc.split(':').map(Number);
-    const [openWeekdayHourHacz, openWeekdayMinuteHacz] = openWeekdayHourResponseHacz.wartosc.split(':').map(Number);
-    const [closeWeekdayHourHacz, closeWeekdayMinuteHacz] = closeWeekdayHourResponseHacz.wartosc.split(':').map(Number);
-    const [openWeekendHourHacz, openWeekendMinuteHacz] = openWeekendHourResponseHacz.wartosc.split(':').map(Number);
-    const [closeWeekendHourHacz, closeWeekendMinuteHacz] = closeWeekendHourResponseHacz.wartosc.split(':').map(Number);
-
-
-
-
-
-
     return (
       <div className="pt-20">
         <div className="max-w-4xl mx-auto">
@@ -176,15 +165,15 @@ deliveryAreas.forEach((area) => {
               <div>
                 <h3 className="font-semibold text-lg mb-2">Miejsce Piastowe</h3>
                 <p className="text-gray-700">
-                  Poniedziałek - Piątek: {openWeekdayHourMp}:{String(openWeekdayMinuteMp).padStart(2, '0')} - {closeWeekdayHourMp}:{String(closeWeekdayMinuteMp).padStart(2, '0')}<br />
-                  Soboty, Niedziele, Święta: {openWeekendHourMp}:{String(openWeekendMinuteMp).padStart(2, '0')} - {closeWeekendHourMp}:{String(closeWeekendMinuteMp).padStart(2, '0')}
+                  Poniedziałek - Piątek: 11:00 - 22:00<br />
+                  Soboty, Niedziele, Święta: 16:00 - 22:00
                 </p>
               </div>
               <div>
                 <h3 className="font-semibold text-lg mb-2">Haczów</h3>
                 <p className="text-gray-700">
-                  Poniedziałek - Piątek: {openWeekdayHourHacz}:{String(openWeekdayMinuteHacz).padStart(2, '0')} - {closeWeekdayHourHacz}:{String(closeWeekdayMinuteHacz).padStart(2, '0')}<br />
-                  Soboty, Niedziele, Święta: {openWeekendHourHacz}:{String(openWeekendMinuteHacz).padStart(2, '0')} - {closeWeekendHourHacz}:{String(closeWeekendMinuteHacz).padStart(2, '0')}
+                  Poniedziałek - Piątek: 12:00 - 22:00<br />
+                  Soboty, Niedziele, Święta: 16:00 - 22:00
                 </p>
               </div>
             </div>
@@ -226,15 +215,8 @@ deliveryAreas.forEach((area) => {
   }
 
   if (selectedLocation) {
-    const openWeekdayHourResponse = await getSetting(selectedLocation, 2);
-    const closeWeekdayHourResponse = await getSetting(selectedLocation, 3);
-    const openWeekendHourResponse = await getSetting(selectedLocation, 4);
-    const closeWeekendHourResponse = await getSetting(selectedLocation, 5);
-    const [openWeekdayHour, openWeekdayMinute] = openWeekdayHourResponse.wartosc.split(':').map(Number);
-    const [closeWeekdayHour, closeWeekdayMinute] = closeWeekdayHourResponse.wartosc.split(':').map(Number);
-    const [openWeekendHour, openWeekendMinute] = openWeekendHourResponse.wartosc.split(':').map(Number);
-    const [closeWeekendHour, closeWeekendMinute] = closeWeekendHourResponse.wartosc.split(':').map(Number);
-
+      
+  
       if (deliveryStatus && !deliveryStatus.available) {
         return (
         <div className="max-w-4xl mx-auto">
@@ -258,8 +240,8 @@ deliveryAreas.forEach((area) => {
             <div className="mt-6">
               <h3 className="font-semibold mb-2">Godziny dowozu:</h3>
               <p className="text-gray-700">
-                Poniedziałek - Piątek: {openWeekdayHour}:{String(openWeekdayMinute).padStart(2, '0')} - {closeWeekdayHour}:{String(closeWeekdayMinute).padStart(2, '0')}<br />
-                Soboty, Niedziele, Święta: {openWeekendHour}:{String(openWeekendMinute).padStart(2, '0')} - {closeWeekendHour}:{String(closeWeekendMinute).padStart(2, '0')}
+                Poniedziałek - Piątek: {selectedLocation === 'miejsce-piastowe' ? '11:00' : '12:00'} - 22:00<br />
+                Soboty, Niedziele, Święta: 16:00 - 22:00
               </p>
             </div>
           </div>
