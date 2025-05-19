@@ -59,10 +59,9 @@ export async function printToReceiptPrinter(orderData) {
       if (item.addedIngredients?.length) {
         receipt1 += `  DODATKI: ${item.addedIngredients.map(i => i.name).join(', ')}\n`;
       }
-      console.log("Kategoria produktu:", item.category);
     });
 
-    console.log('Zawartość paragonu:', receipt1, receipt2, receipt3);
+    console.log('Zawartość paragonu:', receipt2, receipt1, receipt3);
 
     // Wyślij do drukarki bezpośrednio
     return new Promise((resolve, reject) => {
