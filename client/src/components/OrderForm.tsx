@@ -564,11 +564,9 @@ export default function OrderForm({ deliveryAreas, location, orderType }: OrderF
                       Numer domu *
                     </label>
                     <input
-                      maxLength={3}
+                      maxLength={4}
                       type="text"
                       name="houseNumber"
-                      inputMode="numeric" 
-                      pattern="[0-9]+"
                       value={customerData.houseNumber}
                       onChange={handleInputChange}
                       required
@@ -584,6 +582,8 @@ export default function OrderForm({ deliveryAreas, location, orderType }: OrderF
                     <input
                       type="text"
                       maxLength={3}
+                      inputMode="numeric" 
+                      pattern="[0-9]+"
                       name="apartmentNumber"
                       value={customerData.apartmentNumber}
                       onChange={handleInputChange}
