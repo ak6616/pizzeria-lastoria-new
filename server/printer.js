@@ -17,61 +17,74 @@ export async function printToReceiptPrinter(orderData) {
   
   try {
     for(let i = 0; i < 2; i++){
+      let receipt1 = '';
       let receipt2 = '';
       let receipt3 = '';
-      let receipt1 = '';
 
     // Header
     
-    receipt2 += `${formatDate(new Date())}\n`;
+    receipt1 += `${formatDate(new Date())}\n`;
     
     // Customer data
-    receipt2 += `${orderData.imie} ${orderData.nazwisko}\n`;
-    receipt2 += `${orderData.numerTelefonu}\n`;
+    receipt1 += `${orderData.imie} ${orderData.nazwisko}\n`;
+    receipt1 += `${orderData.numerTelefonu}\n`;
     if (orderData.typ === 'delivery') {
-      receipt2 += `${orderData.miejscowosc}${orderData.ulica ? `, ${orderData.ulica}` : ''} ${orderData.numerDomu}${orderData.numerMieszkania ? `/${orderData.numerMieszkania}` : ''}\n`;
+      receipt1 += `${orderData.miejscowosc}${orderData.ulica ? `, ${orderData.ulica}` : ''} ${orderData.numerDomu}${orderData.numerMieszkania ? `/${orderData.numerMieszkania}` : ''}\n`;
     }
-    receipt2 += `Typ: ${orderData.typ === 'delivery' ? 'Dostawa' : 'Odbiór osobisty'}\n`;
+    receipt1 += `Typ: ${orderData.typ === 'delivery' ? 'Dostawa' : 'Odbiór osobisty'}\n`;
     if (orderData.zamowienieNaGodzine) {
-      receipt2 += `Na godzinę: ${orderData.zamowienieNaGodzine}\n`;
+      receipt1 += `Na godzinę: ${orderData.zamowienieNaGodzine}\n`;
     }
 
      // Total
-     receipt2 += `SUMA: ${orderData.suma} zł\n`;
-     if (orderData.notes){
-        receipt3+= `Uwagi: ${orderData.notes}\n`
-     }
-    //////////////////////////////
+     receipt1 += `SUMA: ${orderData.suma} zł\n`;
+         //////////////////////////////
     // Ordered products
-    receipt1 += 'ZAMÓWIENIE:\n';
+    receipt2 += 'ZAMÓWIENIE:\n';
     let items = Array.isArray(orderData.zamowioneProdukty) 
       ? orderData.zamowioneProdukty 
       : [];
 
     items.forEach(item => {
-      receipt1 += `${item.name} x${item.quantity}\n`;
+      receipt2 += `${item.name} x${item.quantity}\n`;
       if (item.doughType) {
-        receipt1 += `Ciasto: ${item.doughType}\n`;
+        receipt2 += `Ciasto: ${item.doughType}\n`;
       }
       if (item.removedIngredients?.length) {
-        receipt1 += `  BEZ: ${item.removedIngredients.join(', ')}\n`;
+        receipt2 += `  BEZ: ${item.removedIngredients.join(', ')}\n`;
       }
       if (item.addedIngredients?.length) {
-        receipt1 += `  DODATKI: ${item.addedIngredients.map(i => i.name).join(', ')}\n`;
+        receipt2 += `  DODATKI: ${item.addedIngredients.map(i => i.name).join(', ')}\n`;
       }
     });
+    //////////////
+     if (orderData.notes){
+        receipt3+= `Uwagi: ${orderData.notes}\n`
+     }
 
-    console.log('Zawartość paragonu:', receipt2, receipt1, receipt3);
+
+    console.log('Zawartość paragonu:', receipt1, receipt2, receipt3);
 
     // Wyślij do drukarki bezpośrednio
     return new Promise((resolve, reject) => {
-      const lpProcess = exec(`echo "${receipt3}" | lp -d xprinter -o media=Custom.50x42mm -o fit-to-page -o font-size=5 -o print-quality=5 -o orientation-requested=6 && echo "${receipt1}" | lp -d xprinter -o media=Custom.50x42mm -o fit-to-page -o font-size=5 -o print-quality=5 -o orientation-requested=6 && echo "${receipt2}" | lp -d xprinter -o media=Custom.50x42mm -o fit-to-page -o font-size=5 -o print-quality=5 -o orientation-requested=6`, (error, stdout, stderr) => {
+      if(orderData.notes){
+        let lpProcess = exec(`echo "${receipt3}" | lp -d xprinter -o media=Custom.50x42mm -o fit-to-page -o font-size=5 -o print-quality=5 -o orientation-requested=6`, (error, stdout, stderr) => {
         if (error) {
           console.error('Błąd drukowania:', error);
           reject(error);
           return;
         }
-        console.log('Wydruk zakończony pomyślnie');
+        console.log('Wydruk uwag zakończony pomyślnie');
+        resolve({ success: true });
+      });
+      };
+      let lpProcess = exec(`echo "${receipt2}" | lp -d xprinter -o media=Custom.50x42mm -o fit-to-page -o font-size=5 -o print-quality=5 -o orientation-requested=6 && echo "${receipt1}" | lp -d xprinter -o media=Custom.50x42mm -o fit-to-page -o font-size=5 -o print-quality=5 -o orientation-requested=6`, (error, stdout, stderr) => {
+        if (error) {
+          console.error('Błąd drukowania:', error);
+          reject(error);
+          return;
+        }
+        console.log('Wydruk danych zakończony pomyślnie');
         resolve({ success: true });
       });
     });
