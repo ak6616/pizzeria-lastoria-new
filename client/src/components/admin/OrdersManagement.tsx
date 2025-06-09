@@ -105,7 +105,9 @@ export default function OrdersManagement({ location }: OrdersManagementProps) {
         <div className="flex justify-between items-start">
           <div>
             <div className="font-medium">{item.name}</div>
-            <div className="text-sm text-gray-600">Rodzaj ciasta: {item.doughType }</div>
+            {item.doughType && (
+              <div className="text-sm text-gray-600">Rodzaj ciasta: {item.doughType }</div>
+            )}
             <div className="text-sm text-gray-600 mt-1">
               Ilość: {item.quantity} x {item.price.toFixed(2)} zł = {(item.quantity * item.price).toFixed(2)} zł
             </div>
@@ -171,7 +173,7 @@ export default function OrdersManagement({ location }: OrdersManagementProps) {
         <div className="flex items-center space-x-4">
           <button
             onClick={() => handleDeleteAll()}
-            className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded items-center"
+            className="bg-red-500 hover:bg-red-700 text-white font-bold items-center px-4 py-2 rounded transition"
           >
             Usuń wszystkie zamówienia
             <Trash2 className="w-5 h-5" />
