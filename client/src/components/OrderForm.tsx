@@ -52,12 +52,21 @@ const isDeliveryTimeAvailable = async (time: string, location: string): Promise<
     const selectedTime = new Date();
     selectedTime.setHours(hours, minutes, 0, 0);
 
+    const minimumLeadTimeMs = 60 * 60 * 1000; // 1 godzina w ms
+
+    if (selectedTime.getTime() - now.getTime() < minimumLeadTimeMs) {
+      return {
+        available: false,
+        message: 'Nie można zamówić dostawy na mniej niż godzinę do przodu, ponieważ potrzebujemy czasu na przygotowanie zamówienia.'
+      };
+    };
+
     if (selectedTime < now) {
       return {
         available: false,
         message: 'Nie można zamówić dostawy na godzinę w przeszłości'
       };
-    }
+    };
 
     return { available: true };
   } catch (error) {
@@ -605,7 +614,7 @@ export default function OrderForm({ deliveryAreas, location, orderType }: OrderF
                   onChange={handleInputChange}
                   min={`${location === 'miejsce-piastowe' ? '11' : '12'}:00`}
                   max="21:30"
-                  step="1800" // 15 minut
+                  step="60" // 15 minut
                   className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-yellow-500 focus:ring-yellow-500"
                 />
                 <p className="mt-1 text-sm text-gray-500">
