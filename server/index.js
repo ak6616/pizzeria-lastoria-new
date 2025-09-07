@@ -728,6 +728,8 @@ app.post('/api/orders/:location', async (req, res) => {
       // Jeśli zapis do bazy się powiódł, drukuj zamówienie
       if (result.insertId) {
         console.log('Zamówienie zapisane w bazie, ID:', result.insertId);
+        console.log('Wysyłanie powiadomienia push');
+        sendNewOrderNotification();
         
         // Przygotuj dane do wydruku
         const printData = {
@@ -1120,73 +1122,34 @@ app.post('/api/subscribe', (req, res) => {
   res.status(201).json({ message: 'Subscribed successfully' });
 });
 
-app.post('/api/notify', async (req, res) => {
+async function sendNewOrderNotification() {
+  console.log("Wysyłanie powiadomienia o nowym zamówieniu do wszystkich subskrybentów...");
   const payload = JSON.stringify({
     title: 'Nowe Zamówienie',
     body: 'Sprawdź szybko nowe zamówienie! 😁',
-  })
+  });
 
   const results = await Promise.allSettled(
     subscriptions.map((sub) => 
-    webpush.sendNotification(sub, payload).catch(err => {
-      console.error("Błąd podczas wysyłania powiadomienia:", err);
-    }))
-  )
-  res.json({ success: true, results })
-
-});
-
-async function notification() {
-  let lastOrderCount = 0;
-  
-  while (true) {
-    try {
-      // Pobierz aktualną liczbę zamówień
-      const response = await fetch('https://pizza-lastoria.pl:3000/api/orders/miejsce-piastowe/count', {
-        credentials: 'include',
-        method: 'GET',
-      });
-      
-      if (!response.ok) {
-        throw new Error('Błąd podczas pobierania liczby zamówień');
-      }
-      
-      const { count } = await response.json();
-      
-      // Jeśli liczba zamówień się zwiększyła, wyślij powiadomienie
-      if (count > lastOrderCount) {
-        console.log(`Wykryto nowe zamówienie! Liczba zamówień: ${count}`);
-        
-        // Wyślij powiadomienie do wszystkich subskrybentów
-        const notifyResponse = await fetch('https://pizza-lastoria.pl:3000/api/notify', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-        });
-        
-        if (!notifyResponse.ok) {
-          console.error("Błąd podczas wysyłania powiadomienia:", notifyResponse.statusText);
+      webpush.sendNotification(sub, payload).catch(err => {
+        // Jeśli subskrypcja wygasła lub jest nieprawidłowa, usuń ją.
+        if (err.statusCode === 404 || err.statusCode === 410) {
+          console.log('Usuwanie nieaktywnej subskrypcji:', sub.endpoint);
+          subscriptions = subscriptions.filter(s => s.endpoint !== sub.endpoint);
         } else {
-          console.log("Powiadomienie wysłane pomyślnie!");
+          console.error("Błąd podczas wysyłania powiadomienia:", err);
         }
-        
-        lastOrderCount = count;
-      }
-      
-      // Czekaj 5 minut przed następnym sprawdzeniem
-      await new Promise(resolve => setTimeout(resolve, 5 * 60 * 1000));
-      
-    } catch (error) {
-      console.error("Błąd w funkcji notification:", error);
-      // W przypadku błędu czekaj 1 minutę przed ponowną próbą
-      await new Promise(resolve => setTimeout(resolve, 60 * 1000));
-    }
+      })
+    )
+  );
+
+  const rejected = results.filter(r => r.status === 'rejected');
+  if (rejected.length > 0) {
+    console.log("Nie udało się wysłać niektórych powiadomień:", rejected);
+  } else {
+    console.log("Wszystkie powiadomienia wysłane pomyślnie.");
   }
 }
-
-// Uruchom funkcję notification
-notification();
 
 // Endpoint do pobierania klucza VAPID
 app.get('/api/vapid-key', (req, res) => {
