@@ -12,6 +12,9 @@ export default defineConfig({
       devOptions: {
         enabled: false,
       },
+      strategies: 'injectManifest',
+      srcDir: '.',
+      filename: 'sw.js',
       manifest: {
         name: 'Pizza Lastoria',
         short_name: 'Lastoria',
